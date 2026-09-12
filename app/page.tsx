@@ -60,13 +60,10 @@ export default function Home() {
     router.push('/itinerary');
   };
 
-  // Mobile card swipe gesture - ONLY when invitation is opened AND mobile
+  // Mobile card swipe gesture - active only on card elements
   const bind = useGesture(
     {
       onDrag: ({ movement: [mx], down, velocity: [vx], direction: [dx], event }) => {
-        // Early return if not mobile or invitation not opened
-        if (!isMobile || !invitationOpened) return;
-        
         // Only prevent default if event is cancelable
         if (event?.cancelable) {
           try {
@@ -99,11 +96,8 @@ export default function Home() {
     {
       drag: {
         filterTaps: true,
-        threshold: 10, // Must drag at least 10px
-        preventScroll: false,
-        // Only enable when invitation is opened AND on mobile
-        enabled: isMobile && invitationOpened,
-        axis: 'x', // Only horizontal
+        threshold: 10,
+        axis: 'x',
         bounds: { left: -400, right: 400 },
         rubberband: true,
       },
@@ -220,13 +214,13 @@ export default function Home() {
             <div className="md:hidden relative w-full max-w-sm h-[70vh] flex items-center justify-center">
               {/* Second card */}
               <animated.div
-                {...(currentCard === 'second' && isMobile && invitationOpened ? bind() : {})}
+                {...(currentCard === 'second' ? bind() : {})}
                 className="absolute w-[85%] shadow-2xl rounded-xl overflow-hidden"
                 style={{
                   x: currentCard === 'second' ? x : 0,
                   y: currentCard === 'second' ? y : 0,
                   zIndex: currentCard === 'second' ? 2 : 1,
-                  touchAction: currentCard === 'second' ? 'pan-x' : 'auto',
+                  touchAction: 'pan-y',
                 }}
               >
                 <motion.div
@@ -270,13 +264,13 @@ export default function Home() {
 
               {/* First card - draggable */}
               <animated.div
-                {...(currentCard === 'first' && isMobile && invitationOpened ? bind() : {})}
+                {...(currentCard === 'first' ? bind() : {})}
                 className="absolute w-[85%] shadow-2xl rounded-xl overflow-hidden"
                 style={{
                   x: currentCard === 'first' ? x : 0,
                   y: currentCard === 'first' ? y : 0,
                   zIndex: currentCard === 'first' ? 2 : 1,
-                  touchAction: currentCard === 'first' ? 'pan-x' : 'auto',
+                  touchAction: 'pan-y',
                 }}
               >
                 <div className="relative w-full aspect-[3/4]">
