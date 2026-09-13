@@ -3,14 +3,14 @@
 import { useCallback, useMemo } from 'react';
 import Particles, { ParticlesProvider } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
-import type { ISourceOptions } from '@tsparticles/engine';
+import type { Container, Engine, ISourceOptions } from '@tsparticles/engine';
 
-const particlesInit = async (engine: any) => {
+const particlesInit = async (engine: Engine) => {
   await loadSlim(engine);
 };
 
 export default function FloatingParticles() {
-  const particlesLoaded = useCallback(async (container: any) => {
+  const particlesLoaded = useCallback(async (container?: Container) => {
     console.log('Particles loaded', container);
   }, []);
 

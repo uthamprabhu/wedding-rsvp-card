@@ -4,8 +4,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import InteractiveItinerary from '@/components/InteractiveItinerary';
 import PaperBackground from '@/components/PaperBackground';
-import TactileButton from '@/components/TactileButton';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const FluidBackground = dynamic(() => import('@/components/FluidBackground'), {
@@ -38,28 +37,26 @@ export default function ItineraryPage() {
       {/* Navigation buttons - z-40 (above everything) */}
       <motion.div
         style={{ zIndex: 40 }}
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-4"
+        className="journey-nav itinerary-nav fixed bottom-6 left-1/2 -translate-x-1/2"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.6 }}
       >
-        <TactileButton
+        <button
           onClick={() => router.back()}
-          icon={ChevronLeft}
-          variant="secondary"
-          size="md"
+          className="journey-nav-secondary"
         >
-          Back to Invitation
-        </TactileButton>
+          <ArrowLeft size={17} aria-hidden="true" />
+          <span>Back to invitation</span>
+        </button>
 
-        <TactileButton
+        <button
           onClick={() => router.push('/rsvp')}
-          icon={ChevronRight}
-          variant="primary"
-          size="md"
+          className="journey-nav-primary"
         >
-          Confirm Attendance
-        </TactileButton>
+          <span><small>One more beautiful detail</small>Confirm attendance</span>
+          <ArrowRight size={17} aria-hidden="true" />
+        </button>
       </motion.div>
     </main>
   );

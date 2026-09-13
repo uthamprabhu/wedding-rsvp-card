@@ -1,20 +1,11 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft, ArrowRight, Check, Minus, Plus, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import PaperBackground from '@/components/PaperBackground';
-import TactileButton from '@/components/TactileButton';
-import PremiumInput from '@/components/PremiumInput';
-import PremiumSwitch from '@/components/PremiumSwitch';
-import GuestCounter from '@/components/GuestCounter';
 import ConfirmationPage from '@/components/ConfirmationPage';
-import { ChevronLeft, Check } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-const FluidBackground = dynamic(() => import('@/components/FluidBackground'), {
-  ssr: false,
-});
 
 interface FormData {
   name: string;
@@ -26,277 +17,131 @@ interface FormData {
   message: string;
 }
 
+const initialFormData: FormData = {
+  name: '', phone: '', email: '', guestCount: 1, accommodation: false,
+  dietaryRestrictions: '', message: '',
+};
+
 export default function RSVPPage() {
   const router = useRouter();
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    phone: '',
-    email: '',
-    guestCount: 1,
-    accommodation: false,
-    dietaryRestrictions: '',
-    message: '',
-  });
+  const [submitError, setSubmitError] = useState('');
 
-  const canSubmit = formData.name && formData.phone && formData.email;
+  const updateField = <Key extends keyof FormData>(key: Key, value: FormData[Key]) => {
+    setFormData((current) => ({ ...current, [key]: value }));
+  };
 
-  const handleSubmit = () => {
-    if (!canSubmit) return;
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitError('');
+    if (!event.currentTarget.checkValidity()) {
+      event.currentTarget.reportValidity();
+      return;
+    }
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      setSubmitError('Please complete the required fields before confirming.');
+      return;
+    }
     setShowConfirmation(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDownload = async () => {
-    // Download logic from existing ConfirmationPage
+    const { default: html2canvas } = await import('html2canvas');
+    const { jsPDF } = await import('jspdf');
+    const downloadContainer = document.createElement('div');
+    downloadContainer.style.cssText = 'position:fixed;left:-10000px;top:0;width:720px;padding:64px;background:#f8f4ee;color:#433b34;font-family:Georgia,serif;';
+
+    const heading = document.createElement('h1');
+    heading.textContent = 'A note of celebration';
+    heading.style.cssText = 'margin:0 0 12px;text-align:center;color:#a6814e;font-size:42px;font-weight:400;';
+    downloadContainer.appendChild(heading);
+    const intro = document.createElement('p');
+    intro.textContent = 'Your RSVP is reserved for Farzeen & Bilal';
+    intro.style.cssText = 'margin:0 0 42px;text-align:center;color:#7d7063;font-size:17px;';
+    downloadContainer.appendChild(intro);
+
+    const details = document.createElement('div');
+    details.style.cssText = 'padding:34px;background:#fffdf9;border:1px solid #d9c7a8;';
+    const rows: [string, string][] = [
+      ['Guest', formData.name.trim()],
+      ['Contact', `${formData.phone.trim()} | ${formData.email.trim()}`],
+      ['Guests', String(formData.guestCount)],
+      ['Accommodation', formData.accommodation ? 'Assistance requested' : 'Not needed'],
+    ];
+    if (formData.dietaryRestrictions.trim()) rows.push(['Dietary notes', formData.dietaryRestrictions.trim()]);
+    if (formData.message.trim()) rows.push(['Message', formData.message.trim()]);
+    rows.forEach(([label, value]) => {
+      const row = document.createElement('p');
+      row.style.cssText = 'margin:0 0 18px;font-size:18px;line-height:1.5;';
+      const strong = document.createElement('strong');
+      strong.textContent = `${label}: `;
+      strong.style.color = '#a6814e';
+      row.append(strong, document.createTextNode(value));
+      details.appendChild(row);
+    });
+    downloadContainer.appendChild(details);
+    document.body.appendChild(downloadContainer);
+
     try {
-      const html2canvas = (await import('html2canvas')).default;
-      const { jsPDF } = await import('jspdf');
-
-      const downloadContainer = document.createElement('div');
-      downloadContainer.style.position = 'absolute';
-      downloadContainer.style.left = '-9999px';
-      downloadContainer.style.width = '800px';
-      downloadContainer.style.background = '#FFF8F0';
-      downloadContainer.style.padding = '40px';
-      downloadContainer.style.fontFamily = 'serif';
-
-      downloadContainer.innerHTML = `
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #D4A574; font-size: 48px; margin-bottom: 10px;">Wedding Invitation</h1>
-          <p style="color: #8B7355; font-size: 18px;">You're invited to celebrate with us</p>
-        </div>
-        <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px;">
-          <img src="/images/couple-pose.jpeg" style="width: 350px; height: auto; border-radius: 10px;" />
-          <img src="/images/invitation-body.jpeg" style="width: 350px; height: auto; border-radius: 10px;" />
-        </div>
-        <div style="background: white; padding: 30px; border-radius: 20px; border: 2px solid #D4A574;">
-          <h2 style="color: #D4A574; font-size: 32px; text-align: center; margin-bottom: 20px;">RSVP Confirmation</h2>
-          <div style="margin-bottom: 15px;">
-            <strong style="color: #8B7355;">Guest Name:</strong> <span style="color: #8B7355;">${formData.name}</span>
-          </div>
-          <div style="margin-bottom: 15px;">
-            <strong style="color: #8B7355;">Contact:</strong> <span style="color: #8B7355;">${formData.phone} | ${formData.email}</span>
-          </div>
-          <div style="margin-bottom: 15px;">
-            <strong style="color: #8B7355;">Number of Guests:</strong> <span style="color: #8B7355;">${formData.guestCount}</span>
-          </div>
-          <div style="margin-bottom: 15px;">
-            <strong style="color: #8B7355;">Accommodation:</strong> <span style="color: #8B7355;">${formData.accommodation ? 'Required' : 'Not needed'}</span>
-          </div>
-          ${formData.dietaryRestrictions ? `<div style="margin-bottom: 15px;"><strong style="color: #8B7355;">Dietary:</strong> <span style="color: #8B7355;">${formData.dietaryRestrictions}</span></div>` : ''}
-          ${formData.message ? `<div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #D4A574;"><em style="color: #8B7355;">"${formData.message}"</em></div>` : ''}
-        </div>
-      `;
-
-      document.body.appendChild(downloadContainer);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const canvas = await html2canvas(downloadContainer, {
-        scale: 2,
-        backgroundColor: '#FFF8F0',
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [canvas.width / 2, canvas.height / 2],
-      });
-
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
-      pdf.save(`wedding-invitation-${formData.name.replace(/\s+/g, '-')}.pdf`);
-
-      document.body.removeChild(downloadContainer);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
+      const canvas = await html2canvas(downloadContainer, { scale: 2, backgroundColor: '#f8f4ee' });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width / 2, canvas.height / 2] });
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+      pdf.save(`wedding-rsvp-${formData.name.trim().replace(/\s+/g, '-').toLowerCase()}.pdf`);
+    } finally {
+      downloadContainer.remove();
     }
   };
 
   if (showConfirmation) {
     return (
-      <main className="relative w-full min-h-screen overflow-x-hidden overflow-y-auto">
+      <main className="rsvp-page">
         <PaperBackground />
-        <FluidBackground className="opacity-25" variant="rsvp" />
-        
-        <motion.div
-          style={{ zIndex: 20 }}
-          className="relative"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6 }}
-        >
-          <ConfirmationPage 
-            data={{
-              ...formData,
-              accommodation: formData.accommodation ? 'yes' : 'no',
-            }} 
-            onDownload={handleDownload} 
-          />
-        </motion.div>
+        <ConfirmationPage data={{ ...formData, accommodation: formData.accommodation ? 'yes' : 'no' }} onDownload={handleDownload} />
       </main>
     );
   }
 
   return (
-    <main className="relative w-full min-h-screen overflow-x-hidden overflow-y-auto pb-32">
-      {/* Paper background - z-0 */}
+    <main className="rsvp-page">
       <PaperBackground />
-      
-      {/* Fluid background - z-5 */}
-      <FluidBackground className="opacity-25" variant="rsvp" />
+      <div className="rsvp-glow rsvp-glow-left" aria-hidden="true" />
+      <div className="rsvp-glow rsvp-glow-right" aria-hidden="true" />
+      <motion.div className="rsvp-wrap" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+        <button type="button" className="rsvp-back" onClick={() => router.back()}><ArrowLeft size={16} aria-hidden="true" /> Back to journey</button>
+        <header className="rsvp-header">
+          <span className="rsvp-kicker"><Sparkles size={14} aria-hidden="true" /> Kindly reply</span>
+          <p className="rsvp-monogram">F <span>&</span> B</p>
+          <h1>Be our guest</h1>
+          <p>We would be honoured to celebrate this beautiful day with you.</p>
+        </header>
 
-      {/* Content - z-20 */}
-      <motion.div
-        style={{ zIndex: 20 }}
-        className="relative max-w-2xl mx-auto px-4 py-20"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        {/* Header */}
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <h1 className="text-5xl md:text-6xl font-serif text-[#D4A574] mb-4">
-            Join Our Celebration
-          </h1>
-          <p className="text-lg text-[#8B7355]">
-            We can't wait to celebrate with you
-          </p>
-        </motion.div>
+        <form className="rsvp-form" onSubmit={handleSubmit} noValidate>
+          <section className="rsvp-section" aria-labelledby="guest-heading">
+            <div className="rsvp-section-heading"><span>01</span><h2 id="guest-heading">Your details</h2></div>
+            <div className="rsvp-grid rsvp-grid-contact">
+              <label className="rsvp-field rsvp-field-wide"><span>Full name <b>*</b></span><input required name="name" value={formData.name} onChange={(event) => updateField('name', event.target.value)} placeholder="Your name" autoComplete="name" /></label>
+              <label className="rsvp-field"><span>Email address <b>*</b></span><input required type="email" name="email" value={formData.email} onChange={(event) => updateField('email', event.target.value)} placeholder="you@example.com" autoComplete="email" /></label>
+              <label className="rsvp-field"><span>Phone number <b>*</b></span><input required type="tel" name="phone" value={formData.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Your phone number" autoComplete="tel" /></label>
+            </div>
+          </section>
 
-        {/* Form sections with stagger */}
-        <div className="space-y-8">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <PremiumInput
-              label="Your Full Name"
-              value={formData.name}
-              onChange={(value) => setFormData({ ...formData, name: value })}
-              placeholder="John & Jane Doe"
-              icon="✍️"
-            />
-          </motion.div>
+          <section className="rsvp-section" aria-labelledby="party-heading">
+            <div className="rsvp-section-heading"><span>02</span><h2 id="party-heading">Your party</h2></div>
+            <div className="rsvp-party-row"><div><span className="rsvp-label">Number of guests</span><p>Including yourself</p></div><div className="rsvp-counter" aria-label="Number of guests"><button type="button" aria-label="Remove a guest" onClick={() => updateField('guestCount', Math.max(1, formData.guestCount - 1))}><Minus size={16} /></button><strong>{String(formData.guestCount).padStart(2, '0')}</strong><button type="button" aria-label="Add a guest" onClick={() => updateField('guestCount', Math.min(10, formData.guestCount + 1))}><Plus size={16} /></button></div></div>
+            <label className={`rsvp-toggle ${formData.accommodation ? 'is-selected' : ''}`}><input type="checkbox" checked={formData.accommodation} onChange={(event) => updateField('accommodation', event.target.checked)} /><span className="rsvp-toggle-mark"><Check size={14} /></span><span><strong>We need accommodation</strong><small>Let us know if we can help arrange your stay.</small></span></label>
+          </section>
 
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-            className="grid md:grid-cols-2 gap-4"
-          >
-            <PremiumInput
-              label="Phone Number"
-              value={formData.phone}
-              onChange={(value) => setFormData({ ...formData, phone: value })}
-              placeholder="+1 (555) 000-0000"
-              type="tel"
-              icon="📱"
-            />
-            <PremiumInput
-              label="Email Address"
-              value={formData.email}
-              onChange={(value) => setFormData({ ...formData, email: value })}
-              placeholder="you@example.com"
-              type="email"
-              icon="✉️"
-            />
-          </motion.div>
+          <section className="rsvp-section" aria-labelledby="notes-heading">
+            <div className="rsvp-section-heading"><span>03</span><h2 id="notes-heading">A few notes</h2></div>
+            <div className="rsvp-grid"><label className="rsvp-field"><span>Dietary requirements <em>Optional</em></span><input name="dietaryRestrictions" value={formData.dietaryRestrictions} onChange={(event) => updateField('dietaryRestrictions', event.target.value)} placeholder="Allergies or preferences" /></label><label className="rsvp-field"><span>A note for us <em>Optional</em></span><textarea name="message" value={formData.message} onChange={(event) => updateField('message', event.target.value)} placeholder="A little note for the couple" rows={3} /></label></div>
+          </section>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <GuestCounter
-              label="Number of Guests"
-              value={formData.guestCount}
-              onChange={(value) => setFormData({ ...formData, guestCount: value })}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <PremiumSwitch
-              label="Need Accommodation?"
-              description="We can help arrange your stay"
-              checked={formData.accommodation}
-              onCheckedChange={(checked) => setFormData({ ...formData, accommodation: checked })}
-              icon="🏨"
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <label className="block text-sm font-medium text-[#8B7355] mb-2 ml-1">
-              Dietary Restrictions <span className="text-[#8B7355]/40">(optional)</span>
-            </label>
-            <textarea
-              value={formData.dietaryRestrictions}
-              onChange={(e) => setFormData({ ...formData, dietaryRestrictions: e.target.value })}
-              placeholder="Vegetarian, vegan, allergies..."
-              rows={3}
-              className="w-full px-4 py-4 rounded-2xl border-2 border-[#D4A574]/30 bg-white/60 backdrop-blur-sm text-[#8B7355] placeholder:text-[#8B7355]/40 focus:outline-none focus:border-[#D4A574] focus:bg-white/80 transition-all font-medium resize-none"
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            <label className="block text-sm font-medium text-[#8B7355] mb-2 ml-1">
-              A Message for Us <span className="text-[#8B7355]/40">(optional)</span>
-            </label>
-            <textarea
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              placeholder="Share your excitement..."
-              rows={4}
-              className="w-full px-4 py-4 rounded-2xl border-2 border-[#D4A574]/30 bg-white/60 backdrop-blur-sm text-[#8B7355] placeholder:text-[#8B7355]/40 focus:outline-none focus:border-[#D4A574] focus:bg-white/80 transition-all font-medium resize-none"
-            />
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* Navigation buttons - z-40 */}
-      <motion.div
-        style={{ zIndex: 40 }}
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-4"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1 }}
-      >
-        <TactileButton
-          onClick={() => router.back()}
-          icon={ChevronLeft}
-          variant="secondary"
-          size="md"
-        >
-          Back to Journey
-        </TactileButton>
-
-        <TactileButton
-          onClick={handleSubmit}
-          icon={Check}
-          variant="primary"
-          size="md"
-          disabled={!canSubmit}
-        >
-          Confirm & Celebrate
-        </TactileButton>
+          {submitError && <p className="rsvp-error" role="alert">{submitError}</p>}
+          <div className="rsvp-submit-row"><p>Your reply helps us prepare a day full of thoughtful details.</p><button className="rsvp-submit" type="submit">Confirm attendance <ArrowRight size={17} aria-hidden="true" /></button></div>
+        </form>
+        <p className="rsvp-footer">With love, Farzeen & Bilal <span>•</span> 2025</p>
       </motion.div>
     </main>
   );

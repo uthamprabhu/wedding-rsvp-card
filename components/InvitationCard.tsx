@@ -342,7 +342,7 @@ export default function InvitationCard({ onClose }: InvitationCardProps) {
       >
         <div className="bg-gradient-to-r from-[#D4A574]/20 to-[#C9A55C]/20 backdrop-blur-md border border-[#D4A574]/30 rounded-full px-8 py-4 shadow-lg">
           <p className="text-[#D4A574] font-serif text-lg mb-1">
-            ✨ There's More Magic Below ✨
+            ✨ There&apos;s More Magic Below ✨
           </p>
           <p className="text-[#B8925A] text-sm tracking-wider">
             Scroll down for the journey ahead

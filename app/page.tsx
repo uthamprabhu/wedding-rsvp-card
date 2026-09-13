@@ -9,8 +9,7 @@ import PaperBackground from '@/components/PaperBackground';
 import LoadingAnimation from '@/components/LoadingAnimation';
 import InvitationHero from '@/components/InvitationHero';
 import FloatingParticles from '@/components/FloatingParticles';
-import TactileButton from '@/components/TactileButton';
-import { ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useGesture } from '@use-gesture/react';
 import { useSpring, animated } from '@react-spring/web';
 
@@ -307,19 +306,18 @@ export default function Home() {
             {/* Forward button - z-40 (above cards) */}
             <motion.div
               style={{ zIndex: 40 }}
-              className="absolute bottom-8 left-1/2 -translate-x-1/2"
+              className="journey-nav absolute bottom-6 left-1/2 -translate-x-1/2"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.2, duration: 0.6 }}
             >
-              <TactileButton
+              <button
                 onClick={handleNavigateToItinerary}
-                icon={ChevronRight}
-                size="lg"
-                variant="primary"
+                className="journey-nav-primary"
               >
-                View the Journey
-              </TactileButton>
+                <span><small>Continue the celebration</small>View the journey</span>
+                <ArrowRight size={18} aria-hidden="true" />
+              </button>
             </motion.div>
           </motion.div>
         )}

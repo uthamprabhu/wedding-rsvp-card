@@ -7,9 +7,14 @@ interface FluidBackgroundProps {
   variant?: 'home' | 'itinerary' | 'rsvp';
 }
 
+interface FluidInstance {
+  destroy?: () => void;
+  pause?: () => void;
+}
+
 export default function FluidBackground({ className = '', variant = 'home' }: FluidBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fluidRef = useRef<any>(null);
+  const fluidRef = useRef<FluidInstance | null>(null);
 
   // Different configs for each variant
   const getVariantConfig = () => {
@@ -118,8 +123,9 @@ export default function FluidBackground({ className = '', variant = 'home' }: Fl
     }
 
     // Dynamically import webgl-fluid to avoid SSR issues
+    let isActive = true;
     import('webgl-fluid').then(({ default: WebGLFluid }) => {
-      if (!canvasRef.current) return;
+      if (!canvasRef.current || !isActive) return;
 
       fluidRef.current = new WebGLFluid(canvasRef.current, getVariantConfig());
 
@@ -129,6 +135,7 @@ export default function FluidBackground({ className = '', variant = 'home' }: Fl
     });
 
     return () => {
+      isActive = false;
       if (fluidRef.current && typeof fluidRef.current.destroy === 'function') {
         fluidRef.current.destroy();
       }

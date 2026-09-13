@@ -156,7 +156,7 @@ export default function RSVPForm({ onSubmit }: RSVPFormProps) {
               whileTap={{ scale: 0.95 }}
               onClick={goNext}
             >
-              Let's Begin ✨
+              Let&apos;s Begin ✨
             </motion.button>
           </motion.div>
         );
@@ -321,7 +321,7 @@ export default function RSVPForm({ onSubmit }: RSVPFormProps) {
                 }}
               >
                 <div className="text-4xl mb-2">🏡</div>
-                <div className="font-semibold text-[#D4A574]">I'm all set</div>
+                <div className="font-semibold text-[#D4A574]">I&apos;m all set</div>
               </motion.button>
             </div>
           </div>

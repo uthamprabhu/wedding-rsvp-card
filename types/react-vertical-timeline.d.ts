@@ -20,7 +20,7 @@ declare module 'react-vertical-timeline-component' {
     iconOnClick?: () => void;
     iconStyle?: CSSProperties;
     id?: string;
-    intersectionObserverProps?: any;
+    intersectionObserverProps?: IntersectionObserverInit;
     onTimelineElementClick?: () => void;
     position?: string;
     style?: CSSProperties;
