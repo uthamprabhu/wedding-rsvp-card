@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Check, Download, Mail, Users, BedDouble } from 'lucide-react';
 import { motion } from 'framer-motion';
+import RsvpCelebration from '@/components/RsvpCelebration';
 
 interface FormData {
   name: string;
@@ -42,6 +43,7 @@ export default function ConfirmationPage({ data, onDownload }: ConfirmationPageP
 
   return (
     <div className="rsvp-confirmation">
+      <RsvpCelebration />
       <motion.div className="rsvp-confirmation-wrap" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7 }}>
         <div className="rsvp-confirmation-mark"><Check size={22} strokeWidth={1.5} /></div>
         <p className="rsvp-kicker">The sweetest yes</p>

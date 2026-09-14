@@ -152,6 +152,8 @@ body {
 .rsvp-confirmation { position: relative; z-index: 2; min-height: 100vh; padding: 80px 16px 44px; }
 .rsvp-confirmation-wrap { width: min(100%, 620px); margin: 0 auto; text-align: center; }
 .rsvp-confirmation-mark { display: grid; width: 54px; height: 54px; margin: 0 auto 26px; place-items: center; border: 1px solid #a6814e; border-radius: 50%; color: #a6814e; }
+.rsvp-celebration-aura { position: fixed; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }.rsvp-celebration-aura span { position: absolute; top: 50%; left: 50%; width: min(88vw, 760px); aspect-ratio: 1; border: 1px solid rgba(183, 139, 75, .22); border-radius: 50%; opacity: 0; transform: translate(-50%, -50%) scale(.18); animation: rsvp-celebration-ring 2.5s cubic-bezier(.16, 1, .3, 1) forwards; }.rsvp-celebration-aura span:nth-child(2) { width: min(66vw, 560px); border-color: rgba(255, 250, 238, .6); animation-delay: .18s; }.rsvp-celebration-aura span:nth-child(3) { width: min(108vw, 960px); border-color: rgba(166, 129, 78, .14); animation-delay: .39s; }
+@keyframes rsvp-celebration-ring { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.18); } 18% { opacity: .72; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
 .rsvp-confirmation-wrap h1 { margin: 20px 0 16px; color: #433b34; font: 400 clamp(3.2rem, 8vw, 5.6rem)/.9 var(--font-cormorant), Georgia, serif; }
 .rsvp-confirmation-intro { max-width: 430px; margin: 0 auto 48px; color: #76695d; font-size: 14px; line-height: 1.8; }
 .rsvp-confirmation-details { border-top: 1px solid rgba(166, 129, 78, .38); border-bottom: 1px solid rgba(166, 129, 78, .24); text-align: left; }
