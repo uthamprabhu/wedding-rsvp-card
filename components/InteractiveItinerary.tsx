@@ -44,7 +44,7 @@ const events: TimelineEvent[] = [
   {
     time: '9:00 PM',
     title: 'An Evening of Joy',
-    description: 'Stay with us for conversation, music, and a final celebration beneath the evening sky.',
+    description: 'Stay with us for warm conversation, sweet memories, and a final celebration beneath the evening sky.',
     note: 'Celebrate with us',
     icon: HeartHandshake,
   },
@@ -61,7 +61,7 @@ export default function InteractiveItinerary() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.7 }}
         >
-          <p className="itinerary-bismillah">Bismillah <span>•</span> with gratitude</p>
+          <p className="itinerary-bismillah">بِسْمِ ٱللَّٰهِ <span>•</span> with gratitude</p>
           <p className="itinerary-monogram">F <span>&</span> B</p>
           <h1 id="itinerary-title">A day of blessings</h1>
           <p className="itinerary-lead">A thoughtful sequence of moments, shared with the people who make our story complete.</p>
@@ -92,7 +92,7 @@ export default function InteractiveItinerary() {
           })}
         </div>
 
-        <p className="itinerary-closing">May this gathering be filled with peace, love, and barakah.</p>
+        <p className="itinerary-closing">May Allah fill this gathering with peace, love, and barakah.</p>
         <div className="itinerary-ornament" aria-hidden="true"><span /><i>✦</i><span /></div>
         <div className="itinerary-bottom-space" aria-hidden="true" />
       </div>

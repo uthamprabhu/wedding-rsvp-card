@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import InteractiveItinerary from '@/components/InteractiveItinerary';
 import PaperBackground from '@/components/PaperBackground';
+import CelestialBackdrop from '@/components/CelestialBackdrop';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
@@ -18,6 +19,7 @@ export default function ItineraryPage() {
     <main className="relative w-full min-h-screen overflow-x-hidden overflow-y-auto">
       {/* Paper background - z-0 */}
       <PaperBackground />
+      <CelestialBackdrop page="itinerary" />
       
       {/* Fluid background - z-5 (always behind content) */}
       <FluidBackground className="opacity-30" variant="itinerary" />

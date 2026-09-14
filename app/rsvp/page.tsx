@@ -6,20 +6,18 @@ import { ArrowLeft, ArrowRight, Check, Minus, Plus, Sparkles } from 'lucide-reac
 import { motion } from 'framer-motion';
 import PaperBackground from '@/components/PaperBackground';
 import ConfirmationPage from '@/components/ConfirmationPage';
+import CelestialBackdrop, { RsvpLantern } from '@/components/CelestialBackdrop';
 
 interface FormData {
   name: string;
   phone: string;
   email: string;
   guestCount: number;
-  accommodation: boolean;
-  dietaryRestrictions: string;
-  message: string;
+  accommodation: 'yes' | 'no' | '';
 }
 
 const initialFormData: FormData = {
-  name: '', phone: '', email: '', guestCount: 1, accommodation: false,
-  dietaryRestrictions: '', message: '',
+  name: '', phone: '', email: '', guestCount: 1, accommodation: '',
 };
 
 export default function RSVPPage() {
@@ -39,7 +37,7 @@ export default function RSVPPage() {
       event.currentTarget.reportValidity();
       return;
     }
-    if (!formData.name.trim() || !formData.phone.trim()) {
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.accommodation) {
       setSubmitError('Please complete the required fields before confirming.');
       return;
     }
@@ -66,12 +64,10 @@ export default function RSVPPage() {
     details.style.cssText = 'padding:34px;background:#fffdf9;border:1px solid #d9c7a8;';
     const rows: [string, string][] = [
       ['Guest', formData.name.trim()],
-      ['Contact', `${formData.phone.trim()} | ${formData.email.trim()}`],
+      ['Contact', formData.email.trim() ? `${formData.phone.trim()} | ${formData.email.trim()}` : formData.phone.trim()],
       ['Guests', String(formData.guestCount)],
-      ['Accommodation', formData.accommodation ? 'Assistance requested' : 'Not needed'],
+      ['Accommodation', formData.accommodation === 'yes' ? 'Assistance requested' : 'Not needed'],
     ];
-    if (formData.dietaryRestrictions.trim()) rows.push(['Dietary notes', formData.dietaryRestrictions.trim()]);
-    if (formData.message.trim()) rows.push(['Message', formData.message.trim()]);
     rows.forEach(([label, value]) => {
       const row = document.createElement('p');
       row.style.cssText = 'margin:0 0 18px;font-size:18px;line-height:1.5;';
@@ -98,7 +94,9 @@ export default function RSVPPage() {
     return (
       <main className="rsvp-page">
         <PaperBackground />
-        <ConfirmationPage data={{ ...formData, accommodation: formData.accommodation ? 'yes' : 'no' }} onDownload={handleDownload} />
+        <CelestialBackdrop page="rsvp" butterflies />
+        <RsvpLantern />
+        <ConfirmationPage data={formData} onDownload={handleDownload} />
       </main>
     );
   }
@@ -106,15 +104,17 @@ export default function RSVPPage() {
   return (
     <main className="rsvp-page">
       <PaperBackground />
+      <CelestialBackdrop page="rsvp" butterflies />
+      <RsvpLantern />
       <div className="rsvp-glow rsvp-glow-left" aria-hidden="true" />
       <div className="rsvp-glow rsvp-glow-right" aria-hidden="true" />
       <motion.div className="rsvp-wrap" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
         <button type="button" className="rsvp-back" onClick={() => router.back()}><ArrowLeft size={16} aria-hidden="true" /> Back to journey</button>
         <header className="rsvp-header">
-          <span className="rsvp-kicker"><Sparkles size={14} aria-hidden="true" /> Kindly reply</span>
+          <span className="rsvp-kicker"><Sparkles size={14} aria-hidden="true" /> With love &amp; dua</span>
           <p className="rsvp-monogram">F <span>&</span> B</p>
           <h1>Be our guest</h1>
-          <p>We would be honoured to celebrate this beautiful day with you.</p>
+          <p>We would be honoured to celebrate this blessed occasion with you.</p>
         </header>
 
         <form className="rsvp-form" onSubmit={handleSubmit} noValidate>
@@ -122,20 +122,15 @@ export default function RSVPPage() {
             <div className="rsvp-section-heading"><span>01</span><h2 id="guest-heading">Your details</h2></div>
             <div className="rsvp-grid rsvp-grid-contact">
               <label className="rsvp-field rsvp-field-wide"><span>Full name <b>*</b></span><input required name="name" value={formData.name} onChange={(event) => updateField('name', event.target.value)} placeholder="Your name" autoComplete="name" /></label>
-              <label className="rsvp-field"><span>Email address <b>*</b></span><input required type="email" name="email" value={formData.email} onChange={(event) => updateField('email', event.target.value)} placeholder="you@example.com" autoComplete="email" /></label>
+              <label className="rsvp-field"><span>Email address <em>Optional</em></span><input type="email" name="email" value={formData.email} onChange={(event) => updateField('email', event.target.value)} placeholder="you@example.com" autoComplete="email" /></label>
               <label className="rsvp-field"><span>Phone number <b>*</b></span><input required type="tel" name="phone" value={formData.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Your phone number" autoComplete="tel" /></label>
             </div>
           </section>
 
           <section className="rsvp-section" aria-labelledby="party-heading">
-            <div className="rsvp-section-heading"><span>02</span><h2 id="party-heading">Your party</h2></div>
+            <div className="rsvp-section-heading"><span>02</span><h2 id="party-heading">Your party &amp; stay</h2></div>
             <div className="rsvp-party-row"><div><span className="rsvp-label">Number of guests</span><p>Including yourself</p></div><div className="rsvp-counter" aria-label="Number of guests"><button type="button" aria-label="Remove a guest" onClick={() => updateField('guestCount', Math.max(1, formData.guestCount - 1))}><Minus size={16} /></button><strong>{String(formData.guestCount).padStart(2, '0')}</strong><button type="button" aria-label="Add a guest" onClick={() => updateField('guestCount', Math.min(10, formData.guestCount + 1))}><Plus size={16} /></button></div></div>
-            <label className={`rsvp-toggle ${formData.accommodation ? 'is-selected' : ''}`}><input type="checkbox" checked={formData.accommodation} onChange={(event) => updateField('accommodation', event.target.checked)} /><span className="rsvp-toggle-mark"><Check size={14} /></span><span><strong>We need accommodation</strong><small>Let us know if we can help arrange your stay.</small></span></label>
-          </section>
-
-          <section className="rsvp-section" aria-labelledby="notes-heading">
-            <div className="rsvp-section-heading"><span>03</span><h2 id="notes-heading">A few notes</h2></div>
-            <div className="rsvp-grid"><label className="rsvp-field"><span>Dietary requirements <em>Optional</em></span><input name="dietaryRestrictions" value={formData.dietaryRestrictions} onChange={(event) => updateField('dietaryRestrictions', event.target.value)} placeholder="Allergies or preferences" /></label><label className="rsvp-field"><span>A note for us <em>Optional</em></span><textarea name="message" value={formData.message} onChange={(event) => updateField('message', event.target.value)} placeholder="A little note for the couple" rows={3} /></label></div>
+            <fieldset className="rsvp-accommodation"><legend>Will you need accommodation? <b>*</b></legend><p>So we can make the right arrangements for you.</p><div className="rsvp-accommodation-options"><label className={`rsvp-choice ${formData.accommodation === 'yes' ? 'is-selected' : ''}`}><input required type="radio" name="accommodation" value="yes" checked={formData.accommodation === 'yes'} onChange={() => updateField('accommodation', 'yes')} /><span className="rsvp-choice-mark"><Check size={14} /></span><span><strong>Yes, please</strong><small>I&apos;ll need assistance with a stay.</small></span></label><label className={`rsvp-choice ${formData.accommodation === 'no' ? 'is-selected' : ''}`}><input required type="radio" name="accommodation" value="no" checked={formData.accommodation === 'no'} onChange={() => updateField('accommodation', 'no')} /><span className="rsvp-choice-mark"><Check size={14} /></span><span><strong>No, thank you</strong><small>I&apos;ve arranged my own stay.</small></span></label></div></fieldset>
           </section>
 
           {submitError && <p className="rsvp-error" role="alert">{submitError}</p>}

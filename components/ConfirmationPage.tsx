@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Download, Mail, Users, Utensils, BedDouble } from 'lucide-react';
+import { Check, Download, Mail, Users, BedDouble } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface FormData {
@@ -10,8 +10,6 @@ interface FormData {
   email: string;
   guestCount: number;
   accommodation: 'yes' | 'no' | '';
-  dietaryRestrictions: string;
-  message: string;
 }
 
 interface ConfirmationPageProps {
@@ -38,9 +36,9 @@ export default function ConfirmationPage({ data, onDownload }: ConfirmationPageP
   const firstName = data.name.trim().split(/\s+/)[0];
   const details = [
     { icon: Users, label: 'Your party', value: `${data.guestCount} ${data.guestCount === 1 ? 'guest' : 'guests'}` },
-    { icon: Mail, label: 'Confirmation email', value: data.email },
     { icon: BedDouble, label: 'Accommodation', value: data.accommodation === 'yes' ? 'Assistance requested' : 'Not needed' },
   ];
+  if (data.email.trim()) details.splice(1, 0, { icon: Mail, label: 'Confirmation email', value: data.email });
 
   return (
     <div className="rsvp-confirmation">
@@ -52,7 +50,6 @@ export default function ConfirmationPage({ data, onDownload }: ConfirmationPageP
 
         <div className="rsvp-confirmation-details">
           {details.map(({ icon: Icon, label, value }) => <div className="rsvp-detail" key={label}><Icon size={17} strokeWidth={1.5} /><div><span>{label}</span><strong>{value}</strong></div></div>)}
-          {data.dietaryRestrictions && <div className="rsvp-detail"><Utensils size={17} strokeWidth={1.5} /><div><span>Dietary notes</span><strong>{data.dietaryRestrictions}</strong></div></div>}
         </div>
 
         <div className="rsvp-confirmation-actions">
@@ -60,7 +57,6 @@ export default function ConfirmationPage({ data, onDownload }: ConfirmationPageP
           <p>We have your RSVP details for {data.phone}.</p>
         </div>
         {downloadError && <p className="rsvp-error" role="alert">{downloadError}</p>}
-        {data.message && <p className="rsvp-confirmation-note">“{data.message}”</p>}
         <p className="rsvp-footer">With love, Farzeen & Bilal <span>•</span> 2025</p>
       </motion.div>
     </div>
