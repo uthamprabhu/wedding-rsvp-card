@@ -2,6 +2,8 @@ declare module 'webgl-fluid' {
   export interface FluidConfig {
     IMMEDIATE?: boolean;
     TRIGGER?: 'hover' | 'click';
+    AUTO?: boolean;
+    INTERVAL?: number;
     SIM_RESOLUTION?: number;
     DYE_RESOLUTION?: number;
     CAPTURE_RESOLUTION?: number;
@@ -12,6 +14,8 @@ declare module 'webgl-fluid' {
     CURL?: number;
     SPLAT_RADIUS?: number;
     SPLAT_FORCE?: number;
+    SPLAT_COUNT?: number;
+    SPLAT_COLOR?: { r: number; g: number; b: number };
     SHADING?: boolean;
     COLORFUL?: boolean;
     COLOR_UPDATE_SPEED?: number;
@@ -25,7 +29,6 @@ declare module 'webgl-fluid' {
     BLOOM_THRESHOLD?: number;
     BLOOM_SOFT_KNEE?: number;
     SUNRAYS?: boolean;
-    COLOR_PALETTE?: Array<{ r: number; g: number; b: number }>;
   }
 
   export default class WebGLFluid {

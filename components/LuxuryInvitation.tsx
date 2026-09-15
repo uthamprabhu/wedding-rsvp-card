@@ -2,22 +2,64 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { motion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
 import { ArrowDown, ArrowRight, ExternalLink, MapPin } from 'lucide-react';
-import { useRef, useState } from 'react';
-import InvitationParticles from '@/components/InvitationParticles';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import PaperBackground from '@/components/PaperBackground';
 import WeddingCountdown from '@/components/WeddingCountdown';
+import { AdaptiveLantern } from '@/components/CelestialBackdrop';
+
+const RealisticButterflies = dynamic(() => import('@/components/RealisticButterflies'), { ssr: false });
 
 const reveal = { hidden: { opacity: 0, y: 34, filter: 'blur(8px)' }, visible: { opacity: 1, y: 0, filter: 'blur(0px)' } };
 
 function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
-  return <motion.div className={className} variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.38 }} transition={{ duration: 1.05, delay: delay + .08, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>;
+  return <motion.div className={className} variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: false, amount: 0.38 }} transition={{ duration: 1.05, delay: delay + .08, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>;
+}
+
+const openingArabicWords = ['بِسْمِ', 'اللَّهِ', 'الرَّحْمَنِ', 'الرَّحِيمِ'];
+const getArabicGraphemes = (value: string) => {
+  if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
+    return Array.from(new Intl.Segmenter('ar', { granularity: 'grapheme' }).segment(value), ({ segment }) => segment);
+  }
+  return Array.from(value);
+};
+
+function ArabicOpeningReveal() {
+  return <motion.p className="invitation-arabic invitation-arabic-opening" lang="ar" dir="rtl" initial="hidden" whileInView="visible" viewport={{ once: false, amount: 0.7 }} variants={{ hidden: {}, visible: { transition: { staggerChildren: .052, delayChildren: .12 } } }}>
+    {openingArabicWords.map((word, wordIndex) => <Fragment key={word}><span>{getArabicGraphemes(word).map((letter, index) => <motion.span key={`${letter}-${index}`} variants={{ hidden: { opacity: 0, x: 24, filter: 'blur(7px)' }, visible: { opacity: 1, x: 0, filter: 'blur(0px)' } }} transition={{ duration: .58, ease: [0.22, 1, 0.36, 1] }}>{letter}</motion.span>)}</span>{wordIndex === 1 && <br className="invitation-arabic-mobile-break" />}{wordIndex < openingArabicWords.length - 1 && ' '}</Fragment>)}
+  </motion.p>;
 }
 
 function CornerOrnaments() {
   const ornament = <g fill="currentColor" stroke="none"><g transform="translate(24 27)"><circle cx="24" cy="10" r="10" opacity=".72" /><circle cx="38" cy="24" r="10" opacity=".72" /><circle cx="24" cy="38" r="10" opacity=".72" /><circle cx="10" cy="24" r="10" opacity=".72" /><circle cx="24" cy="24" r="6" fill="#b88a50" /></g><g transform="translate(78 67) scale(.72)"><circle cx="24" cy="10" r="10" opacity=".65" /><circle cx="38" cy="24" r="10" opacity=".65" /><circle cx="24" cy="38" r="10" opacity=".65" /><circle cx="10" cy="24" r="10" opacity=".65" /><circle cx="24" cy="24" r="6" fill="#b88a50" /></g><circle cx="72" cy="57" r="3" opacity=".5" /><circle cx="120" cy="104" r="3" opacity=".5" /></g>;
   return <div className="invitation-ornaments" aria-hidden="true"><svg className="invitation-corner invitation-corner-tl" viewBox="0 0 180 180" fill="none">{ornament}</svg><svg className="invitation-corner invitation-corner-tr" viewBox="0 0 180 180" fill="none">{ornament}</svg><svg className="invitation-corner invitation-corner-bl" viewBox="0 0 180 180" fill="none">{ornament}</svg><svg className="invitation-corner invitation-corner-br" viewBox="0 0 180 180" fill="none">{ornament}</svg></div>;
+}
+
+function DeferredButterflies() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // Three.js is atmospheric rather than essential. Let text and layout paint first.
+    const timer = window.setTimeout(() => setReady(true), 1000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return ready ? <RealisticButterflies /> : null;
+}
+
+function DeferredPaperBackground() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // The solid paper colour on the page is an intentional fallback. Starting
+    // its shader after first paint avoids competing with the opening reveal.
+    const timer = window.setTimeout(() => setReady(true), 180);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return ready ? <PaperBackground /> : null;
 }
 
 function CouplePortraitStory() {
@@ -55,8 +97,8 @@ export default function LuxuryInvitation() {
     document.getElementById('invitation-message')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  return <main className="luxury-invitation"><PaperBackground /><InvitationParticles /><CornerOrnaments /><div className="invitation-story">
-    <section className="invitation-opening"><Reveal><p className="invitation-arabic" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p><div className="invitation-starline"><span />✦<span /></div><p className="invitation-translation">In the name of Allah,<br />the Most Gracious, the Most Merciful</p></Reveal><motion.a href="#invitation-message" className="invitation-scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: .7 }} aria-label="Begin invitation" onClick={(event) => { event.preventDefault(); scrollToMessage(); }}><span>Begin</span><ArrowDown size={15} /></motion.a></section>
+  return <main className="luxury-invitation"><DeferredPaperBackground /><DeferredButterflies /><AdaptiveLantern /><CornerOrnaments /><div className="invitation-story">
+    <section className="invitation-opening"><div><ArabicOpeningReveal /><Reveal delay={.38}><div className="invitation-starline"><span />✦<span /></div><p className="invitation-translation">In the name of Allah,<br />the Most Gracious, the Most Merciful</p></Reveal></div><motion.a href="#invitation-message" className="invitation-scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: .7 }} aria-label="Begin invitation" onClick={(event) => { event.preventDefault(); scrollToMessage(); }}><span>Begin</span><ArrowDown size={15} /></motion.a></section>
     <section id="invitation-message" className="invitation-message-section"><Reveal className="invitation-message"><p className="section-eyebrow">A family invitation</p><blockquote>“With hearts full of joy, we invite you and your family to be a part of the Nikah and Wedding Ceremony of our beloved daughter.”</blockquote><p className="invitation-from">With love from<br /><strong>Mr. Firoz Khan M <em>(Late)</em><br />&amp; Mrs. Ambily Firoz</strong></p></Reveal></section>
     <section className="invitation-names" aria-label="The couple"><Reveal><p className="section-eyebrow">Together with their families</p></Reveal><Reveal delay={.06}><h1>Farzeen <span>Fathima Firoz</span></h1></Reveal><Reveal delay={.1}><p className="invitation-with">with</p></Reveal><Reveal delay={.14}><h2>Bilal <span>Nasimudeen</span></h2></Reveal><Reveal delay={.18}><p className="invitation-event-label">Nikah &amp; Wedding Ceremony</p></Reveal></section>
     <Reveal><WeddingCountdown /></Reveal>

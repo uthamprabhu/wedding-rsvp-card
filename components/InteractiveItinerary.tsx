@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import { HeartHandshake, MoonStar, Sparkles, Utensils, UsersRound } from 'lucide-react';
 
@@ -51,6 +51,8 @@ const events: TimelineEvent[] = [
 ];
 
 export default function InteractiveItinerary() {
+  const reducedMotion = useReducedMotion();
+
   return (
     <section className="itinerary-experience" aria-labelledby="itinerary-title">
       <div className="itinerary-shell">
@@ -58,7 +60,7 @@ export default function InteractiveItinerary() {
           className="itinerary-header"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: false, amount: 0.3 }}
           transition={{ duration: 0.7 }}
         >
           <p className="itinerary-bismillah">بِسْمِ ٱللَّٰهِ <span>•</span> with gratitude</p>
@@ -68,31 +70,39 @@ export default function InteractiveItinerary() {
         </motion.header>
 
         <div className="itinerary-timeline">
-          <div className="itinerary-line" aria-hidden="true" />
+          <motion.div
+            className="itinerary-line"
+            aria-hidden="true"
+            initial={{ scaleY: 0, opacity: 0 }}
+            whileInView={{ scaleY: 1, opacity: 1 }}
+            viewport={{ once: false, amount: 0.08 }}
+            transition={{ duration: reducedMotion ? 0 : 1.25, ease: [0.22, 1, 0.36, 1] }}
+          />
           {events.map((event, index) => {
             const Icon = event.icon;
+            const entersFromLeft = index % 2 === 0;
             return (
               <motion.article
                 className={`itinerary-event ${index % 2 === 0 ? 'is-left' : 'is-right'}`}
                 key={event.title}
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.55, delay: index * 0.06 }}
+                initial={{ opacity: 0, x: reducedMotion ? 0 : entersFromLeft ? -46 : 46, y: 20, scale: 0.975 }}
+                whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                viewport={{ once: false, amount: 0.25 }}
+                transition={{ duration: reducedMotion ? 0 : 0.68, delay: reducedMotion ? 0 : 0.04, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="itinerary-card">
+                <motion.div className="itinerary-card" whileHover={reducedMotion ? undefined : { y: -4, rotate: entersFromLeft ? -0.35 : 0.35 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}>
                   <div className="itinerary-card-meta"><span>{event.note}</span><time>{event.time}</time></div>
                   <h2>{event.title}</h2>
                   <p>{event.description}</p>
-                </div>
-                <div className="itinerary-marker" aria-hidden="true"><Icon size={18} strokeWidth={1.4} /></div>
+                </motion.div>
+                <motion.div className="itinerary-marker" aria-hidden="true" initial={{ opacity: 0, scale: 0.35, rotate: -30 }} whileInView={{ opacity: 1, scale: 1, rotate: 0 }} viewport={{ once: false, amount: 0.35 }} transition={{ type: 'spring', stiffness: 240, damping: 17, delay: reducedMotion ? 0 : 0.13 }}><Icon size={18} strokeWidth={1.4} /></motion.div>
                 <div className="itinerary-spacer" aria-hidden="true" />
               </motion.article>
             );
           })}
         </div>
 
-        <p className="itinerary-closing">May Allah fill this gathering with peace, love, and barakah.</p>
+        <motion.p className="itinerary-closing" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false, amount: 0.7 }} transition={{ duration: reducedMotion ? 0 : 0.65, ease: [0.22, 1, 0.36, 1] }}>May Allah fill this gathering with peace, love, and barakah.</motion.p>
         <div className="itinerary-ornament" aria-hidden="true"><span /><i>✦</i><span /></div>
         <div className="itinerary-bottom-space" aria-hidden="true" />
       </div>

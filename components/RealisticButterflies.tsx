@@ -4,13 +4,17 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 interface Butterfly {
+  curve: THREE.CubicBezierCurve3 | null;
+  cycle: number;
   delay: number;
   duration: number;
   hasHeading: boolean;
   heading: number;
   material: THREE.ShaderMaterial;
   mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
+  point: THREE.Vector3;
   seed: number;
+  tangent: THREE.Vector3;
 }
 
 interface ButterflyOptions {
@@ -75,7 +79,19 @@ function createButterfly(texture: THREE.Texture, options: ButterflyOptions): But
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.rotation.x = -0.18;
-  return { delay: options.delay, duration: options.duration, hasHeading: false, heading: 0, material, mesh, seed: options.seed };
+  return {
+    curve: null,
+    cycle: -1,
+    delay: options.delay,
+    duration: options.duration,
+    hasHeading: false,
+    heading: 0,
+    material,
+    mesh,
+    point: new THREE.Vector3(),
+    seed: options.seed,
+    tangent: new THREE.Vector3(),
+  };
 }
 
 const fract = (value: number) => value - Math.floor(value);
@@ -100,9 +116,13 @@ export default function RealisticButterflies() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
+    const isCompact = window.matchMedia('(max-width: 700px)').matches;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !isCompact, powerPreference: 'low-power' });
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isCompact ? 1.15 : 1.5));
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
@@ -119,11 +139,13 @@ export default function RealisticButterflies() {
         texture.colorSpace = THREE.SRGBColorSpace;
         texture.magFilter = THREE.LinearFilter;
         texture.minFilter = THREE.LinearMipmapLinearFilter;
-        butterflies = butterflyOptions.map((options) => createButterfly(loadedTexture, options));
+        butterflies = butterflyOptions
+          .filter((_, index) => !isCompact || index < 3)
+          .map((options) => createButterfly(loadedTexture, options));
         butterflies.forEach(({ mesh }) => scene.add(mesh));
       },
       undefined,
-      () => console.warn('Unable to load the RSVP butterfly texture.'),
+      () => console.warn('Unable to load the invitation butterfly texture.'),
     );
 
     let width = 0;
@@ -144,8 +166,13 @@ export default function RealisticButterflies() {
     observer.observe(canvas);
     resize();
 
+    const frameInterval = isCompact ? 1000 / 40 : 1000 / 55;
     let animationFrame = 0;
+    let lastFrame = 0;
     const render = (timestamp: number) => {
+      animationFrame = requestAnimationFrame(render);
+      if (timestamp - lastFrame < frameInterval) return;
+      lastFrame = timestamp;
       timer.update(timestamp);
       const elapsed = timer.getElapsed();
       const delta = timer.getDelta();
@@ -162,24 +189,28 @@ export default function RealisticButterflies() {
         const cycle = Math.floor(flightTime / butterfly.duration);
         const flight = (flightTime % butterfly.duration) / butterfly.duration;
         const pathSeed = butterfly.seed + cycle * 11.31;
-        const startSide = Math.floor(noise(pathSeed) * 4);
-        const endSide = (startSide + 1 + Math.floor(noise(pathSeed + 1) * 3)) % 4;
-        const start = edgePoint(startSide, noise(pathSeed + 2), width, height);
-        const end = edgePoint(endSide, noise(pathSeed + 3), width, height);
-        const curve = new THREE.CubicBezierCurve3(
-          new THREE.Vector3(start.x, start.y, 0),
-          new THREE.Vector3(THREE.MathUtils.lerp(start.x, end.x, .28) + (noise(pathSeed + 4) - .5) * width * .55, THREE.MathUtils.lerp(start.y, end.y, .28) + (noise(pathSeed + 5) - .5) * height * .5, 20),
-          new THREE.Vector3(THREE.MathUtils.lerp(start.x, end.x, .72) + (noise(pathSeed + 6) - .5) * width * .55, THREE.MathUtils.lerp(start.y, end.y, .72) + (noise(pathSeed + 7) - .5) * height * .5, -12),
-          new THREE.Vector3(end.x, end.y, 0),
-        );
-        const point = curve.getPoint(flight);
-        const tangent = curve.getTangent(flight);
+        if (butterfly.cycle !== cycle || !butterfly.curve) {
+          butterfly.cycle = cycle;
+          const startSide = Math.floor(noise(pathSeed) * 4);
+          const endSide = (startSide + 1 + Math.floor(noise(pathSeed + 1) * 3)) % 4;
+          const start = edgePoint(startSide, noise(pathSeed + 2), width, height);
+          const end = edgePoint(endSide, noise(pathSeed + 3), width, height);
+          butterfly.curve = new THREE.CubicBezierCurve3(
+            new THREE.Vector3(start.x, start.y, 0),
+            new THREE.Vector3(THREE.MathUtils.lerp(start.x, end.x, .28) + (noise(pathSeed + 4) - .5) * width * .55, THREE.MathUtils.lerp(start.y, end.y, .28) + (noise(pathSeed + 5) - .5) * height * .5, 20),
+            new THREE.Vector3(THREE.MathUtils.lerp(start.x, end.x, .72) + (noise(pathSeed + 6) - .5) * width * .55, THREE.MathUtils.lerp(start.y, end.y, .72) + (noise(pathSeed + 7) - .5) * height * .5, -12),
+            new THREE.Vector3(end.x, end.y, 0),
+          );
+        }
+        const curve = butterfly.curve;
+        curve.getPoint(flight, butterfly.point);
+        curve.getTangent(flight, butterfly.tangent);
         const drift = Math.sin(elapsed * (1.8 + noise(pathSeed + 8)) + butterfly.seed) * 8;
 
         butterfly.material.uniforms.time.value = elapsed;
-        butterfly.mesh.position.set(point.x, point.y + drift, point.z);
+        butterfly.mesh.position.set(butterfly.point.x, butterfly.point.y + drift, butterfly.point.z);
         // The texture's body points upward on its Y axis, so orient that axis along the flight tangent.
-        const targetHeading = Math.atan2(tangent.y, tangent.x) - Math.PI / 2;
+        const targetHeading = Math.atan2(butterfly.tangent.y, butterfly.tangent.x) - Math.PI / 2;
         butterfly.heading = butterfly.hasHeading ? smoothAngle(butterfly.heading, targetHeading, delta) : targetHeading;
         butterfly.hasHeading = true;
         const bank = Math.sin(elapsed * 2.1 + butterfly.seed) * .12 + Math.sin(elapsed * 1.3 + butterfly.seed) * .04;
@@ -187,7 +218,6 @@ export default function RealisticButterflies() {
       });
 
       renderer.render(scene, camera);
-      animationFrame = requestAnimationFrame(render);
     };
     animationFrame = requestAnimationFrame(render);
 

@@ -4,14 +4,15 @@ import { PaperTexture } from '@paper-design/shaders-react';
 
 interface PaperBackgroundProps {
   className?: string;
+  zIndex?: number;
 }
 
-export default function PaperBackground({ className = '' }: PaperBackgroundProps) {
+export default function PaperBackground({ className = '', zIndex = -1 }: PaperBackgroundProps) {
   return (
     <div 
       className={`fixed inset-0 ${className}`} 
       style={{ 
-        zIndex: -1,
+        zIndex,
         backgroundColor: '#EBE1D6' // Fallback color while shader loads
       }}
     >

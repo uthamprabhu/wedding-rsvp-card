@@ -3,8 +3,9 @@
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import InteractiveItinerary from '@/components/InteractiveItinerary';
+import JourneyPageLoader from '@/components/JourneyPageLoader';
 import PaperBackground from '@/components/PaperBackground';
-import CelestialBackdrop from '@/components/CelestialBackdrop';
+import CelestialBackdrop, { AdaptiveLantern } from '@/components/CelestialBackdrop';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
@@ -17,12 +18,14 @@ export default function ItineraryPage() {
 
   return (
     <main className="relative w-full min-h-screen overflow-x-hidden overflow-y-auto">
+      <JourneyPageLoader label="Preparing the celebration" />
       {/* Paper background - z-0 */}
       <PaperBackground />
       <CelestialBackdrop page="itinerary" />
+      <AdaptiveLantern />
       
       {/* Fluid background - z-5 (always behind content) */}
-      <FluidBackground className="opacity-30" variant="itinerary" />
+      <FluidBackground className="itinerary-fluid" variant="itinerary" forwardPagePointer />
 
       {/* Content - z-20 */}
       <motion.div

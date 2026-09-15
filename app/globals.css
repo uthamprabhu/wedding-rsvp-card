@@ -68,20 +68,86 @@ body {
   font-family: var(--font-geist-sans), sans-serif;
 }
 
+/* Branded loading states use the supplied cover mark rather than a JS spinner. */
+.loading-experience, .invitation-handoff-loader {
+  background:
+    radial-gradient(circle at 50% 44%, rgba(255, 253, 247, .96), rgba(235, 225, 214, .96) 50%, #e6d9ca 100%);
+}
+.loading-logo-mark, .invitation-handoff-mark {
+  position: relative;
+  display: grid;
+  width: 92px;
+  height: 92px;
+  place-items: center;
+  border-radius: 50%;
+  overflow: visible;
+  box-shadow: 0 13px 28px rgba(95, 66, 38, .12);
+}
+.loading-logo-mark img, .invitation-handoff-mark img { border-radius: 50%; object-fit: cover; }
+.loading-logo-ring, .invitation-handoff-ring {
+  position: absolute;
+  inset: -8px;
+  border: 1px solid rgba(173, 130, 73, .58);
+  border-right-color: transparent;
+  border-radius: inherit;
+}
+.invitation-handoff-loader {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  color: #78634d;
+}
+.invitation-handoff-loader p { font: 500 10px/1.3 var(--font-geist-sans), Inter, sans-serif; letter-spacing: .24em; text-transform: uppercase; }
+
+/* Used after the opening logo: a restrained silver ring with a diamond stone. */
+.diamond-ring-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 23px;
+  color: #6d655e;
+}
+.diamond-ring-loader-overlay {
+  position: fixed;
+  z-index: 80;
+  inset: 0;
+  background: radial-gradient(circle at 50% 44%, rgba(255, 254, 252, .97), rgba(236, 229, 220, .96) 52%, #e8ddd0 100%);
+}
+.diamond-ring-loader-mark { position: relative; display: grid; width: 104px; height: 104px; place-items: center; border: 2px solid rgba(119, 126, 140, .72); border-right-color: rgba(255, 255, 255, .96); border-bottom-color: rgba(206, 212, 221, .95); border-radius: 50%; box-shadow: 0 0 0 5px rgba(255, 255, 255, .36), 0 12px 28px rgba(77, 82, 92, .14), inset 0 0 15px rgba(255, 255, 255, .82); }
+.diamond-ring-loader-mark::before { position: absolute; inset: 8px; border: 1px solid rgba(142, 149, 162, .52); border-left-color: transparent; border-radius: inherit; content: ''; animation: diamond-ring-fallback-spin 3.8s linear infinite; }.diamond-ring-loader-mark::after { position: absolute; top: 7px; left: 50%; width: 7px; height: 7px; border: 1px solid #8e96a2; background: #fff; box-shadow: 0 0 12px rgba(255, 255, 255, .96); content: ''; transform: translateX(-50%) rotate(45deg); }
+.diamond-ring-loader-orbit { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; opacity: .9; }
+.diamond-ring-loader-stone { position: relative; z-index: 2; width: 40px; height: 40px; }
+.diamond-ring-loader p { margin: 0; font: 500 10px/1.3 var(--font-geist-sans), Inter, sans-serif; letter-spacing: .22em; text-align: center; text-transform: uppercase; }
+@keyframes diamond-ring-fallback-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 640px) {
+  .diamond-ring-loader-mark { width: 90px; height: 90px; }
+  .diamond-ring-loader-stone { width: 35px; height: 35px; }
+  .diamond-ring-loader p { font-size: 9px; letter-spacing: .18em; }
+}
+
 /* RSVP atmosphere: always below form content, except its intentional foreground lantern. */
 .celestial-backdrop { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
 .celestial-backdrop-itinerary { z-index: 10; }
 .celestial-sparkles { position: absolute !important; inset: 0; width: 100%; height: 100%; pointer-events: auto; transition: transform .12s linear; }
-.celestial-arabic { position: absolute; top: 22px; left: 50%; margin: 0; color: rgba(133, 96, 46, .3); font: 400 clamp(16px, 2vw, 23px)/1.2 Georgia, serif; letter-spacing: .06em; transform: translateX(-50%); white-space: nowrap; }
 .celestial-arch { position: absolute; width: clamp(140px, 18vw, 260px); height: clamp(210px, 28vw, 390px); border: 1px solid rgba(166, 129, 78, .16); border-bottom: 0; border-radius: 999px 999px 0 0; }
 .celestial-arch::after { position: absolute; inset: 10px; border: 1px solid rgba(166, 129, 78, .11); border-bottom: 0; border-radius: inherit; content: ''; }
 .celestial-arch-left { top: 14%; left: -90px; transform: rotate(-10deg); }.celestial-arch-right { right: -100px; bottom: 7%; transform: rotate(12deg); }
-.celestial-floral { position: absolute; width: clamp(155px, 20vw, 260px); color: rgba(143, 106, 57, .28); }.celestial-floral-top { top: 68px; left: -48px; transform: rotate(-21deg); }.celestial-floral-bottom { right: -48px; bottom: 54px; transform: rotate(159deg); }
-.celestial-backdrop-rsvp .celestial-arch, .celestial-backdrop-rsvp .celestial-floral { display: none; }
-.rsvp-hanging-lantern { position: fixed; z-index: 4; top: 2px; left: 50%; width: clamp(40px, 4.8vw, 56px); overflow: visible; opacity: .88; filter: drop-shadow(0 8px 10px rgba(97, 66, 31, .18)); pointer-events: none; transform: translateX(-50%); transform-origin: 50% 0; animation: lantern-sway 7s ease-in-out infinite alternate; }
+.itinerary-floral-cluster { --flower-flip: 1; position: absolute; width: clamp(128px, 15vw, 210px); height: auto; opacity: .72; filter: drop-shadow(0 8px 12px rgba(123, 86, 46, .07)); transform-origin: 50% 100%; animation: itinerary-corner-sway 9s ease-in-out infinite alternate; }.itinerary-floral-cluster-top { --flower-angle: -13deg; top: 26px; left: -26px; }.itinerary-floral-cluster-bottom { --flower-angle: 13deg; --flower-flip: -1; top: 26px; right: -26px; animation-delay: -3.6s; }
+.celestial-backdrop-rsvp .celestial-arch { display: none; }
+@keyframes itinerary-corner-sway { from { transform: scaleX(var(--flower-flip)) rotate(calc(var(--flower-angle) - 2deg)) translate(0, 0); } to { transform: scaleX(var(--flower-flip)) rotate(calc(var(--flower-angle) + 2deg)) translate(3px, 5px); } }
+.lantern-motion-shell { --lantern-motion-x: 0px; --lantern-motion-y: 0px; --lantern-motion-rotate: 0deg; position: fixed; z-index: 5; top: 0; left: 50%; width: clamp(30px, 3.2vw, 40px); overflow: visible; opacity: .9; filter: drop-shadow(0 7px 9px rgba(97, 66, 31, .17)); pointer-events: none; transform: translateX(calc(-50% + var(--lantern-motion-x))) translateY(var(--lantern-motion-y)) rotate(var(--lantern-motion-rotate)); transform-origin: 50% 0; transition: transform .16s cubic-bezier(.22, 1, .36, 1); will-change: transform; }.rsvp-lantern-art { display: block; width: 100%; height: auto; overflow: visible; transform-origin: 50% 0; animation: lantern-sway 7s ease-in-out infinite alternate; }
+.lantern-motion-permission { position: fixed; z-index: 70; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, calc(16px + env(safe-area-inset-bottom))); display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px 12px; width: min(370px, calc(100% - 36px)); padding: 15px; border: 1px solid rgba(171, 142, 97, .44); background: rgba(73, 59, 47, .86); box-shadow: 0 16px 38px rgba(54, 39, 25, .2), inset 0 1px rgba(255, 255, 255, .14); backdrop-filter: blur(16px); color: #fff8ed; }.lantern-motion-permission-gem { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid rgba(223, 192, 139, .65); border-radius: 50%; color: #e3c38c; font-size: 12px; }.lantern-motion-permission p { margin: 0; color: #fff9ef; font: 500 18px/1 var(--font-cormorant), Georgia, serif; }.lantern-motion-permission small { display: block; margin-top: 5px; color: rgba(255, 248, 237, .7); font: 400 11px/1.45 var(--font-geist-sans), Inter, sans-serif; }.lantern-motion-permission-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }.lantern-motion-permission-actions button { min-height: 34px; padding: 0 11px; border: 1px solid transparent; background: transparent; color: rgba(255, 248, 237, .76); font: 500 9px/1 var(--font-geist-sans), Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }.lantern-motion-permission-actions button:last-child { border-color: rgba(225, 191, 132, .76); background: rgba(177, 138, 82, .22); color: #fff9ef; }
 .rsvp-corner-lines { position: absolute; inset: 0; z-index: 0; color: rgba(158, 117, 62, .38); }.rsvp-corner { position: absolute; display: block; width: clamp(86px, 12vw, 154px); height: clamp(86px, 12vw, 154px); border: solid currentColor; border-width: 1px 0 0 1px; }.rsvp-corner::before { position: absolute; inset: 8px; border: solid rgba(191, 152, 94, .58); border-width: 1px 0 0 1px; content: ''; }.rsvp-corner::after { position: absolute; top: 19px; left: 19px; width: 10px; height: 10px; border: 1px solid rgba(181, 137, 77, .72); transform: rotate(45deg); content: ''; }.rsvp-corner-tl { top: 21px; left: 21px; }.rsvp-corner-tr { top: 21px; right: 21px; transform: scaleX(-1); }.rsvp-corner-bl { bottom: 21px; left: 21px; transform: scaleY(-1); }.rsvp-corner-br { right: 21px; bottom: 21px; transform: scale(-1); }
 .realistic-butterflies { position: absolute !important; inset: 0; z-index: 1; width: 100% !important; height: 100% !important; pointer-events: none; }
-@keyframes lantern-sway { from { transform: translateX(-50%) rotate(-2deg); } to { transform: translateX(-50%) rotate(2deg); } }
+.luxury-invitation .realistic-butterflies { position: fixed !important; }
+@keyframes lantern-sway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
 
 .rsvp-wrap {
   position: relative;
@@ -122,10 +188,10 @@ body {
 .rsvp-field > span, .rsvp-label { color: #66594e; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
 .rsvp-field b { color: #a6814e; font-weight: 500; }
 .rsvp-field em { margin-left: 8px; color: #a4988d; font-size: 10px; font-style: normal; letter-spacing: .06em; text-transform: uppercase; }
-.rsvp-field input, .rsvp-field textarea { width: 100%; border: 0; border-bottom: 1px solid rgba(118, 105, 93, .4); border-radius: 0; outline: 0; background: rgba(255, 253, 249, .42); color: #433b34; font: 400 18px var(--font-cormorant), Georgia, serif; padding: 13px 14px; transition: border-color .2s, background .2s; }
+.rsvp-field input, .rsvp-field textarea { width: 100%; border: 0; border-bottom: 1px solid rgba(118, 105, 93, .4); border-radius: 0; outline: 0; background: transparent; color: #433b34; font: 400 18px var(--font-cormorant), Georgia, serif; padding: 13px 14px; transition: border-color .2s, background .2s; }
 .rsvp-field textarea { resize: vertical; line-height: 1.5; }
 .rsvp-field input::placeholder, .rsvp-field textarea::placeholder { color: #a89d92; }
-.rsvp-field input:focus, .rsvp-field textarea:focus { border-color: #a6814e; background: rgba(255, 253, 249, .8); }
+.rsvp-field input:focus, .rsvp-field textarea:focus { border-color: #a6814e; background: transparent; }
 .rsvp-party-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .rsvp-party-row p { margin: 7px 0 0; color: #93867a; font-size: 13px; }
 .rsvp-counter { display: flex; align-items: center; gap: 22px; }
@@ -139,11 +205,10 @@ body {
 .rsvp-toggle strong, .rsvp-toggle small { display: block; }
 .rsvp-toggle strong { color: #66594e; font-size: 14px; font-weight: 500; }
 .rsvp-toggle small { margin-top: 4px; color: #93867a; font-size: 12px; }
-.rsvp-accommodation { margin: 34px 0 0; padding: 0; border: 0; }.rsvp-accommodation legend { color: #66594e; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }.rsvp-accommodation legend b { color: #a6814e; font-weight: 500; }.rsvp-accommodation > p { margin: 7px 0 17px; color: #93867a; font-size: 13px; }.rsvp-accommodation-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }.rsvp-choice { display: grid; grid-template-columns: 25px minmax(0, 1fr); align-items: start; gap: 12px; min-height: 90px; padding: 18px; border: 1px solid rgba(166, 129, 78, .3); background: rgba(255, 253, 249, .28); cursor: pointer; transition: border-color .2s ease, background .2s ease, transform .2s ease; }.rsvp-choice:hover { border-color: rgba(166, 129, 78, .7); transform: translateY(-2px); }.rsvp-choice input { position: absolute; opacity: 0; pointer-events: none; }.rsvp-choice-mark { display: grid; width: 25px; height: 25px; place-items: center; border: 1px solid rgba(166, 129, 78, .55); color: transparent; transition: background .2s ease, color .2s ease; }.rsvp-choice.is-selected { border-color: #a6814e; background: rgba(255, 253, 249, .72); }.rsvp-choice.is-selected .rsvp-choice-mark { background: #a6814e; color: #fffdf9; }.rsvp-choice strong, .rsvp-choice small { display: block; }.rsvp-choice strong { color: #5d4d40; font-size: 14px; font-weight: 500; }.rsvp-choice small { margin-top: 5px; color: #93867a; font-size: 12px; line-height: 1.45; }
+.rsvp-accommodation { margin: 34px 0 0; padding: 0; border: 0; }.rsvp-accommodation legend { color: #66594e; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }.rsvp-accommodation legend b { color: #a6814e; font-weight: 500; }.rsvp-accommodation > p { margin: 7px 0 17px; color: #93867a; font-size: 13px; }.rsvp-accommodation-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }.rsvp-choice { display: grid; grid-template-columns: 25px minmax(0, 1fr); align-items: start; gap: 12px; min-height: 90px; padding: 18px; border: 1px solid rgba(166, 129, 78, .3); background: transparent; cursor: pointer; transition: border-color .2s ease, background .2s ease, transform .2s ease; }.rsvp-choice:hover { border-color: rgba(166, 129, 78, .7); transform: translateY(-2px); }.rsvp-choice input { position: absolute; opacity: 0; pointer-events: none; }.rsvp-choice-mark { display: grid; width: 25px; height: 25px; place-items: center; border: 1px solid rgba(166, 129, 78, .55); color: transparent; transition: background .2s ease, color .2s ease; }.rsvp-choice.is-selected { border-color: #a6814e; background: rgba(166, 129, 78, .09); }.rsvp-choice.is-selected .rsvp-choice-mark { background: #a6814e; color: #fffdf9; }.rsvp-choice strong, .rsvp-choice small { display: block; }.rsvp-choice strong { color: #5d4d40; font-size: 14px; font-weight: 500; }.rsvp-choice small { margin-top: 5px; color: #93867a; font-size: 12px; line-height: 1.45; }
 .rsvp-submit-row { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding: 36px 0 0; }
 .rsvp-submit-row p { max-width: 290px; margin: 0; color: #93867a; font: italic 18px var(--font-cormorant), Georgia, serif; line-height: 1.35; }
-.rsvp-submit { display: inline-flex; align-items: center; justify-content: center; gap: 14px; min-height: 52px; padding: 0 26px; border: 1px solid #a6814e; background: #a6814e; color: #fffdf9; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: background .2s, transform .2s; }
-.rsvp-submit:hover { background: #8e6d3f; transform: translateY(-2px); }
+.rsvp-slide-confirm { max-width: 100%; border-color: rgba(166, 129, 78, .62) !important; background: rgba(248, 240, 226, .33) !important; color: #6f563b; box-shadow: 0 10px 24px rgba(98, 73, 47, .08), inset 0 1px rgba(255, 252, 246, .58); }.rsvp-slide-confirm > div:first-of-type { background: linear-gradient(90deg, #b0834d, #d7b87d) !important; opacity: .16 !important; }.rsvp-slide-confirm > div:nth-of-type(2) { background: linear-gradient(145deg, #fff9ef, #e9d7bc) !important; color: #8b673a; box-shadow: 0 5px 12px rgba(92, 65, 36, .14) !important; }.rsvp-slide-confirm > span { color: #74583b !important; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
 .rsvp-error { margin: 26px 0 0; color: #9e4e42; font-size: 13px; }
 .rsvp-footer { margin: 52px 0 0; color: #93867a; font: italic 18px var(--font-cormorant), Georgia, serif; text-align: center; }
 .rsvp-footer span { padding: 0 8px; color: #a6814e; }
@@ -164,7 +229,6 @@ body {
 .rsvp-detail strong { overflow-wrap: anywhere; color: #433b34; font: 400 20px var(--font-cormorant), Georgia, serif; }
 .rsvp-confirmation-actions { display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 38px; }
 .rsvp-confirmation-actions p { margin: 0; color: #93867a; font: italic 17px var(--font-cormorant), Georgia, serif; }
-.rsvp-submit:disabled { cursor: wait; opacity: .65; transform: none; }
 .rsvp-confirmation-note { margin: 36px auto 0; color: #76695d; font: italic 20px var(--font-cormorant), Georgia, serif; }
 
 /* Itinerary timeline */
@@ -178,7 +242,7 @@ body {
 .itinerary-header h1 { margin: 0; color: #433b34; font: 400 clamp(3.5rem, 7vw, 6rem)/.9 var(--font-cormorant), Georgia, serif; }
 .itinerary-lead { max-width: 420px; margin: 23px auto 0; color: #76695d; font-size: 14px; line-height: 1.8; }
 .itinerary-timeline { position: relative; }
-.itinerary-line { position: absolute; top: 20px; bottom: 20px; left: 50%; width: 1px; background: linear-gradient(to bottom, transparent, rgba(166, 129, 78, .6) 8%, rgba(166, 129, 78, .6) 92%, transparent); transform: translateX(-50%); }
+.itinerary-line { position: absolute; top: 20px; bottom: 20px; left: calc(50% - .5px); width: 1px; background: linear-gradient(to bottom, transparent, rgba(166, 129, 78, .6) 8%, rgba(166, 129, 78, .6) 92%, transparent); transform-origin: top; }
 .itinerary-event { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr); align-items: center; min-height: 190px; }
 .itinerary-event.is-left .itinerary-card { grid-column: 1; grid-row: 1; text-align: right; }
 .itinerary-event.is-left .itinerary-marker { grid-column: 2; grid-row: 1; }
@@ -199,11 +263,11 @@ body {
 .itinerary-ornament span { width: 45px; height: 1px; background: rgba(166, 129, 78, .4); }.itinerary-ornament i { font-size: 13px; font-style: normal; }.itinerary-bottom-space { height: 100px; }
 
 @media (max-width: 700px) {
-  .itinerary-experience { padding: 56px 18px 24px; }
+  .itinerary-experience { padding: 76px 18px 24px; }
   .itinerary-header { margin-bottom: 48px; }
   .itinerary-header h1 { font-size: clamp(3.4rem, 16vw, 5rem); }
   .itinerary-lead { font-size: 13px; }
-  .itinerary-line { top: 20px; bottom: 20px; left: 22px; transform: none; }
+  .itinerary-line { top: 20px; bottom: 20px; left: 22px; }
   .itinerary-event, .itinerary-event.is-left, .itinerary-event.is-right { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: start; min-height: 0; padding-bottom: 26px; }
   .itinerary-event .itinerary-card, .itinerary-event.is-left .itinerary-card, .itinerary-event.is-right .itinerary-card { grid-column: 2; grid-row: 1; width: 100%; justify-self: stretch; padding: 21px 19px; text-align: left; }
   .itinerary-event .itinerary-marker, .itinerary-event.is-left .itinerary-marker, .itinerary-event.is-right .itinerary-marker { grid-column: 1; grid-row: 1; width: 44px; height: 44px; }
@@ -270,7 +334,6 @@ body {
   .rsvp-choice { min-height: 0; padding: 16px; }
   .rsvp-submit-row { align-items: stretch; flex-direction: column; gap: 22px; }
   .rsvp-submit-row p { max-width: none; }
-  .rsvp-submit { width: 100%; }
 }
 
 /* Home invitation entry and editorial story.  These surfaces deliberately
@@ -280,9 +343,14 @@ body {
 .invitation-entry-hero { position: fixed; z-index: 5; inset: 0; overflow: hidden; isolation: isolate; background: #ebe1d6; }
 .invitation-entry-story { position: relative; z-index: 10; }
 .invitation-entry-glow { position: absolute; top: 50%; left: 50%; width: min(82vw, 600px); height: min(82vw, 600px); border-radius: 50%; background: radial-gradient(circle, rgba(255, 252, 240, .72), rgba(208, 174, 119, .13) 43%, transparent 72%); filter: blur(12px); transform: translate(-50%, -50%); }
+.invitation-opening-fluid, .itinerary-fluid { mix-blend-mode: multiply; transition: opacity .7s ease; }.invitation-opening-fluid { opacity: .58; }.itinerary-fluid { opacity: .56; }
+
+@media (max-width: 640px) {
+  .invitation-opening-fluid { opacity: .44; }.itinerary-fluid { opacity: .42; }
+}
 
 .luxury-invitation { position: relative; isolation: isolate; min-height: 100svh; overflow: clip; background: #ebe1d6; color: #46372d; font-family: var(--font-geist-sans), Inter, sans-serif; }
-.invitation-particles { position: fixed !important; inset: 0; z-index: 0; width: 100% !important; height: 100% !important; pointer-events: none; }
+.invitation-particles { position: fixed !important; inset: 0; z-index: 0; width: 100% !important; height: 100% !important; opacity: 0; pointer-events: none; transition: opacity 1.15s cubic-bezier(.22, 1, .36, 1); }.invitation-particles.is-visible { opacity: 1; }
 .invitation-story { position: relative; z-index: 2; width: min(100%, 1220px); margin: 0 auto; }
 .invitation-ornaments { position: fixed; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
 .invitation-corner { position: absolute; width: clamp(88px, 13vw, 150px); color: rgba(151, 112, 59, .3); }
@@ -292,6 +360,8 @@ body {
 .invitation-opening { display: grid; min-height: 100svh; padding: 112px 28px 58px; place-items: center; text-align: center; }
 .invitation-opening > div { max-width: 450px; }
 .invitation-arabic { margin: 0; color: #8f6739; font: 400 clamp(1.8rem, 8vw, 3.5rem)/1.55 'Cormorant Garamond', Georgia, serif; text-wrap: balance; }
+.invitation-arabic-opening { display: inline-block; direction: rtl; unicode-bidi: plaintext; }.invitation-arabic-opening span { display: inline-block; will-change: opacity, transform, filter; }
+.invitation-arabic-mobile-break { display: none; }
 .invitation-starline { display: flex; align-items: center; justify-content: center; gap: 13px; margin: 25px 0 20px; color: #b08751; font-size: 13px; }.invitation-starline span { width: 56px; height: 1px; background: linear-gradient(to right, transparent, rgba(176, 135, 81, .7)); }.invitation-starline span:last-child { transform: scaleX(-1); }
 .invitation-translation { margin: 0; color: #69594b; font-size: 10px; font-weight: 500; letter-spacing: .18em; line-height: 1.85; text-transform: uppercase; }
 .invitation-scroll { position: absolute; bottom: 32px; left: 50%; display: inline-flex; align-items: center; gap: 10px; color: #79624a; font-size: 10px; letter-spacing: .2em; text-decoration: none; text-transform: uppercase; transform: translateX(-50%); }
@@ -315,10 +385,190 @@ body {
 .invitation-closing { padding: 105px 26px 135px; text-align: center; }.invitation-closing > div { max-width: 570px; margin: 0 auto; }.invitation-closing-arabic { font-size: clamp(1.25rem, 4vw, 2rem); }.closing-copy { max-width: 430px; margin: 23px auto 0; color: #68594b; font: italic clamp(1.5rem, 3vw, 2rem)/1.25 'Cormorant Garamond', Georgia, serif; }.closing-links { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 37px; }.closing-links a { display: inline-flex; align-items: center; gap: 9px; min-height: 46px; padding: 0 18px; border: 1px solid rgba(166, 129, 78, .62); color: #60482f; font-size: 10px; font-weight: 600; letter-spacing: .13em; text-decoration: none; text-transform: uppercase; transition: background .25s ease, color .25s ease, transform .25s ease; }.closing-links a:hover { background: #a6814e; color: #fffdf9; transform: translateY(-2px); }.closing-links .closing-rsvp { background: #a6814e; color: #fffdf9; }.closing-links .closing-rsvp:hover { background: #876437; }.closing-support { margin: 35px 0 0; color: #887867; font-size: 11px; line-height: 1.9; }.closing-support a { color: #795c3a; text-decoration: none; }
 
 @media (max-width: 640px) {
-  .rsvp-hanging-lantern { top: 1px; width: 40px; }.rsvp-corner { width: 78px; height: 78px; }.rsvp-corner-tl { top: 13px; left: 13px; }.rsvp-corner-tr { top: 13px; right: 13px; }.rsvp-corner-bl { bottom: 13px; left: 13px; }.rsvp-corner-br { right: 13px; bottom: 13px; }
+  .lantern-motion-shell { top: 1px; width: 40px; }.rsvp-corner { width: 78px; height: 78px; }.rsvp-corner-tl { top: 13px; left: 13px; }.rsvp-corner-tr { top: 13px; right: 13px; }.rsvp-corner-bl { bottom: 13px; left: 13px; }.rsvp-corner-br { right: 13px; bottom: 13px; }
   .invitation-corner { width: 72px; }.invitation-opening { padding: 94px 22px 56px; }.invitation-message-section { min-height: 70svh; padding: 86px 24px; }.invitation-message blockquote { font-size: clamp(2rem, 9vw, 3.3rem); }.invitation-names { padding: 76px 20px 58px; }.invitation-names h1, .invitation-names h2 { font-size: clamp(3.7rem, 17vw, 5.6rem); }.wedding-countdown { width: min(100% - 32px, 560px); padding: 40px 10px; }.countdown-unit strong { font-size: clamp(2.45rem, 12vw, 3.6rem); }.countdown-unit:not(:last-child)::after { top: 25px; right: -1px; }.countdown-unit span { font-size: 8px; letter-spacing: .1em; }.countdown-note { font-size: 9px; letter-spacing: .1em; }.invitation-portrait-section { padding: 2px 12px 82px; }.couple-portrait-story { width: min(100% - 4px, 560px); padding: 46px 0 10px; }.couple-presentation { display: block; perspective: none; }.couple-profile { display: none; }.couple-presentation[data-featured='bride'] .couple-profile-bride, .couple-presentation[data-featured='groom'] .couple-profile-groom { display: block; }.couple-portrait-frame { width: min(80vw, 372px); }.couple-profile h3 { font-size: clamp(3.3rem, 14vw, 4.8rem); }.couple-union { display: none; }.portrait-memory { width: 92px; padding: 4px; }.portrait-memory-left { top: 13%; left: -13px; }.portrait-memory-right { right: -12px; bottom: 27%; }.mobile-person-switch { position: relative; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 13px; margin: 29px auto 0; }.mobile-person-switch button { min-height: 34px; padding: 0 7px; border: 0; border-bottom: 1px solid transparent; background: transparent; color: #8d765a; font: 400 18px 'Cormorant Garamond', Georgia, serif; cursor: pointer; }.mobile-person-switch button[aria-selected='true'] { border-color: #a6814e; color: #533b2a; }.mobile-person-switch span { color: #b48c59; font-size: 10px; }.couple-hands-portrait { width: 148px; height: 132px; margin-top: 24px; }.couple-weds { margin-top: 24px; font-size: clamp(2.1rem, 10vw, 3.2rem); }.invitation-event-section { grid-template-columns: 1fr; gap: 43px; padding: 70px 22px; }.event-map { margin-top: -3px; }.event-map iframe { height: 245px; }.invitation-families { padding: 84px 18px; }.family-columns { grid-template-columns: 1fr; gap: 48px; margin-top: 38px; }.invitation-closing { padding: 80px 20px 112px; }.closing-links { flex-direction: column; }.closing-links a { width: min(100%, 260px); justify-content: center; }
 }
 
 @media (min-width: 641px) and (max-width: 900px) {
   .invitation-opening { padding-top: 104px; }.invitation-message-section { padding-inline: 46px; }.invitation-names { padding-inline: 38px; }.couple-portrait-story { padding-inline: 26px; }.couple-presentation { grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr); gap: 22px; }.portrait-memory { width: 130px; }.invitation-event-section { gap: 48px; padding: 80px 48px; }.invitation-families { padding-inline: 46px; }.invitation-closing { padding-inline: 42px; }
+}
+
+/* Invitation story: intentional phone-first composition, not a compressed desktop. */
+@media (max-width: 640px) {
+  .luxury-invitation { overflow-x: clip; }
+  .invitation-opening {
+    min-height: 100dvh;
+    padding: max(82px, calc(54px + env(safe-area-inset-top))) 24px max(68px, calc(38px + env(safe-area-inset-bottom)));
+  }
+  .invitation-opening > div { width: min(100%, 390px); }
+  .invitation-arabic { font-size: clamp(1.7rem, 8.2vw, 2.35rem); line-height: 1.48; }
+  .invitation-arabic-mobile-break { display: block; }
+  .invitation-starline { gap: 11px; margin: 21px 0 17px; }
+  .invitation-starline span { width: clamp(34px, 13vw, 52px); }
+  .invitation-translation { font-size: 9px; letter-spacing: .15em; line-height: 1.9; }
+  .invitation-scroll {
+    bottom: max(24px, calc(14px + env(safe-area-inset-bottom)));
+    min-height: 44px;
+    padding: 0 8px;
+  }
+
+  #invitation-message { scroll-margin-top: 18px; }
+  .invitation-message-section { min-height: auto; padding: 100px 24px 92px; }
+  .invitation-message { width: min(100%, 450px); }
+  .section-eyebrow { margin-bottom: 16px; font-size: 9px; letter-spacing: .18em; }
+  .invitation-message blockquote { font-size: clamp(2.15rem, 10vw, 3.35rem); line-height: 1.02; }
+  .invitation-from { margin-top: 29px; font-size: 11px; }
+  .invitation-from strong { font-size: 18px; }
+
+  .invitation-names { padding: 84px 22px 66px; }
+  .invitation-names h1, .invitation-names h2 { font-size: clamp(3.55rem, 16vw, 5.25rem); line-height: .8; }
+  .invitation-with { margin: 24px 0; }
+  .invitation-event-label { margin-top: 30px; font-size: 9px; letter-spacing: .17em; }
+
+  .wedding-countdown { width: calc(100% - 28px); padding: 36px 8px 34px; }
+  .wedding-countdown .section-eyebrow { margin-bottom: 23px; }
+  .countdown-unit { gap: 7px; }
+  .countdown-unit strong { font-size: clamp(2.15rem, 11vw, 3.45rem); }
+  .countdown-unit:not(:last-child)::after { right: -1px; }
+  .countdown-note { margin-top: 24px; font-size: 8px; letter-spacing: .11em; }
+
+  .invitation-portrait-section { padding: 34px 10px 82px; }
+  .couple-portrait-story { width: min(100%, 470px); padding: 28px 0 12px; }
+  .couple-portrait-frame { width: min(78vw, 360px); box-shadow: 0 22px 38px rgba(73, 50, 30, .17); }
+  .portrait-memory { width: clamp(74px, 24vw, 104px); padding: 4px; opacity: .92; }
+  .portrait-memory-left { top: 9%; left: -16px; }
+  .portrait-memory-right { right: -16px; bottom: 25%; }
+  .couple-profile { will-change: auto; }
+  .couple-presentation[data-featured='bride'] .couple-profile-bride .couple-portrait-frame,
+  .couple-presentation[data-featured='groom'] .couple-profile-groom .couple-portrait-frame { animation: invitation-mobile-portrait-in .56s cubic-bezier(.22, 1, .36, 1) both; }
+  .portrait-role { margin-top: 17px; }
+  .couple-profile h3 { font-size: clamp(3.1rem, 14vw, 4.4rem); }
+  .mobile-person-switch { gap: 10px; margin-top: 25px; }
+  .mobile-person-switch button { min-height: 44px; padding: 0 12px; font-size: 19px; }
+  .couple-hands-portrait { width: 140px; height: 124px; margin-top: 22px; }
+  .couple-weds { margin-top: 22px; font-size: clamp(2.05rem, 9.6vw, 3rem); }
+
+  .invitation-event-section { gap: 37px; padding: 75px 22px; }
+  .event-heading h2 { font-size: clamp(3.25rem, 14vw, 4.5rem); }
+  .event-heading > p:last-child { margin-top: 16px; font-size: 10px; line-height: 1.6; }
+  .event-details { gap: 25px; }
+  .event-details strong { font-size: 22px; }
+  .event-map { width: 100%; margin-top: 0; }
+  .event-map iframe { height: min(64vw, 250px); min-height: 210px; }
+  .event-map-link { min-height: 52px; padding: 0 13px; font-size: 9px; letter-spacing: .12em; }
+
+  .invitation-families { padding: 84px 23px; }
+  .family-columns { gap: 43px; margin-top: 36px; }
+  .family-note { padding: 0; }
+  .family-note h3 { font-size: clamp(2.2rem, 10vw, 3rem); }
+  .family-note p { margin-top: 14px; }
+
+  .invitation-closing { padding: 77px 22px max(105px, calc(76px + env(safe-area-inset-bottom))); }
+  .invitation-closing-arabic { font-size: clamp(1.22rem, 5.5vw, 1.7rem); line-height: 1.65; }
+  .closing-copy { margin-top: 20px; font-size: clamp(1.55rem, 7vw, 2.05rem); }
+  .closing-links { width: min(100%, 310px); margin: 31px auto 0; gap: 11px; }
+  .closing-links a { width: 100%; min-height: 52px; }
+  .closing-support { margin-top: 31px; }
+}
+
+@media (max-width: 360px) {
+  .invitation-opening { padding-inline: 18px; }
+  .invitation-message-section, .invitation-names, .invitation-event-section, .invitation-closing { padding-inline: 18px; }
+  .invitation-message blockquote { font-size: 2.05rem; }
+  .countdown-unit strong { font-size: 2.05rem; }
+  .countdown-unit span { font-size: 7px; }
+  .portrait-memory { width: 70px; }
+  .mobile-person-switch button { padding-inline: 8px; }
+}
+
+@keyframes invitation-mobile-portrait-in {
+  from { opacity: 0; transform: translateY(14px) scale(.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* RSVP paper must sit inside the RSVP stacking context, beneath its content. */
+.rsvp-page { isolation: isolate; background: #ebe1d6; }
+
+/* A composed timeline on small screens: rail, markers, and cards retain the editorial rhythm. */
+.itinerary-card { transform-origin: center; }
+.itinerary-marker { transform-origin: center; }
+@media (max-width: 700px) {
+  .itinerary-experience { min-height: 100dvh; padding-bottom: 34px; }
+  .itinerary-header { max-width: 420px; margin-bottom: 54px; }
+  .itinerary-bismillah { margin-bottom: 18px; font-size: 9px; letter-spacing: .18em; }
+  .itinerary-monogram { margin-bottom: 12px; }
+  .itinerary-line { left: 21px; background: linear-gradient(to bottom, transparent, rgba(166, 129, 78, .72) 6%, rgba(166, 129, 78, .72) 94%, transparent); }
+  .itinerary-event, .itinerary-event.is-left, .itinerary-event.is-right { grid-template-columns: 43px minmax(0, 1fr); padding-bottom: 34px; }
+  .itinerary-event .itinerary-marker, .itinerary-event.is-left .itinerary-marker, .itinerary-event.is-right .itinerary-marker { width: 42px; height: 42px; box-shadow: 0 0 0 6px rgba(235, 225, 214, .84); }
+  .itinerary-event .itinerary-card, .itinerary-event.is-left .itinerary-card, .itinerary-event.is-right .itinerary-card { padding: 22px 18px 21px; border-color: rgba(166, 129, 78, .38); background: rgba(255, 253, 249, .72); box-shadow: 0 13px 26px rgba(100, 75, 48, .09); backdrop-filter: none; }
+  .itinerary-card-meta { margin-bottom: 11px; font-size: 8px; letter-spacing: .13em; }
+  .itinerary-card h2 { margin-bottom: 10px; font-size: clamp(1.7rem, 7.8vw, 2.1rem); }
+  .itinerary-card p { font-size: 12px; line-height: 1.72; }
+  .itinerary-closing { max-width: 300px; margin-top: 28px; line-height: 1.28; }
+  .itinerary-bottom-space { height: max(112px, calc(82px + env(safe-area-inset-bottom))); }
+}
+
+/* RSVP gets a compact invitation-like surface rather than a stretched form. */
+@media (max-width: 640px) {
+  .lantern-motion-shell { top: 0; width: 30px; }
+  .rsvp-page { min-height: 100dvh; }
+  .rsvp-wrap { width: min(calc(100% - 28px), 520px); padding: max(24px, env(safe-area-inset-top)) 0 max(62px, calc(36px + env(safe-area-inset-bottom))); }
+  .rsvp-back { min-height: 44px; padding: 0 4px; font-size: 10px; letter-spacing: .14em; }
+  .rsvp-header { margin: 38px auto 33px; padding: 0 8px; }
+  .rsvp-kicker { font-size: 9px; letter-spacing: .18em; }
+  .rsvp-monogram { margin: 19px 0 8px; font-size: 22px; }
+  .rsvp-header h1 { font-size: clamp(3.25rem, 15vw, 4.55rem); }
+  .rsvp-header > p:last-child { margin-top: 17px; font-size: 13px; line-height: 1.7; }
+  .rsvp-form { border-top: 0; }
+  .rsvp-section { margin-top: 0; padding: 29px 4px 27px; border: 0; border-top: 1px solid rgba(166, 129, 78, .28); background: transparent; box-shadow: none; }
+  .rsvp-section-heading { gap: 13px; margin-bottom: 23px; }
+  .rsvp-section-heading > span { font-size: 10px; }
+  .rsvp-section-heading h2 { font-size: clamp(1.85rem, 8.8vw, 2.3rem); }
+  .rsvp-grid, .rsvp-grid-contact { gap: 19px; }
+  .rsvp-field { gap: 8px; }
+  .rsvp-field > span, .rsvp-label, .rsvp-accommodation legend { font-size: 10px; letter-spacing: .09em; }
+  .rsvp-field input { min-height: 48px; padding: 12px 11px; background: transparent; font-size: 18px; }
+  .rsvp-party-row { align-items: center; flex-direction: row; gap: 12px; }
+  .rsvp-party-row p { margin-top: 5px; font-size: 12px; }
+  .rsvp-counter { flex: 0 0 auto; align-self: auto; gap: 13px; }
+  .rsvp-counter button { width: 42px; height: 42px; }
+  .rsvp-counter strong { flex: 0 0 34px; min-width: 34px; font-size: 30px; }
+  .rsvp-accommodation { margin-top: 29px; }
+  .rsvp-accommodation > p { margin-top: 7px; font-size: 12px; line-height: 1.55; }
+  .rsvp-accommodation-options { gap: 10px; }
+  .rsvp-choice { min-height: 82px; padding: 15px; }
+  .rsvp-choice strong { font-size: 14px; }
+  .rsvp-choice small { font-size: 11px; }
+  .rsvp-submit-row { gap: 18px; padding-top: 28px; }
+  .rsvp-submit-row p { padding: 0 5px; font-size: 17px; }
+  .rsvp-slide-confirm { align-self: center; }
+  .rsvp-error { margin: 20px 4px 0; font-size: 12px; }
+  .rsvp-footer { margin-top: 38px; font-size: 17px; }
+  .rsvp-glow { width: 210px; height: 210px; filter: blur(48px); }
+  .rsvp-confirmation { padding: max(68px, calc(48px + env(safe-area-inset-top))) 20px max(58px, calc(32px + env(safe-area-inset-bottom))); }
+  .rsvp-confirmation-wrap { width: min(100%, 470px); }
+  .rsvp-confirmation-wrap h1 { font-size: clamp(3rem, 14vw, 4.4rem); }
+  .rsvp-confirmation-details { padding: 0 2px; }
+  .rsvp-detail { gap: 12px; padding: 19px 0; }
+  .rsvp-detail strong { font-size: 19px; }
+  .lantern-motion-permission { right: 14px; bottom: max(14px, calc(12px + env(safe-area-inset-bottom))); width: calc(100% - 28px); padding: 14px; }
+  .lantern-motion-permission p { font-size: 17px; }
+}
+
+@media (max-width: 375px) {
+  .rsvp-wrap { width: calc(100% - 24px); }
+  .rsvp-section { padding-inline: 15px; }
+  .rsvp-party-row { align-items: flex-start; flex-direction: column; }
+  .rsvp-counter { align-self: stretch; justify-content: center; }
+  .rsvp-header h1 { font-size: 3.15rem; }
+}
+
+/* Keep the bride and groom portraits intimate on compact invitation layouts. */
+@media (max-width: 640px) {
+  .luxury-invitation .couple-portrait-frame { width: min(68vw, 300px); }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .luxury-invitation .couple-portrait-story { max-width: 760px; }
+  .luxury-invitation .couple-portrait-frame { width: min(100%, 280px); }
 }
