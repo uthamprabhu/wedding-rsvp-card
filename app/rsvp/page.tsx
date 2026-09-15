@@ -46,11 +46,10 @@ export default function RSVPPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [slideWidth, setSlideWidth] = useState(300);
   const [isMobile, setIsMobile] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const confirmationTimer = useRef<number | null>(null);
 
   useEffect(() => {
     // Detect mobile for optimized animations
@@ -65,15 +64,9 @@ export default function RSVPPage() {
     };
     
     updateConfirmControl();
-    
-    // Mark as loaded after a brief delay to show loader
-    const loadTimer = setTimeout(() => setIsLoaded(true), 100);
-    
     window.addEventListener('resize', updateConfirmControl);
     return () => {
-      clearTimeout(loadTimer);
       window.removeEventListener('resize', updateConfirmControl);
-      if (confirmationTimer.current) window.clearTimeout(confirmationTimer.current);
     };
   }, []);
 
@@ -81,49 +74,62 @@ export default function RSVPPage() {
     setFormData((current) => ({ ...current, [key]: value }));
   };
 
-  const confirmRsvp = async () => {
+  const confirmRsvp = async (): Promise<void> => {
     setSubmitError('');
+    setIsSubmitting(true);
+    
     const form = formRef.current;
     if (!form?.checkValidity()) {
       form?.reportValidity();
-      return false;
+      setIsSubmitting(false);
+      return;
     }
+    
     if (!formData.name.trim() || !formData.phone.trim() || !formData.accommodation) {
       setSubmitError('Please complete the required fields before confirming.');
-      return false;
+      setIsSubmitting(false);
+      return;
     }
 
-    // Save to Supabase in background (don't wait for it)
-    void (async () => {
-      try {
-        const { submitRsvp } = await import('@/lib/supabase');
-        await submitRsvp({
+    try {
+      // Submit to API route (server-side handles Supabase)
+      const response = await fetch('/api/rsvp/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           name: formData.name.trim(),
           phone: formData.phone.trim(),
-          email: formData.email.trim() || undefined,
+          email: formData.email.trim() || null,
           guest_count: formData.guestCount,
           accommodation_needed: formData.accommodation === 'yes',
-        });
-      } catch (error) {
-        console.error('Background save error:', error);
-        // Don't show error to user - data is still in URL
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Submission failed');
       }
-    })();
 
-    // Immediately redirect with data in URL
-    const params = new URLSearchParams({
-      name: formData.name.trim(),
-      phone: formData.phone.trim(),
-      email: formData.email.trim(),
-      guestCount: formData.guestCount.toString(),
-      accommodation: formData.accommodation,
-    });
+      // Success - redirect to confirmation
+      const params = new URLSearchParams({
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        guestCount: formData.guestCount.toString(),
+        accommodation: formData.accommodation,
+      });
 
-    confirmationTimer.current = window.setTimeout(() => {
-      router.push(`/rsvp/confirmation?${params.toString()}`);
-    }, 620);
-    
-    return true;
+      // Small delay for animation to complete
+      setTimeout(() => {
+        router.push(`/rsvp/confirmation?${params.toString()}`);
+      }, 400);
+    } catch (error) {
+      console.error('RSVP submission error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unable to submit your RSVP. Please check your connection and try again.';
+      setSubmitError(errorMessage);
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -133,18 +139,13 @@ export default function RSVPPage() {
 
   return (
     <main className="rsvp-page">
-      {!isLoaded && (
-        <div className="simple-loader">
-          <p>Loading your experience...</p>
-        </div>
-      )}
       <PaperBackground zIndex={0} />
       <CelestialBackdrop page="rsvp" />
       <InvitationParticles />
       <AdaptiveLantern />
       <div className="rsvp-glow rsvp-glow-left" aria-hidden="true" />
       <div className="rsvp-glow rsvp-glow-right" aria-hidden="true" />
-      <motion.div className="rsvp-wrap" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+      <motion.div className="rsvp-wrap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
         <button type="button" className="rsvp-back" onClick={() => router.back()}><ArrowLeft size={16} aria-hidden="true" /> Back to journey</button>
         <motion.header className="rsvp-header" variants={scrollReveal} initial="hidden" whileInView="visible" viewport={{ once: isMobile, amount: .5 }} transition={{ duration: isMobile ? 0.5 : .72, ease: [0.22, 1, 0.36, 1] }}>
           <span className="rsvp-kicker"><Sparkles size={14} aria-hidden="true" /> With love &amp; dua</span>
@@ -170,7 +171,18 @@ export default function RSVPPage() {
           </motion.section>
 
           {submitError && <p className="rsvp-error" role="alert">{submitError}</p>}
-          <motion.div className="rsvp-submit-row" variants={scrollReveal} initial="hidden" whileInView="visible" viewport={{ once: isMobile, amount: .55 }} transition={{ duration: isMobile ? 0.5 : .7, ease: [0.22, 1, 0.36, 1] }}><p>Your reply helps us prepare a day full of thoughtful details.</p><SlideToConfirm className="rsvp-slide-confirm" width={slideWidth} height={60} text="Slide to confirm your place" successText="Your place is confirmed" onConfirm={async () => { await confirmRsvp(); }} /></motion.div>
+          <motion.div className="rsvp-submit-row" variants={scrollReveal} initial="hidden" whileInView="visible" viewport={{ once: isMobile, amount: .55 }} transition={{ duration: isMobile ? 0.5 : .7, ease: [0.22, 1, 0.36, 1] }}>
+            <p>Your reply helps us prepare a day full of thoughtful details.</p>
+            <SlideToConfirm 
+              className="rsvp-slide-confirm" 
+              width={slideWidth} 
+              height={60} 
+              text={isSubmitting ? "Saving..." : "Slide to confirm your place"}
+              successText="Your place is confirmed" 
+              onConfirm={confirmRsvp}
+              disabled={isSubmitting}
+            />
+          </motion.div>
         </form>
         <p className="rsvp-footer">With love, Farzeen & Bilal <span>•</span> 2026</p>
       </motion.div>

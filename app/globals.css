@@ -62,7 +62,7 @@ body {
 }
 
 /* RSVP invitation surface */
-.rsvp-page { position: relative; min-height: 100vh; overflow-x: hidden;
+.rsvp-page { position: relative; min-height: 100vh; height: 100%; overflow-x: hidden;
   color: #433b34;
   background: #ebe1d6;
   font-family: var(--font-geist-sans), sans-serif;
@@ -1489,5 +1489,16 @@ body {
     will-change: auto;
     transform: none !important;
   }
+}
+
+
+/* Ensure paper background covers full scrollable page, not just viewport */
+.rsvp-page > div:first-child {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100%;
+  height: auto;
 }
 

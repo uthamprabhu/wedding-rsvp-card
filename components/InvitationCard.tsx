@@ -144,7 +144,6 @@ export default function InvitationCard({ onClose }: InvitationCardProps) {
       // Clean up
       document.body.removeChild(downloadContainer);
     } catch (error) {
-      console.error('Error generating PDF:', error);
       alert('There was an error generating your invitation card. Please try again.');
     }
   };

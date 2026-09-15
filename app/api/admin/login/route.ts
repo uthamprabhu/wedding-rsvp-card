@@ -13,12 +13,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if ADMIN_PASSWORD is configured
+    const configuredPassword = process.env.ADMIN_PASSWORD;
+    if (!configuredPassword) {
+      console.error('ADMIN_PASSWORD environment variable is not set');
+      return NextResponse.json(
+        { success: false, message: 'Admin authentication is not configured' },
+        { status: 500 }
+      );
+    }
+
     // Verify password against environment variable
     const isValid = verifyAdminPassword(password);
 
     if (!isValid) {
       // Add small delay to prevent brute force
       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Login attempt failed: Invalid password');
       
       return NextResponse.json(
         { success: false, message: 'Invalid password' },
@@ -28,6 +40,8 @@ export async function POST(request: NextRequest) {
 
     // Create secure session cookie
     await createAdminSession();
+    
+    console.log('Login successful, session created');
 
     return NextResponse.json(
       { success: true, message: 'Authentication successful' },
@@ -36,7 +50,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
-      { success: false, message: 'An error occurred' },
+      { success: false, message: error instanceof Error ? error.message : 'An error occurred' },
       { status: 500 }
     );
   }

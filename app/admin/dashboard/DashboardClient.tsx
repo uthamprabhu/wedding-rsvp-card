@@ -84,7 +84,6 @@ export default function DashboardClient({ stats, rsvps, initialFilters }: Dashbo
       router.push('/admin');
       router.refresh();
     } catch (error) {
-      console.error('Logout error:', error);
       setIsLoggingOut(false);
     }
   };

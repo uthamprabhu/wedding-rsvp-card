@@ -10,8 +10,8 @@ const particlesInit = async (engine: Engine) => {
 };
 
 export default function FloatingParticles() {
-  const particlesLoaded = useCallback(async (container?: Container) => {
-    console.log('Particles loaded', container);
+  const particlesLoaded = useCallback(async () => {
+    // Particles initialized
   }, []);
 
   const options: ISourceOptions = useMemo(

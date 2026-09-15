@@ -10,10 +10,12 @@ interface PaperBackgroundProps {
 export default function PaperBackground({ className = '', zIndex = -1 }: PaperBackgroundProps) {
   return (
     <div 
-      className={`fixed inset-0 ${className}`} 
+      className={`absolute inset-0 ${className}`} 
       style={{ 
         zIndex,
-        backgroundColor: '#EBE1D6' // Fallback color while shader loads
+        backgroundColor: '#EBE1D6', // Fallback color while shader loads
+        width: '100%',
+        minHeight: '100vh',
       }}
     >
       <PaperTexture
@@ -31,8 +33,8 @@ export default function PaperBackground({ className = '', zIndex = -1 }: PaperBa
         fade={0.2}
         seed={42}
         scale={0.8}
-        width="100vw"
-        height="100vh"
+        width="100%"
+        height="100%"
         fit="cover"
       />
     </div>

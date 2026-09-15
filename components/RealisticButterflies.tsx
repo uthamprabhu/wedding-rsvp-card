@@ -147,7 +147,7 @@ export default function RealisticButterflies() {
       undefined,
       (error) => {
         console.error('Failed to load butterfly texture:', error);
-      },
+      }
     );
 
     let width = 0;

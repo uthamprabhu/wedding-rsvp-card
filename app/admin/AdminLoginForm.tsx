@@ -34,7 +34,6 @@ export default function AdminLoginForm() {
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
-      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }

@@ -18,6 +18,8 @@ interface SlideToConfirmProps {
   height?: number;
   /** Additional classes for the container */
   className?: string;
+  /** Disable the slider */
+  disabled?: boolean;
 }
 
 export function SlideToConfirm({
@@ -27,6 +29,7 @@ export function SlideToConfirm({
   width = 320,
   height = 56,
   className,
+  disabled = false,
 }: SlideToConfirmProps) {
   const [state, setState] = useState<"idle" | "loading" | "success">("idle");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,7 +45,7 @@ export function SlideToConfirm({
   const bgWidth = useTransform(x, [0, trackWidth], [height, width]);
 
   const handleDragEnd = async () => {
-    if (state !== "idle") return;
+    if (state !== "idle" || disabled) return;
 
     if (x.get() >= trackWidth * 0.9) {
       // Completed drag
@@ -52,10 +55,12 @@ export function SlideToConfirm({
       try {
         await onConfirm();
         setState("success");
-      } catch {
+      } catch (error) {
         // If error, reset
         setState("idle");
         controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
+        // Re-throw to let parent handle
+        throw error;
       }
     } else {
       // Reset if not fully dragged
@@ -77,6 +82,7 @@ export function SlideToConfirm({
       className={cn(
         "relative flex items-center justify-center overflow-hidden rounded-full border bg-muted select-none",
         state === "success" ? "cursor-pointer border-green-500/50" : "",
+        disabled ? "opacity-50 cursor-not-allowed" : "",
         className
       )}
       style={{
@@ -123,14 +129,15 @@ export function SlideToConfirm({
 
       {/* Draggable Thumb */}
       <motion.div
-        drag={state === "idle" ? "x" : false}
+        drag={state === "idle" && !disabled ? "x" : false}
         dragConstraints={{ left: 0, right: trackWidth }}
         dragElastic={0.05}
         dragMomentum={false}
         onDragEnd={handleDragEnd}
         className={cn(
           "absolute left-1 z-10 flex cursor-grab items-center justify-center rounded-full bg-background shadow-md active:cursor-grabbing",
-          state !== "idle" && "cursor-default"
+          state !== "idle" && "cursor-default",
+          disabled && "cursor-not-allowed opacity-50"
         )}
 
         initial={false}

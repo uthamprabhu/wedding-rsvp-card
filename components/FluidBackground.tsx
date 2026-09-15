@@ -103,7 +103,6 @@ export default function FluidBackground({ className = '', variant = 'home', forw
     // Check for WebGL support
     const gl = canvasRef.current.getContext('webgl2') || canvasRef.current.getContext('webgl');
     if (!gl) {
-      console.warn('WebGL not supported, fluid simulation disabled');
       return;
     }
 
@@ -115,10 +114,8 @@ export default function FluidBackground({ className = '', variant = 'home', forw
       const fluidConfig = getVariantConfig();
       fluidConfigRef.current = fluidConfig;
       fluidRef.current = new WebGLFluid(canvasRef.current, fluidConfig);
-
-      console.log(`WebGL Fluid initialized (${variant}):`, fluidRef.current);
-    }).catch(error => {
-      console.warn('Failed to load webgl-fluid:', error);
+    }).catch(() => {
+      // Fluid simulation unavailable - fallback to static background
     });
 
     return () => {
