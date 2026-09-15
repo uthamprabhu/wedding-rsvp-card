@@ -1,0 +1,6 @@
+# Robots.txt for Farzeen & Bilal Wedding Invitation
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://farzeen-bilal.vercel.app/sitemap.xml

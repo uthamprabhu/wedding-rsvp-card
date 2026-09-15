@@ -4,8 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import InvitationHero from '@/components/InvitationHero';
 import LoadingAnimation from '@/components/LoadingAnimation';
-import InvitationHandoffLoader from '@/components/InvitationHandoffLoader';
-import JourneyPageLoader from '@/components/JourneyPageLoader';
 import PaperBackground from '@/components/PaperBackground';
 import dynamic from 'next/dynamic';
 
@@ -16,7 +14,7 @@ const FluidBackground = dynamic(() => import('@/components/FluidBackground'), {
 const loadLuxuryInvitation = () => import('@/components/LuxuryInvitation');
 const LuxuryInvitation = dynamic(loadLuxuryInvitation, {
   ssr: false,
-  loading: () => <InvitationHandoffLoader />,
+  loading: () => null, // No loader - content streams in
 });
 
 export default function Home() {
@@ -71,7 +69,6 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: .9, ease: [0.22, 1, 0.36, 1] }}
           >
-            <JourneyPageLoader label="Preparing your invitation" />
             <LuxuryInvitation />
           </motion.div>
         )}

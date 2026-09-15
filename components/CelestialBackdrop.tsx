@@ -65,42 +65,42 @@ const motionChoiceKey = 'farzeen-lantern-motion-choice';
 
 export function AdaptiveLantern() {
   const lanternRef = useRef<HTMLDivElement>(null);
-  const pendingTilt = useRef({ x: 0, y: 0, rotation: 0 });
+  const pendingRotation = useRef(0);
   const animationFrame = useRef(0);
   const [showPrompt, setShowPrompt] = useState(false);
   const [motionEnabled, setMotionEnabled] = useState(false);
 
-  const applyTilt = useCallback(() => {
+  const applyRotation = useCallback(() => {
     const lantern = lanternRef.current;
     if (!lantern) return;
-    const { x, y, rotation } = pendingTilt.current;
-    lantern.style.setProperty('--lantern-motion-x', `${x.toFixed(2)}px`);
-    lantern.style.setProperty('--lantern-motion-y', `${y.toFixed(2)}px`);
-    lantern.style.setProperty('--lantern-motion-rotate', `${rotation.toFixed(2)}deg`);
+    const rotation = pendingRotation.current;
+    // Only rotate - don't translate. The attachment point stays fixed.
+    lantern.style.setProperty('--lantern-swing-rotation', `${rotation.toFixed(2)}deg`);
   }, []);
 
-  const scheduleTilt = useCallback((x: number, y: number, rotation: number) => {
-    pendingTilt.current = { x, y, rotation };
+  const scheduleRotation = useCallback((rotation: number) => {
+    pendingRotation.current = rotation;
     if (animationFrame.current) return;
     animationFrame.current = window.requestAnimationFrame(() => {
       animationFrame.current = 0;
-      applyTilt();
+      applyRotation();
     });
-  }, [applyTilt]);
+  }, [applyRotation]);
 
   useEffect(() => {
     const supportsOrientation = typeof window.DeviceOrientationEvent !== 'undefined';
     const storedChoice = window.sessionStorage.getItem(motionChoiceKey);
 
     if (!supportsOrientation) {
-      const pointerTilt = (event: PointerEvent) => {
-        const x = (event.clientX / window.innerWidth - .5) * 7;
-        const y = (event.clientY / window.innerHeight - .5) * 2;
-        scheduleTilt(x, y, x * .72);
+      // For non-mobile: subtle mouse-based pendulum swing
+      const pointerSwing = (event: PointerEvent) => {
+        const xNormalized = (event.clientX / window.innerWidth - 0.5);
+        const swingAngle = xNormalized * 6; // Max 3 degrees swing on each side
+        scheduleRotation(swingAngle);
       };
-      window.addEventListener('pointermove', pointerTilt, { passive: true });
+      window.addEventListener('pointermove', pointerSwing, { passive: true });
       return () => {
-        window.removeEventListener('pointermove', pointerTilt);
+        window.removeEventListener('pointermove', pointerSwing);
         if (animationFrame.current) window.cancelAnimationFrame(animationFrame.current);
       };
     }
@@ -114,18 +114,24 @@ export function AdaptiveLantern() {
       window.cancelAnimationFrame(stateFrame);
       if (animationFrame.current) window.cancelAnimationFrame(animationFrame.current);
     };
-  }, [scheduleTilt]);
+  }, [scheduleRotation]);
 
   useEffect(() => {
     if (!motionEnabled) return;
-    const orientationTilt = (event: DeviceOrientationEvent) => {
-      const gamma = Math.max(-40, Math.min(40, event.gamma ?? 0));
-      const beta = Math.max(-40, Math.min(40, event.beta ?? 0));
-      scheduleTilt(gamma * .12, beta * .035, gamma * .13);
+    
+    // Device orientation: use gamma (left-right tilt) for pendulum swing
+    const orientationSwing = (event: DeviceOrientationEvent) => {
+      // gamma ranges from -90 to 90 (left-right tilt)
+      // We'll map this to a gentle swing range
+      const gamma = Math.max(-30, Math.min(30, event.gamma ?? 0));
+      // Scale to realistic pendulum range: about ±8 degrees max
+      const swingAngle = gamma * 0.27;
+      scheduleRotation(swingAngle);
     };
-    window.addEventListener('deviceorientation', orientationTilt, { passive: true });
-    return () => window.removeEventListener('deviceorientation', orientationTilt);
-  }, [motionEnabled, scheduleTilt]);
+    
+    window.addEventListener('deviceorientation', orientationSwing, { passive: true });
+    return () => window.removeEventListener('deviceorientation', orientationSwing);
+  }, [motionEnabled, scheduleRotation]);
 
   const enableMotion = async () => {
     const orientationApi = window.DeviceOrientationEvent as OrientationPermissionApi;
@@ -149,7 +155,9 @@ export function AdaptiveLantern() {
   };
 
   return <>
-    <div ref={lanternRef} className="lantern-motion-shell"><RsvpLantern /></div>
+    <div ref={lanternRef} className="lantern-pendulum-container">
+      <RsvpLantern />
+    </div>
     {showPrompt && <motion.aside className="lantern-motion-permission" initial={{ opacity: 0, y: 18, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: .45, ease: [0.22, 1, 0.36, 1] }} aria-label="Lantern motion preference">
       <span className="lantern-motion-permission-gem">✦</span>
       <div><p>Bring the lantern to life</p><small>Allow gentle motion for a more immersive invitation.</small></div>
@@ -159,19 +167,27 @@ export function AdaptiveLantern() {
 }
 
 function RsvpCornerLines() {
-  return <div className="rsvp-corner-lines" aria-hidden="true"><i className="rsvp-corner rsvp-corner-tl" /><i className="rsvp-corner rsvp-corner-tr" /><i className="rsvp-corner rsvp-corner-bl" /><i className="rsvp-corner rsvp-corner-br" /></div>;
+  // Corner decorations removed per user request
+  return null;
 }
 
 export default function CelestialBackdrop({ page }: CelestialBackdropProps) {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Ensure particles initialize immediately
+    setIsReady(true);
+  }, []);
+
   const options: ISourceOptions = useMemo(() => ({
     fullScreen: { enable: false },
     background: { color: { value: 'transparent' } },
-    fpsLimit: 60,
+    fpsLimit: 50,
     interactivity: {
       events: {
         onHover: { enable: true, mode: 'bubble' },
         onClick: { enable: true, mode: 'push' },
-        resize: { enable: true },
+        resize: { enable: true, delay: 0.5 },
       },
       modes: {
         bubble: { distance: 110, duration: 1.2, opacity: 0.9, size: 7 },
@@ -180,10 +196,37 @@ export default function CelestialBackdrop({ page }: CelestialBackdropProps) {
     },
     particles: {
       color: { value: ['#b18a52', '#d4b77c', '#fff4d9'] },
-      move: { enable: true, speed: 0.38, random: true, outModes: { default: 'out' } },
-      number: { density: { enable: true }, value: 34 },
-      opacity: { value: { min: 0.2, max: 0.62 }, animation: { enable: true, speed: 0.45, minimumValue: 0.16, sync: false } },
-      shape: { type: 'char', options: { char: { value: ['✦', '✧', '·'], font: 'serif', style: '', weight: '400' } } },
+      move: { 
+        enable: true, 
+        speed: 0.5, 
+        random: true, 
+        outModes: { default: 'out' },
+        attract: { enable: false }
+      },
+      number: { 
+        density: { enable: true, width: 1920, height: 1080 }, 
+        value: 32 
+      },
+      opacity: { 
+        value: { min: 0.25, max: 0.68 }, 
+        animation: { 
+          enable: true, 
+          speed: 0.5, 
+          minimumValue: 0.18, 
+          sync: false 
+        } 
+      },
+      shape: { 
+        type: 'char', 
+        options: { 
+          char: { 
+            value: ['✦', '✧', '·'], 
+            font: 'serif', 
+            style: '', 
+            weight: '400' 
+          } 
+        } 
+      },
       size: { value: { min: 2, max: 7 } },
     },
     detectRetina: true,
@@ -191,7 +234,7 @@ export default function CelestialBackdrop({ page }: CelestialBackdropProps) {
 
   return (
     <div className={`celestial-backdrop celestial-backdrop-${page}`} aria-hidden="true">
-      {page === 'itinerary' && <ParticlesProvider init={particlesInit}>
+      {page === 'itinerary' && isReady && <ParticlesProvider init={particlesInit}>
         <Particles id={`${page}-sparkles`} options={options} className="celestial-sparkles" />
       </ParticlesProvider>}
       <div className="celestial-arch celestial-arch-left" />

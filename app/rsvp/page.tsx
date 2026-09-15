@@ -5,11 +5,9 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Minus, Plus, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PaperBackground from '@/components/PaperBackground';
-import ConfirmationPage from '@/components/ConfirmationPage';
 import CelestialBackdrop, { AdaptiveLantern } from '@/components/CelestialBackdrop';
 import InvitationParticles from '@/components/InvitationParticles';
 import { SlideToConfirm } from '@/components/lightswind/slide-to-confirm';
-import JourneyPageLoader from '@/components/JourneyPageLoader';
 
 interface FormData {
   name: string;
@@ -31,7 +29,6 @@ const scrollReveal = {
 export default function RSVPPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [showConfirmation, setShowConfirmation] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [slideWidth, setSlideWidth] = useState(300);
   const formRef = useRef<HTMLFormElement>(null);
@@ -54,7 +51,7 @@ export default function RSVPPage() {
     setFormData((current) => ({ ...current, [key]: value }));
   };
 
-  const confirmRsvp = () => {
+  const confirmRsvp = async () => {
     setSubmitError('');
     const form = formRef.current;
     if (!form?.checkValidity()) {
@@ -65,80 +62,47 @@ export default function RSVPPage() {
       setSubmitError('Please complete the required fields before confirming.');
       return false;
     }
-    // Preserve the slider's completion state briefly before the celebration
-    // sequence replaces the form.
+
+    // Save to Supabase in background (don't wait for it)
+    void (async () => {
+      try {
+        const { submitRsvp } = await import('@/lib/supabase');
+        await submitRsvp({
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim() || undefined,
+          guest_count: formData.guestCount,
+          accommodation_needed: formData.accommodation === 'yes',
+        });
+      } catch (error) {
+        console.error('Background save error:', error);
+        // Don't show error to user - data is still in URL
+      }
+    })();
+
+    // Immediately redirect with data in URL
+    const params = new URLSearchParams({
+      name: formData.name.trim(),
+      phone: formData.phone.trim(),
+      email: formData.email.trim(),
+      guestCount: formData.guestCount.toString(),
+      accommodation: formData.accommodation,
+    });
+
     confirmationTimer.current = window.setTimeout(() => {
-      setShowConfirmation(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      router.push(`/rsvp/confirmation?${params.toString()}`);
     }, 620);
+    
     return true;
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    confirmRsvp();
+    void confirmRsvp();
   };
-
-  const handleDownload = async () => {
-    const { default: html2canvas } = await import('html2canvas');
-    const { jsPDF } = await import('jspdf');
-    const downloadContainer = document.createElement('div');
-    downloadContainer.style.cssText = 'position:fixed;left:-10000px;top:0;width:720px;padding:64px;background:#f8f4ee;color:#433b34;font-family:Georgia,serif;';
-
-    const heading = document.createElement('h1');
-    heading.textContent = 'A note of celebration';
-    heading.style.cssText = 'margin:0 0 12px;text-align:center;color:#a6814e;font-size:42px;font-weight:400;';
-    downloadContainer.appendChild(heading);
-    const intro = document.createElement('p');
-    intro.textContent = 'Your RSVP is reserved for Farzeen & Bilal';
-    intro.style.cssText = 'margin:0 0 42px;text-align:center;color:#7d7063;font-size:17px;';
-    downloadContainer.appendChild(intro);
-
-    const details = document.createElement('div');
-    details.style.cssText = 'padding:34px;background:#fffdf9;border:1px solid #d9c7a8;';
-    const rows: [string, string][] = [
-      ['Guest', formData.name.trim()],
-      ['Contact', formData.email.trim() ? `${formData.phone.trim()} | ${formData.email.trim()}` : formData.phone.trim()],
-      ['Guests', String(formData.guestCount)],
-      ['Accommodation', formData.accommodation === 'yes' ? 'Assistance requested' : 'Not needed'],
-    ];
-    rows.forEach(([label, value]) => {
-      const row = document.createElement('p');
-      row.style.cssText = 'margin:0 0 18px;font-size:18px;line-height:1.5;';
-      const strong = document.createElement('strong');
-      strong.textContent = `${label}: `;
-      strong.style.color = '#a6814e';
-      row.append(strong, document.createTextNode(value));
-      details.appendChild(row);
-    });
-    downloadContainer.appendChild(details);
-    document.body.appendChild(downloadContainer);
-
-    try {
-      const canvas = await html2canvas(downloadContainer, { scale: 2, backgroundColor: '#f8f4ee' });
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width / 2, canvas.height / 2] });
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
-      pdf.save(`wedding-rsvp-${formData.name.trim().replace(/\s+/g, '-').toLowerCase()}.pdf`);
-    } finally {
-      downloadContainer.remove();
-    }
-  };
-
-  if (showConfirmation) {
-    return (
-      <main className="rsvp-page">
-        <PaperBackground zIndex={0} />
-        <CelestialBackdrop page="rsvp" />
-        <InvitationParticles />
-        <AdaptiveLantern />
-        <ConfirmationPage data={formData} onDownload={handleDownload} />
-      </main>
-    );
-  }
 
   return (
     <main className="rsvp-page">
-      <JourneyPageLoader label="Preparing your RSVP" />
       <PaperBackground zIndex={0} />
       <CelestialBackdrop page="rsvp" />
       <InvitationParticles />
@@ -171,9 +135,9 @@ export default function RSVPPage() {
           </motion.section>
 
           {submitError && <p className="rsvp-error" role="alert">{submitError}</p>}
-          <motion.div className="rsvp-submit-row" variants={scrollReveal} initial="hidden" whileInView="visible" viewport={{ once: false, amount: .55 }} transition={{ duration: .7, ease: [0.22, 1, 0.36, 1] }}><p>Your reply helps us prepare a day full of thoughtful details.</p><SlideToConfirm className="rsvp-slide-confirm" width={slideWidth} height={60} text="Slide to confirm your place" successText="Your place is confirmed" onConfirm={() => confirmRsvp() ? undefined : Promise.reject(new Error('Please complete the RSVP form.'))} /></motion.div>
+          <motion.div className="rsvp-submit-row" variants={scrollReveal} initial="hidden" whileInView="visible" viewport={{ once: false, amount: .55 }} transition={{ duration: .7, ease: [0.22, 1, 0.36, 1] }}><p>Your reply helps us prepare a day full of thoughtful details.</p><SlideToConfirm className="rsvp-slide-confirm" width={slideWidth} height={60} text="Slide to confirm your place" successText="Your place is confirmed" onConfirm={async () => { await confirmRsvp(); }} /></motion.div>
         </form>
-        <p className="rsvp-footer">With love, Farzeen & Bilal <span>•</span> 2025</p>
+        <p className="rsvp-footer">With love, Farzeen & Bilal <span>•</span> 2026</p>
       </motion.div>
     </main>
   );

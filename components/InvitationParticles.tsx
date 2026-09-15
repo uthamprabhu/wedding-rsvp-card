@@ -21,8 +21,12 @@ export default function InvitationParticles() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [assetsReady, setAssetsReady] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    // Mark component as mounted to enable particles
+    setIsMounted(true);
+    
     const update = () => {
       setIsCompact(window.innerWidth < 700);
       setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -33,27 +37,43 @@ export default function InvitationParticles() {
   }, []);
 
   useEffect(() => {
+    if (!isMounted) return;
+    
     let cancelled = false;
 
-    // tsParticles can briefly draw an image placeholder while SVGs are still
-    // decoding. Preload all four assets before its canvas is allowed to mount.
+    // Preload all particle assets with a timeout fallback for slow networks
     const preload = (src: string) => new Promise<void>((resolve) => {
       const image = new Image();
-      image.onload = () => resolve();
-      image.onerror = () => resolve();
+      const timeout = window.setTimeout(() => resolve(), 2000); // 2s fallback
+      image.onload = () => {
+        window.clearTimeout(timeout);
+        resolve();
+      };
+      image.onerror = () => {
+        window.clearTimeout(timeout);
+        resolve();
+      };
       image.src = src;
     });
 
     void Promise.all(particleAssets.map(preload)).then(() => {
-      if (!cancelled) setAssetsReady(true);
+      if (!cancelled) {
+        setAssetsReady(true);
+        // Immediately show particles once assets are ready
+        requestAnimationFrame(() => {
+          if (!cancelled) setIsVisible(true);
+        });
+      }
     });
 
-    return () => { cancelled = true; };
-  }, []);
+    return () => { 
+      cancelled = true; 
+    };
+  }, [isMounted]);
 
   const options: ISourceOptions = useMemo(() => ({
     fullScreen: { enable: false },
-    fpsLimit: isCompact ? 36 : 40,
+    fpsLimit: isCompact ? 36 : 45,
     preload: [
       { src: '/images/particles/star.svg', width: 24, height: 24 },
       { src: '/images/particles/heart.svg', width: 24, height: 24 },
@@ -61,11 +81,36 @@ export default function InvitationParticles() {
       { src: '/images/particles/gift.svg', width: 24, height: 24 },
     ],
     particles: {
-      move: { enable: !reducedMotion, speed: isCompact ? 0.34 : 0.22, random: true, straight: false, outModes: { default: 'out' } },
-      number: { density: { enable: true }, value: isCompact ? 30 : 40 },
-      opacity: { value: { min: isCompact ? 0.34 : 0.28, max: 0.66 }, animation: { enable: !reducedMotion, speed: 0.2, minimumValue: 0.24, sync: false } },
+      move: { 
+        enable: !reducedMotion, 
+        speed: isCompact ? 0.5 : 0.35, 
+        random: true, 
+        straight: false, 
+        outModes: { default: 'out' },
+        attract: { enable: false }
+      },
+      number: { 
+        density: { enable: true, width: 1920, height: 1080 }, 
+        value: isCompact ? 28 : 38 
+      },
+      opacity: { 
+        value: { min: isCompact ? 0.35 : 0.3, max: 0.7 }, 
+        animation: { 
+          enable: !reducedMotion, 
+          speed: 0.3, 
+          minimumValue: 0.25, 
+          sync: false 
+        } 
+      },
       reduceDuplicates: true,
-      rotate: { value: { min: 0, max: 360 }, animation: { enable: !reducedMotion, speed: isCompact ? 0.75 : 1.1, sync: false } },
+      rotate: { 
+        value: { min: 0, max: 360 }, 
+        animation: { 
+          enable: !reducedMotion, 
+          speed: isCompact ? 1 : 1.3, 
+          sync: false 
+        } 
+      },
       shape: {
         type: 'image',
         options: {
@@ -77,22 +122,20 @@ export default function InvitationParticles() {
           ],
         },
       },
-      size: { value: { min: 7, max: 16 } },
+      size: { value: { min: 8, max: 17 } },
     },
     detectRetina: true,
   }), [isCompact, reducedMotion]);
 
+  if (!isMounted || !assetsReady) return null;
+
   return (
     <ParticlesProvider init={particlesInit}>
-      {assetsReady && <Particles
+      <Particles
         id="invitation-dust"
         options={options}
         className={`invitation-particles ${isVisible ? 'is-visible' : ''}`}
-        particlesLoaded={() => {
-          // Let the canvas complete its first real draw, then fade it in.
-          window.requestAnimationFrame(() => window.requestAnimationFrame(() => setIsVisible(true)));
-        }}
-      />}
+      />
     </ParticlesProvider>
   );
 }
