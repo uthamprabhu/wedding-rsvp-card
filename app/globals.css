@@ -1455,3 +1455,39 @@ body {
   }
 }
 
+
+/* Performance optimizations - will-change hints for animated elements */
+.rsvp-wrap,
+.itinerary-event,
+.itinerary-card,
+.couple-portrait-frame,
+.portrait-memory {
+  will-change: transform, opacity;
+}
+
+.simple-loader {
+  will-change: opacity;
+}
+
+/* Ensure hardware acceleration for smooth scrolling */
+.rsvp-page,
+.itinerary-experience,
+.luxury-invitation {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Reduce motion on mobile for better performance */
+@media (max-width: 768px) {
+  * {
+    animation-duration: 0.5s !important;
+    transition-duration: 0.5s !important;
+  }
+  
+  .portrait-memory,
+  .couple-portrait-frame {
+    will-change: auto;
+    transform: none !important;
+  }
+}
+

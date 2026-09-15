@@ -12,10 +12,16 @@ import { AdaptiveLantern } from '@/components/CelestialBackdrop';
 
 const RealisticButterflies = dynamic(() => import('@/components/RealisticButterflies'), { ssr: false });
 
-const reveal = { hidden: { opacity: 0, y: 34, filter: 'blur(8px)' }, visible: { opacity: 1, y: 0, filter: 'blur(0px)' } };
+const reveal = { hidden: { opacity: 0, y: 20, filter: 'blur(4px)' }, visible: { opacity: 1, y: 0, filter: 'blur(0px)' } }; // Reduced blur for performance
 
 function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
-  return <motion.div className={className} variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: false, amount: 0.38 }} transition={{ duration: 1.05, delay: delay + .08, ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>;
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    setIsMobile(window.innerWidth <= 768);
+  }, []);
+  
+  return <motion.div className={className} variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: isMobile, amount: 0.38 }} transition={{ duration: isMobile ? 0.6 : 1.05, delay: delay + (isMobile ? 0 : .08), ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>;
 }
 
 const openingArabicWords = ['بِسْمِ', 'اللَّهِ', 'الرَّحْمَنِ', 'الرَّحِيمِ'];
@@ -27,8 +33,14 @@ const getArabicGraphemes = (value: string) => {
 };
 
 function ArabicOpeningReveal() {
-  return <motion.p className="invitation-arabic invitation-arabic-opening" lang="ar" dir="rtl" initial="hidden" whileInView="visible" viewport={{ once: false, amount: 0.7 }} variants={{ hidden: {}, visible: { transition: { staggerChildren: .052, delayChildren: .12 } } }}>
-    {openingArabicWords.map((word, wordIndex) => <Fragment key={word}><span>{getArabicGraphemes(word).map((letter, index) => <motion.span key={`${letter}-${index}`} variants={{ hidden: { opacity: 0, x: 24, filter: 'blur(7px)' }, visible: { opacity: 1, x: 0, filter: 'blur(0px)' } }} transition={{ duration: .58, ease: [0.22, 1, 0.36, 1] }}>{letter}</motion.span>)}</span>{wordIndex === 1 && <br className="invitation-arabic-mobile-break" />}{wordIndex < openingArabicWords.length - 1 && ' '}</Fragment>)}
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    setIsMobile(window.innerWidth <= 768);
+  }, []);
+  
+  return <motion.p className="invitation-arabic invitation-arabic-opening" lang="ar" dir="rtl" initial="hidden" whileInView="visible" viewport={{ once: isMobile, amount: 0.7 }} variants={{ hidden: {}, visible: { transition: { staggerChildren: isMobile ? .03 : .052, delayChildren: isMobile ? 0 : .12 } } }}>
+    {openingArabicWords.map((word, wordIndex) => <Fragment key={word}><span>{getArabicGraphemes(word).map((letter, index) => <motion.span key={`${letter}-${index}`} variants={{ hidden: { opacity: 0, x: isMobile ? 12 : 24, filter: 'blur(4px)' }, visible: { opacity: 1, x: 0, filter: 'blur(0px)' } }} transition={{ duration: isMobile ? .4 : .58, ease: [0.22, 1, 0.36, 1] }}>{letter}</motion.span>)}</span>{wordIndex === 1 && <br className="invitation-arabic-mobile-break" />}{wordIndex < openingArabicWords.length - 1 && ' '}</Fragment>)}
   </motion.p>;
 }
 
@@ -65,13 +77,24 @@ function DeferredPaperBackground() {
 function CouplePortraitStory() {
   const ref = useRef<HTMLDivElement>(null);
   const [featured, setFeatured] = useState<'bride' | 'groom'>('bride');
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => window.innerWidth <= 768;
+    setIsMobile(checkMobile());
+    const handleResize = () => setIsMobile(checkMobile());
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Disable scroll-linked animations on mobile for performance
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const portraitY = useTransform(scrollYProgress, [0, 1], [34, -34]);
-  const backY = useTransform(scrollYProgress, [0, 1], [-28, 28]);
+  const portraitY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, 0] : [34, -34]);
+  const backY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, 0] : [-28, 28]);
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
-  const rotateY = useSpring(useTransform(pointerX, [-.5, .5], [-3.5, 3.5]), { stiffness: 90, damping: 18 });
-  const rotateX = useSpring(useTransform(pointerY, [-.5, .5], [2.5, -2.5]), { stiffness: 90, damping: 18 });
+  const rotateY = useSpring(useTransform(pointerX, [-.5, .5], isMobile ? [0, 0] : [-3.5, 3.5]), { stiffness: 90, damping: 18 });
+  const rotateX = useSpring(useTransform(pointerY, [-.5, .5], isMobile ? [0, 0] : [2.5, -2.5]), { stiffness: 90, damping: 18 });
   return <section className="couple-portrait-story" ref={ref} aria-label="Meet the couple">
     <motion.div className="portrait-memory portrait-memory-left" style={{ y: backY, rotate: -9 }}><Image src="/images/humans/couple-pose-straight-full.jpg" alt="Farzeen and Bilal together" fill sizes="(max-width: 640px) 29vw, 190px" className="object-contain" /></motion.div>
     <motion.div className="portrait-memory portrait-memory-right" style={{ y: portraitY, rotate: 8 }}><Image src="/images/humans/couple-pose-look-eachother.jpg" alt="Farzeen and Bilal sharing a moment" fill sizes="(max-width: 640px) 28vw, 185px" className="object-contain" /></motion.div>

@@ -145,7 +145,9 @@ export default function RealisticButterflies() {
         butterflies.forEach(({ mesh }) => scene.add(mesh));
       },
       undefined,
-      () => console.warn('Unable to load the invitation butterfly texture.'),
+      (error) => {
+        console.error('Failed to load butterfly texture:', error);
+      },
     );
 
     let width = 0;

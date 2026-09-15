@@ -2,21 +2,53 @@
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import InteractiveItinerary from '@/components/InteractiveItinerary';
-import PaperBackground from '@/components/PaperBackground';
-import CelestialBackdrop, { AdaptiveLantern } from '@/components/CelestialBackdrop';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
+// Lazy load heavy components
+const InteractiveItinerary = dynamic(() => import('@/components/InteractiveItinerary'), {
+  ssr: false,
+  loading: () => (
+    <div className="simple-loader">
+      <p>Loading your experience...</p>
+    </div>
+  ),
+});
+const PaperBackground = dynamic(() => import('@/components/PaperBackground'), {
+  ssr: false,
+  loading: () => null,
+});
+const CelestialBackdrop = dynamic(() => import('@/components/CelestialBackdrop').then(mod => ({ default: mod.default })), {
+  ssr: false,
+  loading: () => null,
+});
+const AdaptiveLantern = dynamic(() => import('@/components/CelestialBackdrop').then(mod => ({ default: mod.AdaptiveLantern })), {
+  ssr: false,
+  loading: () => null,
+});
 const FluidBackground = dynamic(() => import('@/components/FluidBackground'), {
   ssr: false,
+  loading: () => null,
 });
 
 export default function ItineraryPage() {
   const router = useRouter();
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  useEffect(() => {
+    // Show loader briefly then mark as loaded
+    const timer = setTimeout(() => setIsLoaded(true), 150);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <main className="relative w-full min-h-screen overflow-x-hidden overflow-y-auto">
+      {!isLoaded && (
+        <div className="simple-loader">
+          <p>Loading your experience...</p>
+        </div>
+      )}
       {/* Paper background - z-0 */}
       <PaperBackground />
       <CelestialBackdrop page="itinerary" />
@@ -29,10 +61,9 @@ export default function ItineraryPage() {
       <motion.div
         style={{ zIndex: 20 }}
         className="relative"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -50 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoaded ? 1 : 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <InteractiveItinerary />
       </motion.div>
