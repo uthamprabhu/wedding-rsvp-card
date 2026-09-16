@@ -1,7 +1,6 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import { HeartHandshake, MoonStar, Sparkles, Utensils, UsersRound } from 'lucide-react';
 
@@ -52,27 +51,15 @@ const events: TimelineEvent[] = [
 ];
 
 export default function InteractiveItinerary() {
-  const reducedMotion = useReducedMotion();
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => window.innerWidth <= 768;
-    setIsMobile(checkMobile());
-    
-    const handleResize = () => setIsMobile(checkMobile());
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   return (
     <section className="itinerary-experience" aria-labelledby="itinerary-title">
       <div className="itinerary-shell">
         <motion.header
           className="itinerary-header"
-          initial={{ opacity: 0, y: isMobile ? 12 : 24 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: isMobile, amount: 0.3 }}
-          transition={{ duration: isMobile ? 0.5 : 0.7 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
         >
           <p className="itinerary-bismillah">بِسْمِ ٱللَّٰهِ <span>•</span> with gratitude</p>
           <p className="itinerary-monogram">F <span>&</span> B</p>
@@ -84,36 +71,35 @@ export default function InteractiveItinerary() {
           <motion.div
             className="itinerary-line"
             aria-hidden="true"
-            initial={{ scaleY: 0, opacity: 0 }}
-            whileInView={{ scaleY: 1, opacity: 1 }}
-            viewport={{ once: isMobile, amount: 0.08 }}
-            transition={{ duration: reducedMotion || isMobile ? 0.6 : 1.25, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, amount: 0.05 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
           />
           {events.map((event, index) => {
             const Icon = event.icon;
-            const entersFromLeft = index % 2 === 0;
             return (
               <motion.article
                 className={`itinerary-event ${index % 2 === 0 ? 'is-left' : 'is-right'}`}
                 key={event.title}
-                initial={{ opacity: 0, x: reducedMotion || isMobile ? 0 : entersFromLeft ? -46 : 46, y: isMobile ? 12 : 20, scale: isMobile ? 1 : 0.975 }}
-                whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                viewport={{ once: isMobile, amount: 0.25 }}
-                transition={{ duration: reducedMotion || isMobile ? 0.5 : 0.68, delay: reducedMotion || isMobile ? 0 : 0.04, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.45, ease: 'easeOut' }}
               >
-                <motion.div className="itinerary-card" whileHover={reducedMotion || isMobile ? undefined : { y: -4, rotate: entersFromLeft ? -0.35 : 0.35 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}>
+                <div className="itinerary-card">
                   <div className="itinerary-card-meta"><span>{event.note}</span><time>{event.time}</time></div>
                   <h2>{event.title}</h2>
                   <p>{event.description}</p>
-                </motion.div>
-                <motion.div className="itinerary-marker" aria-hidden="true" initial={{ opacity: 0, scale: 0.35, rotate: -30 }} whileInView={{ opacity: 1, scale: 1, rotate: 0 }} viewport={{ once: isMobile, amount: 0.35 }} transition={{ type: 'spring', stiffness: 240, damping: 17, delay: reducedMotion || isMobile ? 0 : 0.13 }}><Icon size={18} strokeWidth={1.4} /></motion.div>
+                </div>
+                <div className="itinerary-marker" aria-hidden="true"><Icon size={18} strokeWidth={1.4} /></div>
                 <div className="itinerary-spacer" aria-hidden="true" />
               </motion.article>
             );
           })}
         </div>
 
-        <motion.p className="itinerary-closing" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: isMobile, amount: 0.7 }} transition={{ duration: reducedMotion || isMobile ? 0.5 : 0.65, ease: [0.22, 1, 0.36, 1] }}>May Allah fill this gathering with peace, love, and barakah.</motion.p>
+        <motion.p className="itinerary-closing" initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.5, ease: 'easeOut' }}>May Allah fill this gathering with peace, love, and barakah.</motion.p>
         <div className="itinerary-ornament" aria-hidden="true"><span /><i>✦</i><span /></div>
         <div className="itinerary-bottom-space" aria-hidden="true" />
       </div>

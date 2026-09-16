@@ -161,37 +161,32 @@ export function SlideToConfirm({
           <ArrowRight className="h-5 w-5 opacity-70" />
         </motion.div>
 
-        <motion.div
-          animate={{
-            scale: state === "loading" ? 1 : 0,
-            opacity: state === "loading" ? 1 : 0,
-          }}
-          transition={{ duration: 0.2 }}
-          className="absolute flex h-full w-full items-center justify-center"
-        >
-          {/* Refined macOS Style Spinner (12 Spokes) */}
-          <div className="relative h-[20px] w-[20px]">
-            {[...Array(12)].map((_, i) => (
-              <motion.span
-                key={i}
-                className="absolute left-[9px] top-0 h-[5.5px] w-[1.8px] rounded-full bg-foreground"
-                style={{
-                  rotate: i * 30,
-                  transformOrigin: "center 10px",
-                }}
-                animate={{
-                  opacity: [0.15, 1, 0.15],
-                }}
-                transition={{
-                  duration: 1.1,
-                  repeat: Infinity,
-                  delay: i * 0.091,
-                  ease: "linear",
-                }}
-              />
-            ))}
+        {state === "loading" && (
+          <div className="absolute flex h-full w-full items-center justify-center">
+            {/* Refined macOS Style Spinner (12 Spokes) */}
+            <div className="relative h-[20px] w-[20px]">
+              {[...Array(12)].map((_, i) => (
+                <motion.span
+                  key={i}
+                  className="absolute left-[9px] top-0 h-[5.5px] w-[1.8px] rounded-full bg-foreground"
+                  style={{
+                    rotate: i * 30,
+                    transformOrigin: "center 10px",
+                  }}
+                  animate={{
+                    opacity: [0.15, 1, 0.15],
+                  }}
+                  transition={{
+                    duration: 1.1,
+                    repeat: Infinity,
+                    delay: i * 0.091,
+                    ease: "linear",
+                  }}
+                />
+              ))}
+            </div>
           </div>
-        </motion.div>
+        )}
 
         <motion.div
           animate={{

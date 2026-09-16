@@ -3,45 +3,49 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { motion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowDown, ArrowRight, ExternalLink, MapPin } from 'lucide-react';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PaperBackground from '@/components/PaperBackground';
 import WeddingCountdown from '@/components/WeddingCountdown';
 import { AdaptiveLantern } from '@/components/CelestialBackdrop';
 
 const RealisticButterflies = dynamic(() => import('@/components/RealisticButterflies'), { ssr: false });
 
-const reveal = { hidden: { opacity: 0, y: 20, filter: 'blur(4px)' }, visible: { opacity: 1, y: 0, filter: 'blur(0px)' } }; // Reduced blur for performance
-
-function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    setIsMobile(window.innerWidth <= 768);
-  }, []);
-  
-  return <motion.div className={className} variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: isMobile, amount: 0.38 }} transition={{ duration: isMobile ? 0.6 : 1.05, delay: delay + (isMobile ? 0 : .08), ease: [0.22, 1, 0.36, 1] }}>{children}</motion.div>;
-}
-
-const openingArabicWords = ['بِسْمِ', 'اللَّهِ', 'الرَّحْمَنِ', 'الرَّحِيمِ'];
-const getArabicGraphemes = (value: string) => {
-  if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
-    return Array.from(new Intl.Segmenter('ar', { granularity: 'grapheme' }).segment(value), ({ segment }) => segment);
-  }
-  return Array.from(value);
+const reveal = {
+  hidden: { opacity: 0, y: 14 },
+  visible: { opacity: 1, y: 0 },
 };
 
+function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  return (
+    <motion.div
+      className={className}
+      variants={reveal}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 function ArabicOpeningReveal() {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    setIsMobile(window.innerWidth <= 768);
-  }, []);
-  
-  return <motion.p className="invitation-arabic invitation-arabic-opening" lang="ar" dir="rtl" initial="hidden" whileInView="visible" viewport={{ once: isMobile, amount: 0.7 }} variants={{ hidden: {}, visible: { transition: { staggerChildren: isMobile ? .03 : .052, delayChildren: isMobile ? 0 : .12 } } }}>
-    {openingArabicWords.map((word, wordIndex) => <Fragment key={word}><span>{getArabicGraphemes(word).map((letter, index) => <motion.span key={`${letter}-${index}`} variants={{ hidden: { opacity: 0, x: isMobile ? 12 : 24, filter: 'blur(4px)' }, visible: { opacity: 1, x: 0, filter: 'blur(0px)' } }} transition={{ duration: isMobile ? .4 : .58, ease: [0.22, 1, 0.36, 1] }}>{letter}</motion.span>)}</span>{wordIndex === 1 && <br className="invitation-arabic-mobile-break" />}{wordIndex < openingArabicWords.length - 1 && ' '}</Fragment>)}
-  </motion.p>;
+  return (
+    <motion.p
+      className="invitation-arabic invitation-arabic-opening"
+      lang="ar"
+      dir="rtl"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.4 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+    >
+      بِسْمِ اللَّهِ <br className="invitation-arabic-mobile-break" /> الرَّحْمَنِ الرَّحِيمِ
+    </motion.p>
+  );
 }
 
 function CornerOrnaments() {
@@ -75,44 +79,46 @@ function DeferredPaperBackground() {
 }
 
 function CouplePortraitStory() {
-  const ref = useRef<HTMLDivElement>(null);
   const [featured, setFeatured] = useState<'bride' | 'groom'>('bride');
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => window.innerWidth <= 768;
-    setIsMobile(checkMobile());
-    const handleResize = () => setIsMobile(checkMobile());
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // Disable scroll-linked animations on mobile for performance
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const portraitY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, 0] : [34, -34]);
-  const backY = useTransform(scrollYProgress, [0, 1], isMobile ? [0, 0] : [-28, 28]);
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const rotateY = useSpring(useTransform(pointerX, [-.5, .5], isMobile ? [0, 0] : [-3.5, 3.5]), { stiffness: 90, damping: 18 });
-  const rotateX = useSpring(useTransform(pointerY, [-.5, .5], isMobile ? [0, 0] : [2.5, -2.5]), { stiffness: 90, damping: 18 });
-  return <section className="couple-portrait-story" ref={ref} aria-label="Meet the couple">
-    <motion.div className="portrait-memory portrait-memory-left" style={{ y: backY, rotate: -9 }}><Image src="/images/humans/couple-pose-straight-full.jpg" alt="Farzeen and Bilal together" fill sizes="(max-width: 640px) 29vw, 190px" className="object-contain" /></motion.div>
-    <motion.div className="portrait-memory portrait-memory-right" style={{ y: portraitY, rotate: 8 }}><Image src="/images/humans/couple-pose-look-eachother.jpg" alt="Farzeen and Bilal sharing a moment" fill sizes="(max-width: 640px) 28vw, 185px" className="object-contain" /></motion.div>
-    <div className="couple-presentation" data-featured={featured} onPointerMove={(event) => { const bounds = event.currentTarget.getBoundingClientRect(); pointerX.set((event.clientX - bounds.left) / bounds.width - .5); pointerY.set((event.clientY - bounds.top) / bounds.height - .5); }} onPointerLeave={() => { pointerX.set(0); pointerY.set(0); }}>
-      <motion.article className="couple-profile couple-profile-bride" style={{ y: portraitY, rotateX, rotateY }}>
-        <figure className="couple-portrait-frame"><Image src="/images/humans/bride-pose-straight.jpg" alt="Farzeen Fathima Firoz" fill sizes="(max-width: 640px) 80vw, (max-width: 1024px) 38vw, 390px" className="object-cover" /></figure>
-        <p className="portrait-role">The bride</p><h3>Farzeen <span>Fathima Firoz</span></h3>
-      </motion.article>
-      <div className="couple-union" aria-hidden="true"><span>✦</span><i /><p>two lives,<br />one prayer</p><i /><span>✦</span></div>
-      <motion.article className="couple-profile couple-profile-groom" style={{ y: backY, rotateX, rotateY }}>
-        <figure className="couple-portrait-frame"><Image src="/images/humans/groom-pose-straight.jpg" alt="Bilal Nasimudeen" fill sizes="(max-width: 640px) 80vw, (max-width: 1024px) 38vw, 390px" className="object-cover" /></figure>
-        <p className="portrait-role">The groom</p><h3>Bilal <span>Nasimudeen</span></h3>
-      </motion.article>
-    </div>
-    <div className="mobile-person-switch" role="tablist" aria-label="Choose a portrait"><button type="button" role="tab" aria-selected={featured === 'bride'} onClick={() => setFeatured('bride')}>Farzeen</button><span>✦</span><button type="button" role="tab" aria-selected={featured === 'groom'} onClick={() => setFeatured('groom')}>Bilal</button></div>
-    <motion.figure className="couple-hands-portrait" style={{ y: backY }}><Image src="/images/humans/couple-handsholding-only.jpg" alt="Farzeen and Bilal holding hands" fill sizes="(max-width: 640px) 148px, 132px" className="object-cover" /></motion.figure>
-    <p className="couple-weds">Farzeen <span>weds</span> Bilal</p>
-  </section>;
+
+  return (
+    <section className="couple-portrait-story" aria-label="Meet the couple">
+      <div className="portrait-memory portrait-memory-left" style={{ transform: 'rotate(-9deg)' }}>
+        <Image src="/images/humans/couple-pose-straight-full.jpg" alt="Farzeen and Bilal together" fill sizes="(max-width: 640px) 29vw, 190px" className="object-contain" />
+      </div>
+      <div className="portrait-memory portrait-memory-right" style={{ transform: 'rotate(8deg)' }}>
+        <Image src="/images/humans/couple-pose-look-eachother.jpg" alt="Farzeen and Bilal sharing a moment" fill sizes="(max-width: 640px) 28vw, 185px" className="object-contain" />
+      </div>
+      <div className="couple-presentation" data-featured={featured}>
+        <article className="couple-profile couple-profile-bride">
+          <figure className="couple-portrait-frame">
+            <Image src="/images/humans/bride-pose-straight.jpg" alt="Farzeen Fathima Firoz" fill sizes="(max-width: 640px) 80vw, (max-width: 1024px) 38vw, 390px" className="object-cover" />
+          </figure>
+          <p className="portrait-role">The bride</p>
+          <h3>Farzeen <span>Fathima Firoz</span></h3>
+        </article>
+        <div className="couple-union" aria-hidden="true">
+          <span>✦</span><i /><p>two lives,<br />one prayer</p><i /><span>✦</span>
+        </div>
+        <article className="couple-profile couple-profile-groom">
+          <figure className="couple-portrait-frame">
+            <Image src="/images/humans/groom-pose-straight.jpg" alt="Bilal Nasimudeen" fill sizes="(max-width: 640px) 80vw, (max-width: 1024px) 38vw, 390px" className="object-cover" />
+          </figure>
+          <p className="portrait-role">The groom</p>
+          <h3>Bilal <span>Nasimudeen</span></h3>
+        </article>
+      </div>
+      <div className="mobile-person-switch" role="tablist" aria-label="Choose a portrait">
+        <button type="button" role="tab" aria-selected={featured === 'bride'} onClick={() => setFeatured('bride')}>Farzeen</button>
+        <span>✦</span>
+        <button type="button" role="tab" aria-selected={featured === 'groom'} onClick={() => setFeatured('groom')}>Bilal</button>
+      </div>
+      <figure className="couple-hands-portrait">
+        <Image src="/images/humans/couple-handsholding-only.jpg" alt="Farzeen and Bilal holding hands" fill sizes="(max-width: 640px) 148px, 132px" className="object-cover" />
+      </figure>
+      <p className="couple-weds">Farzeen <span>weds</span> Bilal</p>
+    </section>
+  );
 }
 
 export default function LuxuryInvitation() {

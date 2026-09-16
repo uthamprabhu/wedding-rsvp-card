@@ -55,7 +55,7 @@ export default function ItineraryPage() {
       <AdaptiveLantern />
       
       {/* Fluid background - z-5 (always behind content) */}
-      <FluidBackground className="itinerary-fluid" variant="itinerary" forwardPagePointer />
+      <FluidBackground className="itinerary-fluid" variant="itinerary" />
 
       {/* Content - z-20 */}
       <motion.div

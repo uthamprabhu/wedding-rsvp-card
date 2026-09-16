@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Check, Mail, Users, BedDouble, ArrowLeft } from 'lucide-react';
@@ -16,44 +16,34 @@ const RsvpCelebration = dynamic(() => import('@/components/RsvpCelebration'), {
 function ConfirmationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [data, setData] = useState<{
-    name: string;
-    phone: string;
-    email: string;
-    guestCount: number;
-    accommodation: string;
-  } | null>(null);
+
+  const name = searchParams.get('name');
+  const phone = searchParams.get('phone');
+  const email = searchParams.get('email') || '';
+  const guestCount = parseInt(searchParams.get('guestCount') || '1', 10);
+  const accommodation = searchParams.get('accommodation') || '';
 
   useEffect(() => {
-    // Get data from URL params
-    const name = searchParams.get('name');
-    const phone = searchParams.get('phone');
-    const email = searchParams.get('email') || '';
-    const guestCount = parseInt(searchParams.get('guestCount') || '1');
-    const accommodation = searchParams.get('accommodation') || '';
-
     if (!name || !phone) {
-      // No data, redirect back to RSVP
       router.push('/rsvp');
-      return;
     }
+  }, [name, phone, router]);
 
-    setData({
-      name,
-      phone,
-      email,
-      guestCount,
-      accommodation,
-    });
-  }, [searchParams, router]);
-
-  if (!data) {
+  if (!name || !phone) {
     return (
       <div className="simple-loader">
         <p>Loading your confirmation...</p>
       </div>
     );
   }
+
+  const data = {
+    name,
+    phone,
+    email,
+    guestCount,
+    accommodation,
+  };
 
   const firstName = data.name.trim().split(/\s+/)[0];
   const details = [
@@ -75,9 +65,9 @@ function ConfirmationContent() {
       <div className="rsvp-confirmation">
         <motion.div 
           className="rsvp-confirmation-wrap" 
-          initial={{ opacity: 0, y: 24 }} 
+          initial={{ opacity: 0, y: 14 }} 
           animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: .7 }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
         >
           <button 
             type="button" 

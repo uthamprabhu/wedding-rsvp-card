@@ -73,7 +73,7 @@ export default function InvitationParticles() {
 
   const options: ISourceOptions = useMemo(() => ({
     fullScreen: { enable: false },
-    fpsLimit: isCompact ? 36 : 45,
+    fpsLimit: 30,
     preload: [
       { src: '/images/particles/star.svg', width: 24, height: 24 },
       { src: '/images/particles/heart.svg', width: 24, height: 24 },
@@ -83,7 +83,7 @@ export default function InvitationParticles() {
     particles: {
       move: { 
         enable: !reducedMotion, 
-        speed: isCompact ? 0.5 : 0.35, 
+        speed: isCompact ? 0.35 : 0.25, 
         random: true, 
         straight: false, 
         outModes: { default: 'out' },
@@ -91,7 +91,7 @@ export default function InvitationParticles() {
       },
       number: { 
         density: { enable: true, width: 1920, height: 1080 }, 
-        value: isCompact ? 28 : 38 
+        value: isCompact ? 16 : 24 
       },
       opacity: { 
         value: { min: isCompact ? 0.35 : 0.3, max: 0.7 }, 
@@ -107,7 +107,7 @@ export default function InvitationParticles() {
         value: { min: 0, max: 360 }, 
         animation: { 
           enable: !reducedMotion, 
-          speed: isCompact ? 1 : 1.3, 
+          speed: isCompact ? 0.8 : 1, 
           sync: false 
         } 
       },
@@ -122,9 +122,9 @@ export default function InvitationParticles() {
           ],
         },
       },
-      size: { value: { min: 8, max: 17 } },
+      size: { value: { min: 8, max: 16 } },
     },
-    detectRetina: true,
+    detectRetina: false,
   }), [isCompact, reducedMotion]);
 
   if (!isMounted || !assetsReady) return null;

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import Particles, { ParticlesProvider } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import type { Engine, ISourceOptions } from '@tsparticles/engine';
@@ -171,47 +171,40 @@ function RsvpCornerLines() {
   return null;
 }
 
-export default function CelestialBackdrop({ page }: CelestialBackdropProps) {
-  const [isReady, setIsReady] = useState(false);
+const emptySubscribe = () => () => {};
 
-  useEffect(() => {
-    // Ensure particles initialize immediately
-    setIsReady(true);
-  }, []);
+export default function CelestialBackdrop({ page }: CelestialBackdropProps) {
+  const isReady = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
   const options: ISourceOptions = useMemo(() => ({
     fullScreen: { enable: false },
     background: { color: { value: 'transparent' } },
-    fpsLimit: 50,
+    fpsLimit: 30,
     interactivity: {
       events: {
-        onHover: { enable: true, mode: 'bubble' },
-        onClick: { enable: true, mode: 'push' },
+        onHover: { enable: false },
+        onClick: { enable: false },
         resize: { enable: true, delay: 0.5 },
-      },
-      modes: {
-        bubble: { distance: 110, duration: 1.2, opacity: 0.9, size: 7 },
-        push: { quantity: 3 },
       },
     },
     particles: {
       color: { value: ['#b18a52', '#d4b77c', '#fff4d9'] },
       move: { 
         enable: true, 
-        speed: 0.5, 
+        speed: 0.35, 
         random: true, 
         outModes: { default: 'out' },
         attract: { enable: false }
       },
       number: { 
         density: { enable: true, width: 1920, height: 1080 }, 
-        value: 32 
+        value: 20 
       },
       opacity: { 
-        value: { min: 0.25, max: 0.68 }, 
+        value: { min: 0.25, max: 0.65 }, 
         animation: { 
           enable: true, 
-          speed: 0.5, 
+          speed: 0.4, 
           minimumValue: 0.18, 
           sync: false 
         } 
@@ -227,9 +220,9 @@ export default function CelestialBackdrop({ page }: CelestialBackdropProps) {
           } 
         } 
       },
-      size: { value: { min: 2, max: 7 } },
+      size: { value: { min: 2, max: 6 } },
     },
-    detectRetina: true,
+    detectRetina: false,
   }), []);
 
   return (
