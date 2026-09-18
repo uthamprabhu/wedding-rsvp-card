@@ -383,10 +383,16 @@ body {
 /* Home invitation entry and editorial story.  These surfaces deliberately
    define their own palette so the system dark-mode media query cannot turn
    the loader or invitation black. */
-.invitation-entry { position: relative; min-height: 100svh; background: #ebe1d6; color: #46372d; }
-.invitation-entry-hero { position: fixed; z-index: 5; inset: 0; overflow: hidden; isolation: isolate; background: #ebe1d6; }
+.invitation-entry { position: relative; min-height: 100svh; background: #3A0712; color: #f0dcc4; }
+.invitation-entry-hero { position: fixed; z-index: 5; inset: 0; overflow: hidden; isolation: isolate; background: #3A0712; }
 .invitation-entry-story { position: relative; z-index: 10; }
-.invitation-entry-glow { position: absolute; top: 50%; left: 50%; width: min(82vw, 600px); height: min(82vw, 600px); border-radius: 50%; background: radial-gradient(circle, rgba(255, 252, 240, .72), rgba(208, 174, 119, .13) 43%, transparent 72%); filter: blur(12px); transform: translate(-50%, -50%); }
+/* Warm pool of light behind the chest so it sits clearly above the burgundy. */
+.invitation-entry-glow { position: absolute; top: 50%; left: 50%; width: min(96vw, 760px); height: min(96vw, 760px); border-radius: 50%; background: radial-gradient(circle, rgba(196, 118, 56, .26), rgba(122, 40, 32, .16) 44%, transparent 72%); filter: blur(22px); transform: translate(-50%, -50%); pointer-events: none; }
+
+/* The shared wedding loader keeps its markup but adopts the dark hero palette
+   on the landing route only, so there is no cream-to-burgundy flash. */
+.invitation-entry .loading-experience { background: radial-gradient(circle at 50% 44%, #5a1320, #400b15 52%, #300509 100%); }
+.invitation-entry .loading-experience p { color: #e3bd8d; }
 .invitation-opening-fluid, .itinerary-fluid { mix-blend-mode: multiply; transition: opacity .7s ease; }.invitation-opening-fluid { opacity: .58; }.itinerary-fluid { opacity: .56; }
 
 @media (max-width: 640px) {
@@ -1502,3 +1508,255 @@ body {
   height: auto;
 }
 
+
+/* ==========================================================================
+   Landing hero: 3D treasure chest
+   Scoped entirely to the landing hero. Nothing here is used by the itinerary,
+   RSVP, confirmation or admin routes.
+   ========================================================================== */
+
+.invitation-hero-shell {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.4vh, 26px);
+  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+}
+
+.invitation-hero-monogram {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(15px, 3.4vw, 21px);
+  font-weight: 400;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  color: #e6c79a;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, .5);
+  opacity: .92;
+}
+.invitation-hero-monogram span { color: #c08a4e; margin: 0 .18em; font-style: italic; letter-spacing: 0; }
+
+/* -------------------------------- stage --------------------------------- */
+
+.chest-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+}
+
+/* Generous, comfortable touch target that still cannot swallow a scroll. */
+.chest-hit {
+  position: relative;
+  width: 100%;
+  height: min(62vh, 460px);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+  outline: none;
+  border-radius: 24px;
+}
+.chest-hit.is-open { cursor: default; pointer-events: none; }
+.chest-hit:focus-visible {
+  box-shadow: 0 0 0 2px rgba(226, 186, 128, .75), 0 0 34px rgba(214, 160, 90, .3);
+}
+
+.chest-canvas { display: block; }
+
+/* ------------------------------- caption -------------------------------- */
+
+.chest-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin-top: clamp(2px, 1.4vh, 14px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.chest-caption.is-hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
+
+.chest-hint {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(10px, 2.5vw, 12px);
+  font-weight: 300;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: #d9b489;
+  text-align: center;
+}
+
+.chest-shake-optin,
+.chest-shake-ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 5px 13px;
+  border: 1px solid rgba(214, 164, 104, .3);
+  border-radius: 999px;
+  background: rgba(255, 226, 180, .05);
+  color: #c9a374;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .3s ease, border-color .3s ease, background .3s ease;
+}
+.chest-shake-ready { cursor: default; border-color: rgba(214, 164, 104, .18); }
+.chest-shake-optin:hover { color: #efd4a6; border-color: rgba(230, 190, 132, .55); background: rgba(255, 226, 180, .1); }
+
+.chest-chevron { color: #a8794c; opacity: .8; animation: chest-chevron-drift 2.4s ease-in-out infinite; }
+@keyframes chest-chevron-drift {
+  0%, 100% { transform: translateY(0); opacity: .55; }
+  50% { transform: translateY(6px); opacity: .95; }
+}
+
+@media (max-width: 480px) {
+  .chest-hit { height: min(54vh, 380px); }
+}
+@media (min-width: 1024px) {
+  .chest-hit { height: min(66vh, 540px); }
+}
+
+/* ======================================================================== *
+   Non-WebGL fallback chest (real CSS 3D, hinged lid)
+   ======================================================================== */
+
+.chest-css {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  perspective: 900px;
+}
+
+.chest-css-stage {
+  position: relative;
+  width: clamp(190px, 62vw, 330px);
+  height: clamp(150px, 48vw, 250px);
+  transform-style: preserve-3d;
+  transform: rotateX(8deg) rotateY(-14deg);
+}
+
+.chest-css-shadow {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  width: clamp(210px, 68vw, 370px);
+  height: 46px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, .68), transparent 70%);
+  filter: blur(7px);
+}
+
+/* body */
+.chest-css-body {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 58%;
+  border-radius: 6px 6px 9px 9px;
+  background:
+    linear-gradient(180deg, #5d3a22 0%, #4a2d19 45%, #33200f 100%),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .18) 0 1px, transparent 1px 34px);
+  box-shadow:
+    inset 0 2px 5px rgba(255, 210, 150, .1),
+    inset 0 -10px 22px rgba(0, 0, 0, .55),
+    0 16px 34px rgba(0, 0, 0, .5);
+}
+
+/* lid: hinged on its rear edge, rotating in real 3D */
+.chest-css-lid {
+  position: absolute;
+  bottom: 58%;
+  left: -1%;
+  width: 102%;
+  height: 46%;
+  transform-origin: 50% 100%;
+  transform: rotateX(0deg);
+  transition: transform 1.15s cubic-bezier(.22, 1.2, .3, 1);
+  border-radius: 46% 46% 5px 5px / 74% 74% 5px 5px;
+  background:
+    linear-gradient(180deg, #6b4427 0%, #55341d 52%, #3b2412 100%),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 30px);
+  box-shadow:
+    inset 0 4px 10px rgba(255, 216, 160, .16),
+    0 -4px 16px rgba(0, 0, 0, .4);
+}
+.chest-css.is-open .chest-css-lid { transform: rotateX(-108deg); }
+.chest-css.is-still .chest-css-lid { transition-duration: .35s; transition-timing-function: ease-out; }
+
+/* brass */
+.chest-css-strap,
+.chest-css-vstrap,
+.chest-css-rail,
+.chest-css-lock {
+  position: absolute;
+  background: linear-gradient(180deg, #8a6a2c, #e0bd6e 38%, #c39a48 62%, #6d5220);
+  box-shadow: inset 0 1px 1px rgba(255, 244, 206, .5), 0 1px 3px rgba(0, 0, 0, .45);
+}
+.chest-css-strap { top: 0; width: 9px; height: 100%; border-radius: 3px; }
+.chest-css-strap:nth-of-type(1) { left: 16%; }
+.chest-css-strap:nth-of-type(2) { left: 48%; }
+.chest-css-strap:nth-of-type(3) { left: 80%; }
+
+.chest-css-rail { left: 0; width: 100%; height: 11px; }
+.chest-css-rail-top { top: 7%; }
+.chest-css-rail-bottom { bottom: 9%; }
+
+.chest-css-vstrap { top: 7%; width: 9px; height: 84%; }
+.chest-css-vstrap:nth-of-type(3) { left: 16%; }
+.chest-css-vstrap:nth-of-type(4) { left: 48%; }
+.chest-css-vstrap:nth-of-type(5) { left: 80%; }
+
+.chest-css-lock {
+  left: 50%;
+  top: 34%;
+  width: 30px;
+  height: 38px;
+  margin-left: -15px;
+  border-radius: 6px 6px 50% 50%;
+  z-index: 2;
+}
+
+/* logo rises from behind the body, which is painted over it */
+.chest-css-logo {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: clamp(84px, 26vw, 132px);
+  height: clamp(84px, 26vw, 132px);
+  margin-left: calc(clamp(84px, 26vw, 132px) / -2);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(216, 178, 106, .85);
+  box-shadow: 0 0 34px rgba(236, 186, 118, .45);
+  opacity: 0;
+  transform: translateY(0) scale(.7);
+  transition: transform 1.1s cubic-bezier(.22, 1, .36, 1), opacity .5s ease;
+}
+.chest-css-logo img { width: 100%; height: 100%; object-fit: cover; }
+.chest-css.is-revealed .chest-css-logo {
+  opacity: 1;
+  transform: translateY(-150%) scale(1);
+}
+.chest-css.is-still .chest-css-logo { transition-duration: .3s; }
+
+/* ------------------------------------------------------------------------ *
+   Reduced motion: keep the chest fully usable, drop the idle life
+   ------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .chest-chevron { animation: none; }
+  .chest-css-lid { transition-duration: .35s; transition-timing-function: ease-out; }
+  .chest-css-logo { transition-duration: .3s; }
+}

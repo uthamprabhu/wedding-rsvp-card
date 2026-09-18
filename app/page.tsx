@@ -4,12 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import InvitationHero from '@/components/InvitationHero';
 import LoadingAnimation from '@/components/LoadingAnimation';
-import PaperBackground from '@/components/PaperBackground';
 import dynamic from 'next/dynamic';
-
-const FluidBackground = dynamic(() => import('@/components/FluidBackground'), {
-  ssr: false,
-});
 
 const loadLuxuryInvitation = () => import('@/components/LuxuryInvitation');
 const LuxuryInvitation = dynamic(loadLuxuryInvitation, {
@@ -54,8 +49,9 @@ export default function Home() {
           animate={opening ? { opacity: 0, scale: 1.08, filter: 'blur(8px)' } : { opacity: 1 }}
           transition={{ duration: .72, ease: [0.22, 1, 0.36, 1] }}
         >
-          <PaperBackground />
-          <FluidBackground className="invitation-opening-fluid" variant="home" />
+          {/* The chest hero is a dark, self-lit stage: no paper texture and no
+              fluid simulation here, so the 3D lighting reads correctly against
+              #3A0712. Other routes keep their own backgrounds untouched. */}
           <div className="invitation-entry-glow" aria-hidden="true" />
           <InvitationHero onOpen={openInvitation} />
         </motion.div>
