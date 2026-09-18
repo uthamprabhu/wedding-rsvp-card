@@ -5,6 +5,12 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import Particles, { ParticlesProvider } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import type { Engine, ISourceOptions } from '@tsparticles/engine';
+import {
+  declineMotion,
+  forgetMotionGrant,
+  requestMotionAccess,
+  useMotionStatus,
+} from '@/lib/motion-access';
 
 interface CelestialBackdropProps {
   page: 'itinerary' | 'rsvp';
@@ -57,18 +63,14 @@ export function RsvpLantern() {
   );
 }
 
-type OrientationPermissionApi = typeof DeviceOrientationEvent & {
-  requestPermission?: () => Promise<'granted' | 'denied'>;
-};
-
-const motionChoiceKey = 'farzeen-lantern-motion-choice';
-
 export function AdaptiveLantern() {
   const lanternRef = useRef<HTMLDivElement>(null);
   const pendingRotation = useRef(0);
   const animationFrame = useRef(0);
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [motionEnabled, setMotionEnabled] = useState(false);
+  // Shared with the landing chest: if the guest already allowed motion there,
+  // nothing is shown here at all.
+  const motionStatus = useMotionStatus();
+  const [retryAsk, setRetryAsk] = useState(false);
 
   const applyRotation = useCallback(() => {
     const lantern = lanternRef.current;
@@ -87,81 +89,80 @@ export function AdaptiveLantern() {
     });
   }, [applyRotation]);
 
+  // Tilt drives the pendulum wherever the sensor is usable: 'open' is Android
+  // and friends (no prompt was ever needed), 'granted' is an iOS guest who
+  // already said yes, here or at the chest.
+  const useSensor = motionStatus === 'open' || motionStatus === 'granted';
+
+  // Desktop / no sensor: subtle mouse-driven swing, exactly as before.
   useEffect(() => {
-    const supportsOrientation = typeof window.DeviceOrientationEvent !== 'undefined';
-    const storedChoice = window.sessionStorage.getItem(motionChoiceKey);
-
-    if (!supportsOrientation) {
-      // For non-mobile: subtle mouse-based pendulum swing
-      const pointerSwing = (event: PointerEvent) => {
-        const xNormalized = (event.clientX / window.innerWidth - 0.5);
-        const swingAngle = xNormalized * 6; // Max 3 degrees swing on each side
-        scheduleRotation(swingAngle);
-      };
-      window.addEventListener('pointermove', pointerSwing, { passive: true });
-      return () => {
-        window.removeEventListener('pointermove', pointerSwing);
-        if (animationFrame.current) window.cancelAnimationFrame(animationFrame.current);
-      };
-    }
-
-    const stateFrame = window.requestAnimationFrame(() => {
-      if (storedChoice === 'granted') setMotionEnabled(true);
-      if (!storedChoice) setShowPrompt(true);
-    });
-
+    if (useSensor) return;
+    const pointerSwing = (event: PointerEvent) => {
+      const xNormalized = event.clientX / window.innerWidth - 0.5;
+      scheduleRotation(xNormalized * 6); // max ~3 degrees each side
+    };
+    window.addEventListener('pointermove', pointerSwing, { passive: true });
     return () => {
-      window.cancelAnimationFrame(stateFrame);
+      window.removeEventListener('pointermove', pointerSwing);
       if (animationFrame.current) window.cancelAnimationFrame(animationFrame.current);
     };
-  }, [scheduleRotation]);
+  }, [useSensor, scheduleRotation]);
 
   useEffect(() => {
-    if (!motionEnabled) return;
-    
-    // Device orientation: use gamma (left-right tilt) for pendulum swing
+    if (!useSensor) return;
+    let delivered = false;
+
     const orientationSwing = (event: DeviceOrientationEvent) => {
-      // gamma ranges from -90 to 90 (left-right tilt)
-      // We'll map this to a gentle swing range
-      const gamma = Math.max(-30, Math.min(30, event.gamma ?? 0));
-      // Scale to realistic pendulum range: about ±8 degrees max
-      const swingAngle = gamma * 0.27;
-      scheduleRotation(swingAngle);
+      if (event.gamma == null) return; // iOS sends empty events without a grant
+      delivered = true;
+      // gamma is left-right tilt (-90..90); scale to a believable pendulum arc
+      const gamma = Math.max(-30, Math.min(30, event.gamma));
+      scheduleRotation(gamma * 0.27);
     };
-    
+
     window.addEventListener('deviceorientation', orientationSwing, { passive: true });
-    return () => window.removeEventListener('deviceorientation', orientationSwing);
-  }, [motionEnabled, scheduleRotation]);
+
+    // A stored "granted" records the guest's choice, not the browser's grant.
+    // iOS does not reliably carry that grant across a fresh page load, so if no
+    // real tilt data arrives we ask once more rather than leaving a dead lantern.
+    let probe = 0;
+    if (motionStatus === 'granted') {
+      probe = window.setTimeout(() => {
+        if (delivered) return;
+        forgetMotionGrant();
+        setRetryAsk(true);
+      }, 1400);
+    }
+
+    return () => {
+      window.removeEventListener('deviceorientation', orientationSwing);
+      if (probe) window.clearTimeout(probe);
+      if (animationFrame.current) window.cancelAnimationFrame(animationFrame.current);
+    };
+  }, [useSensor, motionStatus, scheduleRotation]);
+
+  // Ask only where a prompt is genuinely required: an iOS guest who has not
+  // answered yet, or one whose grant did not survive landing here directly.
+  const showPrompt = motionStatus === 'needs-ask' || retryAsk;
 
   const enableMotion = async () => {
-    const orientationApi = window.DeviceOrientationEvent as OrientationPermissionApi;
-    try {
-      if (typeof orientationApi.requestPermission === 'function') {
-        const permission = await orientationApi.requestPermission();
-        if (permission !== 'granted') throw new Error('Motion permission was denied.');
-      }
-      window.sessionStorage.setItem(motionChoiceKey, 'granted');
-      setMotionEnabled(true);
-      setShowPrompt(false);
-    } catch {
-      window.sessionStorage.setItem(motionChoiceKey, 'declined');
-      setShowPrompt(false);
-    }
+    await requestMotionAccess();
+    setRetryAsk(false);
   };
 
   const dismissPrompt = () => {
-    window.sessionStorage.setItem(motionChoiceKey, 'declined');
-    setShowPrompt(false);
+    declineMotion();
+    setRetryAsk(false);
   };
 
   return <>
     <div ref={lanternRef} className="lantern-pendulum-container">
       <RsvpLantern />
     </div>
-    {showPrompt && <motion.aside className="lantern-motion-permission" initial={{ opacity: 0, y: 18, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: .45, ease: [0.22, 1, 0.36, 1] }} aria-label="Lantern motion preference">
-      <span className="lantern-motion-permission-gem">✦</span>
-      <div><p>Bring the lantern to life</p><small>Allow gentle motion for a more immersive invitation.</small></div>
-      <div className="lantern-motion-permission-actions"><button type="button" onClick={dismissPrompt}>Not now</button><button type="button" onClick={() => { void enableMotion(); }}>Enable motion</button></div>
+    {showPrompt && <motion.aside className="motion-consent" initial={{ opacity: 0, y: 18, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: .45, ease: [0.22, 1, 0.36, 1] }} aria-label="Lantern motion preference">
+      <span className="motion-consent-gem">✦</span>
+      <div className="motion-consent-copy"><p>Bring the lantern to life</p><small>Allow gentle motion for a more immersive invitation.</small></div>
+      <div className="motion-consent-actions"><button type="button" onClick={dismissPrompt}>Not now</button><button type="button" className="is-primary" onClick={() => { void enableMotion(); }}>Enable motion</button></div>
     </motion.aside>}
   </>;
 }

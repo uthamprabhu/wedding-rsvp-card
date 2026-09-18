@@ -13,10 +13,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { createChestRuntime } from './chestRuntime';
 import {
-  requestMotionPermission,
+  declineMotion,
+  requestMotionAccess,
   useChestQuality,
   useIsTouch,
-  useMotionSupport,
+  useMotionStatus,
   useReducedMotion,
   useWebGLSupport,
 } from './useCapabilities';
@@ -39,11 +40,10 @@ export default function TreasureChest({ onOpen }: Props) {
   const webgl = useWebGLSupport();
   const quality = useChestQuality();
   const reducedMotion = useReducedMotion();
-  const motion = useMotionSupport();
+  const motionStatus = useMotionStatus();
   const isTouch = useIsTouch();
 
   const [open, setOpen] = useState(false);
-  const [shakeArmed, setShakeArmed] = useState(false);
 
   const runtimeRef = useRef(createChestRuntime(false));
   const handedOff = useRef(false);
@@ -76,21 +76,25 @@ export default function TreasureChest({ onOpen }: Props) {
   }, [onOpen]);
 
   /* ---------------------------- shake gesture ----------------------------- */
-  useDeviceShake({ onShake: handleOpen, enabled: !open });
+  const shakeLive = motionStatus === 'open' || motionStatus === 'granted';
+  useDeviceShake({ onShake: handleOpen, enabled: !open && shakeLive });
 
-  const enableShake = useCallback(async (event: React.MouseEvent) => {
+  // This is the single motion ask for the whole invitation: the lantern on the
+  // RSVP and itinerary screens inherits the answer and stays silent.
+  const enableMotion = useCallback(async (event: React.MouseEvent) => {
     event.stopPropagation();
-    const granted = await requestMotionPermission();
-    setShakeArmed(granted);
+    await requestMotionAccess();
   }, []);
 
-  // Only mention shaking on a touch device: desktop Chrome exposes
-  // DeviceMotionEvent even with no accelerometer behind it. The opt-in appears
-  // only where a permission prompt is genuinely required (iOS Safari); on
-  // Android the gesture already works with no prompt at all.
-  const canShake = isTouch && motion.available;
-  const needsOptIn = canShake && motion.needsPermission && !shakeArmed;
-  const shakeReady = canShake && (!motion.needsPermission || shakeArmed);
+  const dismissMotion = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation();
+    declineMotion();
+  }, []);
+
+  // Only ask on a touch device that genuinely needs a prompt, i.e. iOS/iPadOS.
+  // Android needs no permission, and desktop has no sensor worth asking about.
+  const askMotion = isTouch && !open && motionStatus === 'needs-ask';
+  const shakeHintable = isTouch && shakeLive;
 
   /* --------------------------- pointer handling --------------------------- */
   const pointerStart = useRef<{ x: number; y: number; id: number } | null>(null);
@@ -182,12 +186,7 @@ export default function TreasureChest({ onOpen }: Props) {
           {open ? 'Opening your invitation' : 'Tap the chest to open the invitation'}
         </p>
 
-        {needsOptIn ? (
-          <button type="button" className="chest-shake-optin" onClick={enableShake}>
-            <Sparkles size={13} aria-hidden="true" />
-            <span>or shake your phone</span>
-          </button>
-        ) : shakeReady ? (
+        {shakeHintable ? (
           <p className="chest-shake-ready">
             <Sparkles size={13} aria-hidden="true" />
             <span>or shake your phone</span>
@@ -196,6 +195,24 @@ export default function TreasureChest({ onOpen }: Props) {
           <ChevronDown className="chest-chevron" size={18} strokeWidth={1.5} aria-hidden="true" />
         )}
       </div>
+
+      {/* The one motion ask for the whole invitation. Never blocks the chest:
+          tap always works, and "Not now" is remembered so nobody is nagged. */}
+      {askMotion && (
+        <aside className="motion-consent is-chest" aria-label="Motion preference">
+          <span className="motion-consent-gem">✦</span>
+          <div className="motion-consent-copy">
+            <p>Bring the invitation to life</p>
+            <small>Allow gentle motion to shake the chest open and sway the lantern.</small>
+          </div>
+          <div className="motion-consent-actions">
+            <button type="button" onClick={dismissMotion}>Not now</button>
+            <button type="button" className="is-primary" onClick={enableMotion}>
+              Enable motion
+            </button>
+          </div>
+        </aside>
+      )}
     </div>
   );
 }

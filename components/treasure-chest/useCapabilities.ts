@@ -117,40 +117,7 @@ export function useChestQuality(): ChestQuality {
 
 /* --------------------------- motion sensor ---------------------------- */
 
-interface MotionCtor {
-  requestPermission?: () => Promise<'granted' | 'denied'>;
-}
-
-let motionCache: { available: boolean; needsPermission: boolean } | null = null;
-
-function getMotion() {
-  if (!motionCache) {
-    const available = typeof window !== 'undefined' && 'DeviceMotionEvent' in window;
-    const ctor = available
-      ? (window.DeviceMotionEvent as unknown as MotionCtor)
-      : undefined;
-    motionCache = {
-      available,
-      needsPermission: typeof ctor?.requestPermission === 'function',
-    };
-  }
-  return motionCache;
-}
-
-const serverMotion = () => ({ available: false, needsPermission: false });
-
-export function useMotionSupport() {
-  return useSyncExternalStore(noopSubscribe, getMotion, serverMotion);
-}
-
-export async function requestMotionPermission(): Promise<boolean> {
-  if (typeof window === 'undefined' || !('DeviceMotionEvent' in window)) return false;
-  const ctor = window.DeviceMotionEvent as unknown as MotionCtor;
-  if (typeof ctor.requestPermission !== 'function') return true;
-  try {
-    return (await ctor.requestPermission()) === 'granted';
-  } catch {
-    // Safari throws when this is not tied to a gesture. Never surface it.
-    return false;
-  }
-}
+// Motion access is shared with the RSVP / itinerary lantern, so it lives in one
+// place rather than being detected twice. See lib/motion-access.ts.
+export { useMotionStatus, requestMotionAccess, declineMotion } from '@/lib/motion-access';
+export type { MotionStatus } from '@/lib/motion-access';

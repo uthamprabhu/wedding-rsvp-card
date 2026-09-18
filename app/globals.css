@@ -188,7 +188,9 @@ body {
   100% { transform: rotate(calc(var(--lantern-swing-rotation) - 2.5deg)); }
 }
 
-.lantern-motion-permission { position: fixed; z-index: 70; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, calc(16px + env(safe-area-inset-bottom))); display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px 12px; width: min(370px, calc(100% - 36px)); padding: 15px; border: 1px solid rgba(171, 142, 97, .44); background: rgba(73, 59, 47, .86); box-shadow: 0 16px 38px rgba(54, 39, 25, .2), inset 0 1px rgba(255, 255, 255, .14); backdrop-filter: blur(16px); color: #fff8ed; }.lantern-motion-permission-gem { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid rgba(223, 192, 139, .65); border-radius: 50%; color: #e3c38c; font-size: 12px; }.lantern-motion-permission p { margin: 0; color: #fff9ef; font: 500 18px/1 var(--font-cormorant), Georgia, serif; }.lantern-motion-permission small { display: block; margin-top: 5px; color: rgba(255, 248, 237, .7); font: 400 11px/1.45 var(--font-geist-sans), Inter, sans-serif; }.lantern-motion-permission-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }.lantern-motion-permission-actions button { min-height: 34px; padding: 0 11px; border: 1px solid transparent; background: transparent; color: rgba(255, 248, 237, .76); font: 500 9px/1 var(--font-geist-sans), Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }.lantern-motion-permission-actions button:last-child { border-color: rgba(225, 191, 132, .76); background: rgba(177, 138, 82, .22); color: #fff9ef; }
+/* The lantern's motion prompt is now the shared `.motion-consent` card defined
+   near the end of this file, so the chest and the lantern ask the same way
+   (and only ever ask once). */
 .rsvp-corner-lines { position: absolute; inset: 0; z-index: 0; color: rgba(158, 117, 62, .38); }.rsvp-corner { position: absolute; display: block; width: clamp(86px, 12vw, 154px); height: clamp(86px, 12vw, 154px); border: solid currentColor; border-width: 1px 0 0 1px; }.rsvp-corner::before { position: absolute; inset: 8px; border: solid rgba(191, 152, 94, .58); border-width: 1px 0 0 1px; content: ''; }.rsvp-corner::after { position: absolute; top: 19px; left: 19px; width: 10px; height: 10px; border: 1px solid rgba(181, 137, 77, .72); transform: rotate(45deg); content: ''; }.rsvp-corner-tl { top: 21px; left: 21px; }.rsvp-corner-tr { top: 21px; right: 21px; transform: scaleX(-1); }.rsvp-corner-bl { bottom: 21px; left: 21px; transform: scaleY(-1); }.rsvp-corner-br { right: 21px; bottom: 21px; transform: scale(-1); }
 .realistic-butterflies { position: absolute !important; inset: 0; z-index: 1; width: 100% !important; height: 100% !important; pointer-events: none; }
 .luxury-invitation .realistic-butterflies { position: fixed !important; }
@@ -601,8 +603,6 @@ body {
   .rsvp-confirmation-details { padding: 0 2px; }
   .rsvp-detail { gap: 12px; padding: 19px 0; }
   .rsvp-detail strong { font-size: 19px; }
-  .lantern-motion-permission { right: 14px; bottom: max(14px, calc(12px + env(safe-area-inset-bottom))); width: calc(100% - 28px); padding: 14px; }
-  .lantern-motion-permission p { font-size: 17px; }
 }
 
 @media (max-width: 375px) {
@@ -1759,4 +1759,109 @@ body {
   .chest-chevron { animation: none; }
   .chest-css-lid { transition-duration: .35s; transition-timing-function: ease-out; }
   .chest-css-logo { transition-duration: .3s; }
+}
+
+/* ==========================================================================
+   Shared motion-consent card
+   Shown only on iOS / iPadOS, where motion access needs a permission prompt.
+   Asked once at the treasure chest; the RSVP and itinerary lantern inherit the
+   answer. Never blocks anything - tap and mouse fallbacks always work.
+   ========================================================================== */
+
+.motion-consent {
+  position: fixed;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: min(calc(100vw - 28px), 430px);
+  padding: 14px 16px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(214, 178, 118, .36);
+  border-radius: 18px;
+  /* Deliberately a neutral warm dark rather than burgundy: this same card is
+     shown over the dark chest hero AND over the cream RSVP / itinerary pages. */
+  background: linear-gradient(160deg, rgba(60, 47, 37, .94), rgba(38, 28, 22, .96));
+  box-shadow: 0 18px 44px rgba(20, 10, 4, .42), inset 0 1px 0 rgba(255, 232, 190, .15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #f2dcbe;
+}
+
+.motion-consent-gem {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(220, 176, 112, .4);
+  background: radial-gradient(circle at 34% 30%, rgba(255, 232, 186, .3), rgba(150, 96, 44, .18));
+  color: #f0cf9a;
+  font-size: 14px;
+}
+
+.motion-consent-copy { flex: 1 1 auto; min-width: 0; }
+.motion-consent-copy p {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  color: #f7e6cc;
+}
+.motion-consent-copy small {
+  display: block;
+  margin-top: 2px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 300;
+  line-height: 1.45;
+  color: #c7a378;
+}
+
+.motion-consent-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.motion-consent-actions button {
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(214, 170, 108, .3);
+  background: transparent;
+  color: #c7a378;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .25s ease, border-color .25s ease, background .25s ease;
+}
+.motion-consent-actions button:hover { color: #f0d6ad; border-color: rgba(230, 190, 132, .55); }
+.motion-consent-actions button.is-primary {
+  border-color: transparent;
+  background: linear-gradient(180deg, #d8ac62, #b0813c);
+  color: #33110c;
+  font-weight: 600;
+}
+.motion-consent-actions button.is-primary:hover { background: linear-gradient(180deg, #e6bd76, #bd8d45); }
+.motion-consent-actions button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(236, 200, 148, .7);
+}
+
+/* Narrow phones: stack so the buttons keep a comfortable tap size. */
+@media (max-width: 430px) {
+  .motion-consent { flex-wrap: wrap; gap: 10px 12px; }
+  .motion-consent-copy { flex: 1 1 calc(100% - 47px); }
+  .motion-consent-actions { flex: 1 1 100%; justify-content: flex-end; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-consent-actions button { transition: none; }
 }
