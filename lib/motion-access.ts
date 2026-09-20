@@ -9,47 +9,70 @@
  * Asking twice for the same grant is the fastest way to get it denied, so the
  * chest asks once, the answer is remembered, and the lantern inherits it.
  *
- * Status meanings:
- *   unsupported - no sensor API at all (typical desktop) -> use pointer fallback
- *   open        - sensor works with no prompt (Android, Chrome OS, etc.)
- *   needs-ask   - iOS/iPadOS gate, guest has not answered yet -> show the card
- *   granted     - iOS gate, guest said yes
- *   declined    - iOS gate, guest said no -> never ask again
+ * Two layers of state, kept deliberately separate:
+ *
+ *  1. The guest's PREFERENCE, persisted in localStorage: 'unset' | 'enabled' |
+ *     'disabled'. This is what task requirements #6 asks for by name, and it
+ *     is the only thing that decides whether the unlock sheet appears again.
+ *  2. The underlying SENSOR status, derived fresh every time from the browser:
+ *     whether a permission API exists at all, and whether it is gated
+ *     (iOS/iPadOS) or open (Android, desktop-with-sensor, etc). This is never
+ *     persisted, because permission state can change between visits (a guest
+ *     can revoke it in iOS Settings) and the code must not assume yesterday's
+ *     grant still holds.
+ *
+ * `useMotionStatus()` below folds both layers into the single status the rest
+ * of the app already consumes, so existing call sites did not need to change
+ * shape - only the meaning of "granted" became more honest (see below).
  */
 
-import { useSyncExternalStore } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
+import { useDeviceClass } from './device';
 
-const STORAGE_KEY = 'farzeen-motion-access';
+/** Bump this if the meaning of the stored value ever needs to change. */
+const STORAGE_KEY = 'farzeen-motion-access-v2';
 
-type Choice = 'granted' | 'declined';
-export type MotionStatus = 'unsupported' | 'open' | 'needs-ask' | 'granted' | 'declined';
+export type MotionPreference = 'unset' | 'enabled' | 'disabled';
+
+export type MotionStatus =
+  /** No sensor exists on this device/browser at all. */
+  | 'unsupported'
+  /** Sensor works with no permission prompt (Android, etc). */
+  | 'open'
+  /** iOS/iPadOS gate, guest has not chosen yet -> show the unlock sheet. */
+  | 'needs-ask'
+  /** iOS/iPadOS gate, guest said yes. */
+  | 'granted'
+  /** Guest said no, OR the device has no sensor worth asking about. */
+  | 'declined';
 
 interface GatedCtor {
   requestPermission?: () => Promise<'granted' | 'denied'>;
 }
 
-/* ------------------------------- storage ------------------------------- */
+/* ------------------------------- storage -------------------------------- */
 
-let choice: Choice | null = null;
-let choiceLoaded = false;
+let preference: MotionPreference | null = null;
+let preferenceLoaded = false;
 const listeners = new Set<() => void>();
 
-function readChoice(): Choice | null {
-  if (choiceLoaded) return choice;
-  choiceLoaded = true;
+function readPreference(): MotionPreference {
+  if (preferenceLoaded) return preference ?? 'unset';
+  preferenceLoaded = true;
   try {
     const value = window.localStorage.getItem(STORAGE_KEY);
-    choice = value === 'granted' || value === 'declined' ? value : null;
+    preference = value === 'enabled' || value === 'disabled' ? value : 'unset';
   } catch {
-    // private mode / storage disabled: fall back to in-memory only
-    choice = null;
+    // Private mode / storage disabled: fall back to in-memory only, so the
+    // guest is not re-asked on every re-render within the same visit.
+    preference = 'unset';
   }
-  return choice;
+  return preference;
 }
 
-function writeChoice(next: Choice) {
-  choice = next;
-  choiceLoaded = true;
+function writePreference(next: MotionPreference) {
+  preference = next;
+  preferenceLoaded = true;
   try {
     window.localStorage.setItem(STORAGE_KEY, next);
   } catch {
@@ -58,7 +81,23 @@ function writeChoice(next: Choice) {
   listeners.forEach((l) => l());
 }
 
-/* ----------------------------- capabilities ---------------------------- */
+/** Explicit, named accessor for requirement #6 ("unset / motion-enabled / motion-disabled"). */
+export function getMotionPreference(): MotionPreference {
+  return readPreference();
+}
+
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+}
+
+const serverPreference = (): MotionPreference => 'unset';
+
+export function useMotionPreference(): MotionPreference {
+  return useSyncExternalStore(subscribe, readPreference, serverPreference);
+}
+
+/* ----------------------------- capabilities ----------------------------- */
 
 function ctor(name: 'DeviceOrientationEvent' | 'DeviceMotionEvent'): GatedCtor | undefined {
   if (typeof window === 'undefined' || !(name in window)) return undefined;
@@ -82,21 +121,56 @@ export function isMotionGated(): boolean {
   );
 }
 
-export function getMotionStatus(): MotionStatus {
+/**
+ * The full status, folding the persisted preference and the live sensor
+ * capability together. Desktop is excluded at the call site (see
+ * `useMotionStatus`) rather than here, so this function stays a pure read of
+ * "what can this browser do" and is easy to reason about on its own.
+ */
+function computeStatus(): MotionStatus {
   if (!hasMotionApi()) return 'unsupported';
-  if (!isMotionGated()) return 'open';
-  return readChoice() ?? 'needs-ask';
+
+  const pref = readPreference();
+  if (pref === 'disabled') return 'declined';
+
+  if (!isMotionGated()) return 'open'; // Android etc: nothing to grant, always live
+
+  if (pref === 'enabled') return 'granted';
+  return 'needs-ask';
 }
 
-/* -------------------------------- actions ------------------------------ */
+const serverStatus = (): MotionStatus => 'unsupported';
+
+/**
+ * The status consumed by the chest and the lantern. Deliberately reports
+ * 'unsupported' on desktop regardless of what the browser's sensor APIs claim
+ * - a laptop with a gyroscope-capable Chromium build must never trigger any
+ * motion UI, per the desktop-exclusion requirement.
+ */
+export function useMotionStatus(): MotionStatus {
+  const deviceClass = useDeviceClass();
+  const status = useSyncExternalStore(subscribe, computeStatus, serverStatus);
+  return deviceClass === 'desktop' ? 'unsupported' : status;
+}
+
+/** Should the unlock sheet be offered right now? Desktop is never eligible. */
+export function useMotionAskNeeded(): boolean {
+  const deviceClass = useDeviceClass();
+  const pref = useMotionPreference();
+  const gated = useSyncExternalStore(subscribe, isMotionGated, () => false);
+  const hasApi = useSyncExternalStore(subscribe, hasMotionApi, () => false);
+  return deviceClass !== 'desktop' && hasApi && gated && pref === 'unset';
+}
+
+/* -------------------------------- actions -------------------------------- */
 
 /**
  * MUST be called directly from a user gesture handler, with no `await` before
  * it, or iOS rejects the request outright.
  *
  * Both constructors are asked in the same tick: iOS treats them as a single
- * permission and shows one dialog, but requesting both means we are not relying
- * on that being true forever.
+ * permission and shows one dialog, but requesting both means we are not
+ * relying on that being true forever.
  */
 export async function requestMotionAccess(): Promise<boolean> {
   const orientation = ctor('DeviceOrientationEvent');
@@ -109,32 +183,38 @@ export async function requestMotionAccess(): Promise<boolean> {
   if (typeof motion?.requestPermission === 'function') {
     pending.push(motion.requestPermission());
   }
-  if (pending.length === 0) return true; // not gated on this platform
+
+  if (pending.length === 0) {
+    // Not gated on this platform: there is nothing to grant, motion is just live.
+    writePreference('enabled');
+    return true;
+  }
 
   try {
     const results = await Promise.all(pending);
     const granted = results.every((r) => r === 'granted');
-    writeChoice(granted ? 'granted' : 'declined');
+    writePreference(granted ? 'enabled' : 'disabled');
     return granted;
   } catch {
     // Safari throws when the call is not tied to a gesture. Never surface it.
-    writeChoice('declined');
+    writePreference('disabled');
     return false;
   }
 }
 
 export function declineMotion() {
-  writeChoice('declined');
+  writePreference('disabled');
 }
 
 /**
- * Forget a stored "granted" so the guest can be asked again. Used when the flag
- * says yes but the sensor never actually delivers data, which happens when iOS
- * has not carried the grant across a fresh page load.
+ * Forget a stored "enabled" so the guest can be asked again. Used when the
+ * preference says yes but the sensor never actually delivers data, which
+ * happens when iOS has not carried the grant across a fresh page load.
  */
 export function forgetMotionGrant() {
-  if (readChoice() !== 'granted') return;
-  choice = null;
+  if (readPreference() !== 'enabled') return;
+  preference = 'unset';
+  preferenceLoaded = true;
   try {
     window.localStorage.removeItem(STORAGE_KEY);
   } catch {
@@ -143,15 +223,7 @@ export function forgetMotionGrant() {
   listeners.forEach((l) => l());
 }
 
-/* --------------------------------- hook -------------------------------- */
-
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  return () => listeners.delete(cb);
-}
-
-const serverStatus = (): MotionStatus => 'unsupported';
-
-export function useMotionStatus(): MotionStatus {
-  return useSyncExternalStore(subscribe, getMotionStatus, serverStatus);
+/** Convenience hook mirroring `declineMotion` for components that prefer hooks. */
+export function useDeclineMotion(): () => void {
+  return useCallback(() => declineMotion(), []);
 }

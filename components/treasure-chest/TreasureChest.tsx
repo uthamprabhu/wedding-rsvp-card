@@ -16,7 +16,8 @@ import {
   declineMotion,
   requestMotionAccess,
   useChestQuality,
-  useIsTouch,
+  useDeviceClass,
+  useMotionAskNeeded,
   useMotionStatus,
   useReducedMotion,
   useWebGLSupport,
@@ -24,6 +25,7 @@ import {
 import { useDeviceShake } from './useDeviceShake';
 import { useChestAudio } from './useChestAudio';
 import TreasureChestFallback from './TreasureChestFallback';
+import MotionUnlockSheet from './MotionUnlockSheet';
 
 const loadScene = () => import('./TreasureChestScene');
 const TreasureChestScene = dynamic(loadScene, { ssr: false, loading: () => null });
@@ -41,9 +43,19 @@ export default function TreasureChest({ onOpen }: Props) {
   const quality = useChestQuality();
   const reducedMotion = useReducedMotion();
   const motionStatus = useMotionStatus();
-  const isTouch = useIsTouch();
+  const deviceClass = useDeviceClass();
+  const isMobileOrTablet = deviceClass !== 'desktop';
+  // Robust replacement for the old `hover: none` viewport check: whether the
+  // unlock sheet is genuinely owed right now (mobile/tablet, sensor exists,
+  // gated by iOS, and the guest has not chosen yet).
+  const askNeeded = useMotionAskNeeded();
 
   const [open, setOpen] = useState(false);
+  // Closes the sheet the instant a button is pressed, without waiting for the
+  // async permission round-trip (enableMotion) or the storage-listener replay
+  // (declineMotion) to flip `askNeeded`. Set only from direct event handlers,
+  // never from an effect, so no derived-state/cascading-render lint issue.
+  const [dismissed, setDismissed] = useState(false);
 
   const runtimeRef = useRef(createChestRuntime(false));
   const handedOff = useRef(false);
@@ -79,22 +91,28 @@ export default function TreasureChest({ onOpen }: Props) {
   const shakeLive = motionStatus === 'open' || motionStatus === 'granted';
   useDeviceShake({ onShake: handleOpen, enabled: !open && shakeLive });
 
+  // Sheet visibility is derived, not stored: it is owed whenever the guest has
+  // not chosen yet, minus an immediate local override once a button is pressed
+  // (so it closes instantly rather than waiting on the permission round-trip).
+  const sheetOpen = askNeeded && !dismissed && !open;
+
   // This is the single motion ask for the whole invitation: the lantern on the
   // RSVP and itinerary screens inherits the answer and stays silent.
-  const enableMotion = useCallback(async (event: React.MouseEvent) => {
-    event.stopPropagation();
+  const enableMotion = useCallback(async () => {
+    setDismissed(true);
     await requestMotionAccess();
   }, []);
 
-  const dismissMotion = useCallback((event: React.MouseEvent) => {
-    event.stopPropagation();
+  const dismissMotion = useCallback(() => {
+    setDismissed(true);
     declineMotion();
   }, []);
 
-  // Only ask on a touch device that genuinely needs a prompt, i.e. iOS/iPadOS.
-  // Android needs no permission, and desktop has no sensor worth asking about.
-  const askMotion = isTouch && !open && motionStatus === 'needs-ask';
-  const shakeHintable = isTouch && shakeLive;
+  // Chest UI must be mutually exclusive: exactly one of "shake" or "tap" is
+  // ever shown, and never both. Mobile/tablet with a live sensor -> shake.
+  // Everything else (desktop, or mobile/tablet that declined/has no sensor)
+  // -> tap. The sheet itself only ever appears on mobile/tablet.
+  const shakeHintable = isMobileOrTablet && shakeLive;
 
   /* --------------------------- pointer handling --------------------------- */
   const pointerStart = useRef<{ x: number; y: number; id: number } | null>(null);
@@ -181,37 +199,34 @@ export default function TreasureChest({ onOpen }: Props) {
         )}
       </div>
 
+      {/* Mutually exclusive by construction: shakeHintable and the tap hint
+          can never both be true, so "shake to open" and "tap to open" never
+          appear together (requirement #8). */}
       <div className={`chest-caption${open ? ' is-hidden' : ''}`}>
         <p className="chest-hint">
-          {open ? 'Opening your invitation' : 'Tap the chest to open the invitation'}
+          {open
+            ? 'Opening your invitation'
+            : shakeHintable
+              ? 'Shake gently to open'
+              : 'Tap the chest to open the invitation'}
         </p>
 
         {shakeHintable ? (
-          <p className="chest-shake-ready">
-            <Sparkles size={13} aria-hidden="true" />
-            <span>or shake your phone</span>
-          </p>
+          <Sparkles className="chest-chevron" size={16} strokeWidth={1.5} aria-hidden="true" />
         ) : (
           <ChevronDown className="chest-chevron" size={18} strokeWidth={1.5} aria-hidden="true" />
         )}
       </div>
 
       {/* The one motion ask for the whole invitation. Never blocks the chest:
-          tap always works, and "Not now" is remembered so nobody is nagged. */}
-      {askMotion && (
-        <aside className="motion-consent is-chest" aria-label="Motion preference">
-          <span className="motion-consent-gem">✦</span>
-          <div className="motion-consent-copy">
-            <p>Bring the invitation to life</p>
-            <small>Allow gentle motion to shake the chest open and sway the lantern.</small>
-          </div>
-          <div className="motion-consent-actions">
-            <button type="button" onClick={dismissMotion}>Not now</button>
-            <button type="button" className="is-primary" onClick={enableMotion}>
-              Enable motion
-            </button>
-          </div>
-        </aside>
+          tap still opens it underneath, and "Not Now" is remembered so nobody
+          is asked again. Mobile/tablet only - desktop never mounts this. */}
+      {isMobileOrTablet && (
+        <MotionUnlockSheet
+          open={sheetOpen}
+          onEnable={() => void enableMotion()}
+          onDismiss={dismissMotion}
+        />
       )}
     </div>
   );

@@ -1,16 +1,10 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import Particles, { ParticlesProvider } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import type { Engine, ISourceOptions } from '@tsparticles/engine';
-import {
-  declineMotion,
-  forgetMotionGrant,
-  requestMotionAccess,
-  useMotionStatus,
-} from '@/lib/motion-access';
+import { forgetMotionGrant, useMotionStatus } from '@/lib/motion-access';
 
 interface CelestialBackdropProps {
   page: 'itinerary' | 'rsvp';
@@ -67,10 +61,13 @@ export function AdaptiveLantern() {
   const lanternRef = useRef<HTMLDivElement>(null);
   const pendingRotation = useRef(0);
   const animationFrame = useRef(0);
-  // Shared with the landing chest: if the guest already allowed motion there,
-  // nothing is shown here at all.
+  // The lantern never asks for motion access itself - the treasure chest on
+  // the landing page is the single place that request is ever made (see
+  // MotionUnlockSheet). This component only ever reads the resulting status:
+  // 'open'/'granted' -> swing on tilt, anything else -> swing on the mouse, and
+  // on a real device without a mouse it simply stays still, which is the
+  // required "static, normal touch/click" fallback.
   const motionStatus = useMotionStatus();
-  const [retryAsk, setRetryAsk] = useState(false);
 
   const applyRotation = useCallback(() => {
     const lantern = lanternRef.current;
@@ -122,15 +119,17 @@ export function AdaptiveLantern() {
 
     window.addEventListener('deviceorientation', orientationSwing, { passive: true });
 
-    // A stored "granted" records the guest's choice, not the browser's grant.
-    // iOS does not reliably carry that grant across a fresh page load, so if no
-    // real tilt data arrives we ask once more rather than leaving a dead lantern.
+    // A stored "enabled" records the guest's choice, not the browser's live
+    // grant. iOS does not reliably carry that grant across a fresh page load
+    // (e.g. arriving here directly from a shared /itinerary or /rsvp link), so
+    // if no real tilt data arrives, forget the stale preference and fall back
+    // to the static/mouse behaviour for this visit rather than leaving a dead
+    // lantern with no way to recover. The guest is never re-prompted here -
+    // that only ever happens back at the chest on their next visit.
     let probe = 0;
     if (motionStatus === 'granted') {
       probe = window.setTimeout(() => {
-        if (delivered) return;
-        forgetMotionGrant();
-        setRetryAsk(true);
+        if (!delivered) forgetMotionGrant();
       }, 1400);
     }
 
@@ -141,30 +140,11 @@ export function AdaptiveLantern() {
     };
   }, [useSensor, motionStatus, scheduleRotation]);
 
-  // Ask only where a prompt is genuinely required: an iOS guest who has not
-  // answered yet, or one whose grant did not survive landing here directly.
-  const showPrompt = motionStatus === 'needs-ask' || retryAsk;
-
-  const enableMotion = async () => {
-    await requestMotionAccess();
-    setRetryAsk(false);
-  };
-
-  const dismissPrompt = () => {
-    declineMotion();
-    setRetryAsk(false);
-  };
-
-  return <>
+  return (
     <div ref={lanternRef} className="lantern-pendulum-container">
       <RsvpLantern />
     </div>
-    {showPrompt && <motion.aside className="motion-consent" initial={{ opacity: 0, y: 18, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: .45, ease: [0.22, 1, 0.36, 1] }} aria-label="Lantern motion preference">
-      <span className="motion-consent-gem">✦</span>
-      <div className="motion-consent-copy"><p>Bring the lantern to life</p><small>Allow gentle motion for a more immersive invitation.</small></div>
-      <div className="motion-consent-actions"><button type="button" onClick={dismissPrompt}>Not now</button><button type="button" className="is-primary" onClick={() => { void enableMotion(); }}>Enable motion</button></div>
-    </motion.aside>}
-  </>;
+  );
 }
 
 function RsvpCornerLines() {

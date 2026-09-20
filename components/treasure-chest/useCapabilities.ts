@@ -119,5 +119,17 @@ export function useChestQuality(): ChestQuality {
 
 // Motion access is shared with the RSVP / itinerary lantern, so it lives in one
 // place rather than being detected twice. See lib/motion-access.ts.
-export { useMotionStatus, requestMotionAccess, declineMotion } from '@/lib/motion-access';
+export {
+  useMotionStatus,
+  useMotionAskNeeded,
+  requestMotionAccess,
+  declineMotion,
+} from '@/lib/motion-access';
 export type { MotionStatus } from '@/lib/motion-access';
+
+/* --------------------------- device class ------------------------------ */
+
+// Robust mobile/tablet/desktop classification (UA + touch capability), shared
+// with the same call sites. See lib/device.ts.
+export { useDeviceClass } from '@/lib/device';
+export type { DeviceClass } from '@/lib/device';

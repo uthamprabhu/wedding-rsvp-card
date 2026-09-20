@@ -188,9 +188,9 @@ body {
   100% { transform: rotate(calc(var(--lantern-swing-rotation) - 2.5deg)); }
 }
 
-/* The lantern's motion prompt is now the shared `.motion-consent` card defined
-   near the end of this file, so the chest and the lantern ask the same way
-   (and only ever ask once). */
+/* The lantern never asks for motion access itself - the treasure chest's
+   MotionUnlockSheet (see the "Landing hero" section below) is the single
+   place that request is ever made for the whole invitation. */
 .rsvp-corner-lines { position: absolute; inset: 0; z-index: 0; color: rgba(158, 117, 62, .38); }.rsvp-corner { position: absolute; display: block; width: clamp(86px, 12vw, 154px); height: clamp(86px, 12vw, 154px); border: solid currentColor; border-width: 1px 0 0 1px; }.rsvp-corner::before { position: absolute; inset: 8px; border: solid rgba(191, 152, 94, .58); border-width: 1px 0 0 1px; content: ''; }.rsvp-corner::after { position: absolute; top: 19px; left: 19px; width: 10px; height: 10px; border: 1px solid rgba(181, 137, 77, .72); transform: rotate(45deg); content: ''; }.rsvp-corner-tl { top: 21px; left: 21px; }.rsvp-corner-tr { top: 21px; right: 21px; transform: scaleX(-1); }.rsvp-corner-bl { bottom: 21px; left: 21px; transform: scaleY(-1); }.rsvp-corner-br { right: 21px; bottom: 21px; transform: scale(-1); }
 .realistic-butterflies { position: absolute !important; inset: 0; z-index: 1; width: 100% !important; height: 100% !important; pointer-events: none; }
 .luxury-invitation .realistic-butterflies { position: fixed !important; }
@@ -1527,6 +1527,55 @@ body {
   padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
 }
 
+/* Corner greenery PNG (top-left source, CSS-mirrored for every corner).
+   The wrapper covers the entire hero shell; each quadrant corner holds one
+   copy of the image. pointer-events: none so taps always reach the chest. */
+.hero-decor-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Base — applies at all sizes, overridden per breakpoint below */
+.hero-decor-corner {
+  position: absolute;
+  width:  clamp(160px, 18vw, 280px);
+  height: clamp(160px, 18vw, 280px);
+  overflow: hidden;
+}
+
+/* Anchor each quadrant firmly to its own corner */
+.hero-decor-tl { top:    0; left:  0; }
+.hero-decor-tr { top:    0; right: 0; }
+.hero-decor-bl { bottom: 0; left:  0; }
+.hero-decor-br { bottom: 0; right: 0; }
+
+/* Tablet 641–1024px */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .hero-decor-corner {
+    width:  clamp(120px, 20vw, 220px);
+    height: clamp(120px, 20vw, 220px);
+  }
+}
+
+/* Mobile 481–640px */
+@media (min-width: 481px) and (max-width: 640px) {
+  .hero-decor-corner {
+    width:  clamp(90px, 22vw, 140px);
+    height: clamp(90px, 22vw, 140px);
+  }
+}
+
+/* Small phones ≤ 480px */
+@media (max-width: 480px) {
+  .hero-decor-corner {
+    width:  clamp(70px, 20vw, 110px);
+    height: clamp(70px, 20vw, 110px);
+  }
+}
+
 .invitation-hero-monogram {
   margin: 0;
   font-family: 'Cormorant Garamond', Georgia, serif;
@@ -1538,6 +1587,26 @@ body {
   text-shadow: 0 1px 18px rgba(0, 0, 0, .5);
   opacity: .92;
 }
+.invitation-hero-logo {
+  position: relative;
+  z-index: 2;
+}
+
+.invitation-hero-logo-img {
+  width: clamp(80px, 14vw, 160px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.45));
+}
+
+@media (max-width: 768px) {
+  .invitation-hero-logo-img { width: clamp(60px, 22vw, 100px); }
+}
+
+@media (max-width: 480px) {
+  .invitation-hero-logo-img { width: clamp(50px, 18vw, 80px); }
+}
+
 .invitation-hero-monogram span { color: #c08a4e; margin: 0 .18em; font-style: italic; letter-spacing: 0; }
 
 /* -------------------------------- stage --------------------------------- */
@@ -1592,32 +1661,17 @@ body {
   text-align: center;
 }
 
-.chest-shake-optin,
-.chest-shake-ready {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  padding: 5px 13px;
-  border: 1px solid rgba(214, 164, 104, .3);
-  border-radius: 999px;
-  background: rgba(255, 226, 180, .05);
-  color: #c9a374;
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 10px;
-  font-weight: 300;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: color .3s ease, border-color .3s ease, background .3s ease;
-}
-.chest-shake-ready { cursor: default; border-color: rgba(214, 164, 104, .18); }
-.chest-shake-optin:hover { color: #efd4a6; border-color: rgba(230, 190, 132, .55); background: rgba(255, 226, 180, .1); }
-
+/* Single small icon under the hint: a chevron while tap is the active
+   instruction, a sparkle while shake is - see chest-hint text logic in
+   TreasureChest.tsx, which keeps the two states mutually exclusive. */
 .chest-chevron { color: #a8794c; opacity: .8; animation: chest-chevron-drift 2.4s ease-in-out infinite; }
 @keyframes chest-chevron-drift {
   0%, 100% { transform: translateY(0); opacity: .55; }
   50% { transform: translateY(6px); opacity: .95; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chest-chevron { animation: none; }
 }
 
 @media (max-width: 480px) {
@@ -1762,106 +1816,168 @@ body {
 }
 
 /* ==========================================================================
-   Shared motion-consent card
-   Shown only on iOS / iPadOS, where motion access needs a permission prompt.
-   Asked once at the treasure chest; the RSVP and itinerary lantern inherit the
-   answer. Never blocks anything - tap and mouse fallbacks always work.
+   Motion-unlock sheet
+   The single motion-access request for the whole invitation. Mobile/tablet
+   only - TreasureChest.tsx never mounts <MotionUnlockSheet> on desktop, so
+   these rules simply never get used there, but they are also written to be
+   inert without JS-side gating (nothing here assumes a viewport width).
    ========================================================================== */
 
-.motion-consent {
+.motion-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: radial-gradient(120% 90% at 50% 100%, rgba(10, 2, 5, .78), rgba(10, 2, 5, .55) 60%, rgba(10, 2, 5, .32));
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.motion-sheet {
   position: fixed;
   left: 50%;
-  bottom: calc(18px + env(safe-area-inset-bottom));
-  z-index: 60;
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  width: min(calc(100vw - 28px), 430px);
-  padding: 14px 16px;
+  bottom: 0;
+  z-index: 71;
+  width: min(100%, 460px);
+  max-height: min(78vh, 560px);
+  padding: 10px 26px calc(28px + env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  border: 1px solid rgba(214, 178, 118, .36);
-  border-radius: 18px;
-  /* Deliberately a neutral warm dark rather than burgundy: this same card is
-     shown over the dark chest hero AND over the cream RSVP / itinerary pages. */
-  background: linear-gradient(160deg, rgba(60, 47, 37, .94), rgba(38, 28, 22, .96));
-  box-shadow: 0 18px 44px rgba(20, 10, 4, .42), inset 0 1px 0 rgba(255, 232, 190, .15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #f2dcbe;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+
+  /* Refined paper/card material: warm ivory over the wedding's burgundy, with
+     a soft gold rim rather than a flat browser-dialog edge. */
+  background:
+    radial-gradient(140% 100% at 50% 0%, rgba(255, 248, 234, .06), transparent 55%),
+    linear-gradient(175deg, #4a0f1c 0%, #3a0712 62%, #2c060e 100%);
+  border: 1px solid rgba(216, 178, 118, .32);
+  border-bottom: none;
+  border-radius: 26px 26px 0 0;
+  box-shadow:
+    0 -18px 60px rgba(0, 0, 0, .55),
+    inset 0 1px 0 rgba(255, 232, 190, .16),
+    inset 0 0 0 1px rgba(255, 232, 190, .04);
 }
 
-.motion-consent-gem {
+.motion-sheet-handle {
+  width: 40px;
+  height: 4px;
+  margin: 8px 0 6px;
+  border-radius: 999px;
+  background: rgba(224, 186, 128, .38);
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(220, 176, 112, .4);
-  background: radial-gradient(circle at 34% 30%, rgba(255, 232, 186, .3), rgba(150, 96, 44, .18));
-  color: #f0cf9a;
-  font-size: 14px;
 }
 
-.motion-consent-copy { flex: 1 1 auto; min-width: 0; }
-.motion-consent-copy p {
-  margin: 0;
+/* -------------------------- sparkles + ornament -------------------------- */
+
+.motion-sheet-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.motion-sheet-sparkle {
+  position: absolute;
+  color: #f0cf8e;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px rgba(240, 207, 142, .55));
+  animation: motion-sparkle-drift 3.6s ease-in-out infinite;
+}
+
+@keyframes motion-sparkle-drift {
+  0%, 100% { opacity: 0; transform: translateY(4px) scale(.8); }
+  35% { opacity: .85; transform: translateY(-2px) scale(1); }
+  70% { opacity: .3; transform: translateY(-8px) scale(.9); }
+}
+
+.motion-sheet-ornament {
+  width: 92px;
+  height: 32px;
+  margin-top: 14px;
+  color: #d8ac62;
+  opacity: .85;
+  flex: none;
+}
+
+/* ---------------------------------- copy ---------------------------------- */
+
+.motion-sheet-title {
+  margin: 16px 0 0;
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 16px;
+  font-size: clamp(24px, 6vw, 30px);
   font-weight: 500;
-  letter-spacing: .02em;
+  letter-spacing: .01em;
   color: #f7e6cc;
 }
-.motion-consent-copy small {
-  display: block;
-  margin-top: 2px;
+
+.motion-sheet-copy {
+  max-width: 320px;
+  margin: 10px 0 0;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 13.5px;
   font-weight: 300;
-  line-height: 1.45;
-  color: #c7a378;
+  line-height: 1.6;
+  color: #dcbe95;
 }
 
-.motion-consent-actions {
-  flex: none;
+/* -------------------------------- actions --------------------------------- */
+
+.motion-sheet-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-.motion-consent-actions button {
-  padding: 8px 13px;
-  border-radius: 999px;
-  border: 1px solid rgba(214, 170, 108, .3);
-  background: transparent;
-  color: #c7a378;
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: color .25s ease, border-color .25s ease, background .25s ease;
-}
-.motion-consent-actions button:hover { color: #f0d6ad; border-color: rgba(230, 190, 132, .55); }
-.motion-consent-actions button.is-primary {
-  border-color: transparent;
-  background: linear-gradient(180deg, #d8ac62, #b0813c);
-  color: #33110c;
-  font-weight: 600;
-}
-.motion-consent-actions button.is-primary:hover { background: linear-gradient(180deg, #e6bd76, #bd8d45); }
-.motion-consent-actions button:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(236, 200, 148, .7);
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 22px;
+  flex: none;
 }
 
-/* Narrow phones: stack so the buttons keep a comfortable tap size. */
-@media (max-width: 430px) {
-  .motion-consent { flex-wrap: wrap; gap: 10px 12px; }
-  .motion-consent-copy { flex: 1 1 calc(100% - 47px); }
-  .motion-consent-actions { flex: 1 1 100%; justify-content: flex-end; }
+.motion-sheet-btn {
+  flex: 1 1 0;
+  padding: 13px 16px;
+  border-radius: 999px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform .2s ease, background .25s ease, border-color .25s ease, color .25s ease;
+}
+.motion-sheet-btn:active { transform: scale(.97); }
+.motion-sheet-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(236, 200, 148, .75);
+}
+
+.motion-sheet-btn.is-ghost {
+  border: 1px solid rgba(214, 170, 108, .32);
+  background: transparent;
+  color: #c7a378;
+}
+.motion-sheet-btn.is-ghost:hover { color: #f0d6ad; border-color: rgba(230, 190, 132, .58); }
+
+.motion-sheet-btn.is-primary {
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, #e6c079, #b0813c);
+  color: #2c0f08;
+  box-shadow: 0 6px 18px rgba(176, 129, 60, .35);
+}
+.motion-sheet-btn.is-primary:hover { background: linear-gradient(180deg, #f0cf8e, #bd8d45); }
+
+/* Small phones: tighten padding so the sheet never crowds the chest above it. */
+@media (max-width: 380px) {
+  .motion-sheet { padding: 8px 20px calc(22px + env(safe-area-inset-bottom)); }
+  .motion-sheet-title { font-size: 22px; }
+  .motion-sheet-actions { flex-direction: column; gap: 10px; }
+  .motion-sheet-btn { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .motion-consent-actions button { transition: none; }
+  .motion-sheet-sparkle { animation: none; opacity: .5; }
+  .motion-sheet-btn { transition: none; }
 }
