@@ -24,12 +24,15 @@ interface Props {
   onDismiss: () => void;
 }
 
+// Positioned within the compact top decorative band only (see
+// .motion-sheet-sparkles), so they always sit around the ornament and never
+// drift onto the title, copy, or buttons on any screen size.
 const SPARKLE_POSITIONS = [
-  { left: '12%', top: '18%', delay: 0 },
-  { left: '82%', top: '24%', delay: 0.5 },
-  { left: '28%', top: '72%', delay: 1.1 },
-  { left: '70%', top: '68%', delay: 0.8 },
-  { left: '50%', top: '10%', delay: 1.6 },
+  { left: '10%', top: '55%', delay: 0 },
+  { left: '88%', top: '35%', delay: 0.5 },
+  { left: '22%', top: '15%', delay: 1.1 },
+  { left: '78%', top: '70%', delay: 0.8 },
+  { left: '50%', top: '5%', delay: 1.6 },
 ] as const;
 
 const sheetSpring = { type: 'spring' as const, stiffness: 340, damping: 32, mass: 0.9 };

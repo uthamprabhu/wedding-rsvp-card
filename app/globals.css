@@ -1837,17 +1837,24 @@ body {
   left: 50%;
   bottom: 0;
   z-index: 71;
-  width: min(100%, 460px);
-  max-height: min(78vh, 560px);
-  padding: 10px 26px calc(28px + env(safe-area-inset-bottom));
+  /* True side gutters on every phone width, capped so it reads as a floating
+     card (not edge-to-edge) once there is enough room - and centred as a
+     proper modal card on tablet rather than pinned to the bottom edge. */
+  width: calc(100% - 32px);
+  max-width: 400px;
+  max-height: min(80vh, 540px);
+  padding: 8px 22px calc(24px + env(safe-area-inset-bottom));
+  margin-bottom: max(14px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   touch-action: none;
   cursor: grab;
+  box-sizing: border-box;
 
   /* Refined paper/card material: warm ivory over the wedding's burgundy, with
      a soft gold rim rather than a flat browser-dialog edge. */
@@ -1855,8 +1862,7 @@ body {
     radial-gradient(140% 100% at 50% 0%, rgba(255, 248, 234, .06), transparent 55%),
     linear-gradient(175deg, #4a0f1c 0%, #3a0712 62%, #2c060e 100%);
   border: 1px solid rgba(216, 178, 118, .32);
-  border-bottom: none;
-  border-radius: 26px 26px 0 0;
+  border-radius: 24px;
   box-shadow:
     0 -18px 60px rgba(0, 0, 0, .55),
     inset 0 1px 0 rgba(255, 232, 190, .16),
@@ -1864,9 +1870,9 @@ body {
 }
 
 .motion-sheet-handle {
-  width: 40px;
+  width: 38px;
   height: 4px;
-  margin: 8px 0 6px;
+  margin: 6px 0 4px;
   border-radius: 999px;
   background: rgba(224, 186, 128, .38);
   flex: none;
@@ -1874,10 +1880,17 @@ body {
 
 /* -------------------------- sparkles + ornament -------------------------- */
 
+/* Confined to the top decorative band (ornament + a little air above the
+   title) rather than the full card, so a sparkle can never land on top of the
+   copy or the buttons regardless of how tall the card ends up being. */
 .motion-sheet-sparkles {
   position: absolute;
-  inset: 0;
+  left: 6%;
+  right: 6%;
+  top: 6px;
+  height: 92px;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .motion-sheet-sparkle {
@@ -1895,9 +1908,11 @@ body {
 }
 
 .motion-sheet-ornament {
-  width: 92px;
-  height: 32px;
-  margin-top: 14px;
+  position: relative;
+  z-index: 1;
+  width: 84px;
+  height: 28px;
+  margin-top: 12px;
   color: #d8ac62;
   opacity: .85;
   flex: none;
@@ -1906,45 +1921,54 @@ body {
 /* ---------------------------------- copy ---------------------------------- */
 
 .motion-sheet-title {
-  margin: 16px 0 0;
+  position: relative;
+  z-index: 1;
+  margin: 14px 0 0;
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(24px, 6vw, 30px);
+  font-size: clamp(21px, 5.6vw, 28px);
   font-weight: 500;
   letter-spacing: .01em;
+  line-height: 1.15;
   color: #f7e6cc;
 }
 
 .motion-sheet-copy {
-  max-width: 320px;
-  margin: 10px 0 0;
+  position: relative;
+  z-index: 1;
+  max-width: 300px;
+  margin: 8px 0 0;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 300;
-  line-height: 1.6;
+  line-height: 1.55;
   color: #dcbe95;
 }
 
 /* -------------------------------- actions --------------------------------- */
 
 .motion-sheet-actions {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  max-width: 320px;
-  margin-top: 22px;
+  max-width: 300px;
+  margin-top: 18px;
   flex: none;
 }
 
 .motion-sheet-btn {
   flex: 1 1 0;
-  padding: 13px 16px;
+  min-width: 0;
+  padding: 12px 14px;
   border-radius: 999px;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: .08em;
+  letter-spacing: .06em;
   text-transform: uppercase;
+  white-space: nowrap;
   cursor: pointer;
   transition: transform .2s ease, background .25s ease, border-color .25s ease, color .25s ease;
 }
@@ -1969,12 +1993,32 @@ body {
 }
 .motion-sheet-btn.is-primary:hover { background: linear-gradient(180deg, #f0cf8e, #bd8d45); }
 
-/* Small phones: tighten padding so the sheet never crowds the chest above it. */
-@media (max-width: 380px) {
-  .motion-sheet { padding: 8px 20px calc(22px + env(safe-area-inset-bottom)); }
-  .motion-sheet-title { font-size: 22px; }
-  .motion-sheet-actions { flex-direction: column; gap: 10px; }
+/* Very small phones (iPhone SE and similar): shave padding and type size a
+   touch further, and stack the buttons so tap targets stay comfortable. */
+@media (max-width: 360px) {
+  .motion-sheet { width: calc(100% - 24px); padding: 6px 16px calc(20px + env(safe-area-inset-bottom)); }
+  .motion-sheet-title { font-size: 20px; }
+  .motion-sheet-copy { font-size: 12.5px; }
+  .motion-sheet-actions { flex-direction: column; gap: 8px; max-width: 100%; }
   .motion-sheet-btn { width: 100%; }
+}
+
+/* Tablets (iPad, Android tablets): the sheet stops behaving like a bottom
+   sheet pinned to the screen edge and becomes a centred floating card, which
+   reads correctly on a large touch screen instead of looking like a stray
+   phone-sized strip glued to the bottom. */
+@media (min-width: 600px) {
+  .motion-sheet {
+    bottom: 50%;
+    max-width: 440px;
+    padding: 14px 34px calc(30px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 50%);
+    border-radius: 28px;
+  }
+  .motion-sheet-handle { display: none; }
+  .motion-sheet-title { font-size: 30px; }
+  .motion-sheet-copy { max-width: 340px; font-size: 14px; }
+  .motion-sheet-actions { max-width: 340px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
