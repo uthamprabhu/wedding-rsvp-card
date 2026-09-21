@@ -1,237 +1,205 @@
-# Farzeen & Bilal Wedding RSVP
+# Farzeen & Bilal — Wedding Invitation
 
-A beautiful, luxury Muslim-themed wedding invitation and RSVP system built with Next.js 16 and Supabase.
+A luxury Muslim wedding invitation and RSVP system, built with Next.js 16 and Supabase.
+
+**Live:** [farzeen-bilal.vercel.app](https://farzeen-bilal.vercel.app/)
 
 ## ✨ Features
 
-### Public Experience
-- **Luxury Digital Invitation** - Elegant card with Muslim wedding theme
-- **Interactive Itinerary** - Timeline of wedding events (Mehndi, Nikah, Walima)
-- **RSVP Form** - Guest registration with accommodation preferences
-- **Confirmation Page** - Celebratory confirmation with confetti animation
-- **Realistic Butterflies** - WebGL-powered 3D butterflies
-- **Smooth Animations** - Framer Motion with mobile optimizations
-- **Responsive Design** - Optimized for mobile, tablet, and desktop
+### Guest Experience
+
+- **Treasure chest opening** — a 3D chest (react-three-fiber / Three.js) that guests tap or shake open to reveal the invitation, with a CSS-only fallback for devices without WebGL
+- **Luxury digital invitation** — cream/burgundy Mughal-inspired design, couple portraits, family invitation, countdown to the big day, save-the-date
+- **Interactive itinerary** — the three wedding events (Fabi Mehandi, Haldi & Sangeeth, The Fabi Big Day) with dates, venue and map
+- **RSVP form** — name, phone, email, day-attendance selector, party size, accommodation, all validated with Zod on both client and server
+- **Duplicate-entry protection** — a phone number can only RSVP once
+- **Confirmation page** — recaps exactly what was submitted, including which days the guest is attending
+- **Slide-to-confirm** — an accessible (keyboard + screen-reader operable), swipe-to-submit control instead of a plain button
+- **Background music** — one persistent audio instance across the whole site, autoplay-on-gesture, on/off toggle, remembers the guest's choice
+- **Ambient effects** — WebGL butterflies and lantern/particle backdrops, all GPU-conscious and paused when off-screen or the tab is hidden
+- **PWA installable** — add-to-home-screen on Android/iOS/desktop, custom generated icons and manifest
+- **Fully responsive** — mobile-first, with dedicated layouts for tablet and desktop
 
 ### Admin Panel
-- **Secure Login** - Password-protected with HttpOnly session cookies
-- **Dashboard Stats** - Total responses, guests, accommodation needs, trends
-- **RSVP Management** - Search, filter, and sort all submissions
-- **Mobile Responsive** - Table view on desktop, card layout on mobile
-- **Elegant Theme** - Matches wedding aesthetic
+
+- **Secure login** — password-protected, HttpOnly session cookie, middleware-enforced route protection
+- **Dashboard stats** — total responses, total guests, accommodation needed, average party size, responses in the last 7 days
+- **Per-event attendance** — guest counts and response counts broken down by each of the three wedding days
+- **Filtering** — search by name/phone/email, filter by accommodation need, filter by which day(s) a guest is attending (match *any* or *all* selected days), sort by date/name/guest count
+- **Responsive table/cards** — full table on desktop, comfortable card layout on tablet and mobile
+- **Streaming + skeletons** — dashboard data streams in behind a themed loading skeleton; a dedicated error boundary with retry on failure
 
 ## 🛠️ Tech Stack
 
-### Frontend
-- **Next.js 16** - React framework with App Router
-- **TypeScript** - Type-safe code
-- **Tailwind CSS 4** - Utility-first styling
-- **Framer Motion** - Smooth animations
-- **Three.js** - 3D butterfly animations
-- **Paper Design Shaders** - Textured backgrounds
+**Frontend**
+- [Next.js 16](https://nextjs.org/) (App Router, Turbopack)
+- [React 19](https://react.dev/) + TypeScript
+- [Tailwind CSS 4](https://tailwindcss.com/)
+- [Framer Motion](https://www.framer.com/motion/) — page/element animation
+- [Three.js](https://threejs.org/) + [react-three-fiber](https://docs.pmnd.rs/react-three-fiber) + [drei](https://github.com/pmndrs/drei) — the treasure chest and butterflies
+- [@tsparticles](https://particles.js.org/) — ambient sparkle/decor particles
+- [@paper-design/shaders-react](https://www.npmjs.com/package/@paper-design/shaders-react) — the paper-texture background shader
+- [Zod](https://zod.dev/) — form and API validation
+- [Lenis](https://github.com/darkroomengineering/lenis) — smooth scrolling
+- [Lucide React](https://lucide.dev/) — icons
 
-### Backend
-- **Supabase** - PostgreSQL database with real-time capabilities
-- **Server Actions** - Secure API routes
-- **Row Level Security** - Database-level security
+**Backend / Data**
+- [Supabase](https://supabase.com/) (PostgreSQL) — RSVP storage, service-role key for admin queries
+- Next.js Route Handlers — `/api/rsvp/submit`, `/api/admin/login`, `/api/admin/logout`
+- Next.js Middleware — admin route protection
 
-### UI Components
-- **Radix UI** - Accessible primitives (Dialog, Switch, Slider)
-- **Lucide React** - Beautiful icons
-- **Canvas Confetti** - Celebration effects
+**Fonts**
+- Cormorant Garamond (`next/font/google`) — editorial headings
+- Geist Sans / Geist Mono (`next/font/google`) — UI, labels, body copy
+- Brittany Signature (self-hosted WOFF2) — the couple's names, used sparingly
+
+**Analytics & Tooling**
+- [@vercel/analytics](https://vercel.com/docs/analytics) — pageview analytics (active once deployed on Vercel)
+- ESLint 9 (flat config) + TypeScript strict mode
 
 ## 📦 Installation
 
 ```bash
-# Clone the repository
 git clone <your-repo-url>
 cd wedding-rsvp-card
 
-# Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.local.example .env.local
-# Edit .env.local with your credentials
+# Copy and fill in your own values
+cp .env.local.example .env.local   # or create .env.local manually — see below
 
-# Run development server
-npm run dev
+npm run dev      # http://localhost:3000
+```
 
-# Build for production
-npm run build
-npm start
+```bash
+npm run build    # production build
+npm start        # serve the production build
+npm run lint      # ESLint
 ```
 
 ## 🔑 Environment Variables
 
-Create `.env.local` in the root directory:
+Create `.env.local` in the project root:
 
 ```env
-# Supabase - Public (client-side safe)
+# Supabase — public, safe to expose client-side
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
 
-# Supabase - Server-side only (keep secret!)
+# Supabase — server-side only, never expose this
 SUPABASE_SECRET_KEY=your_service_role_key
 
-# Admin Panel Access
+# Admin panel password
 ADMIN_PASSWORD=your_secure_password
 ```
 
 ## 🗄️ Database Schema
 
-Run this SQL in Supabase SQL Editor:
+Run in the Supabase SQL editor:
 
 ```sql
--- Create RSVPs table
-CREATE TABLE IF NOT EXISTS public.rsvps (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  phone TEXT NOT NULL,
-  email TEXT,
-  guest_count INTEGER NOT NULL CHECK (guest_count >= 1 AND guest_count <= 10),
-  accommodation_needed BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+create table if not exists public.rsvps (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  phone text not null unique,                 -- one RSVP per phone number
+  email text,
+  guest_count integer not null check (guest_count between 1 and 10),
+  accommodation_needed boolean not null default false,
+  days_attending text[] not null default '{}', -- e.g. {day1,day3}
+  created_at timestamp with time zone default now()
 );
 
--- Create index for performance
-CREATE INDEX IF NOT EXISTS idx_rsvps_created_at ON public.rsvps(created_at DESC);
+create index if not exists idx_rsvps_created_at on public.rsvps (created_at desc);
 
--- Enable RLS
-ALTER TABLE public.rsvps ENABLE ROW LEVEL SECURITY;
+alter table public.rsvps enable row level security;
 
--- Grant permissions
-GRANT ALL ON public.rsvps TO service_role;
-GRANT ALL ON public.rsvps TO postgres;
-GRANT INSERT ON public.rsvps TO anon;
+grant all on public.rsvps to service_role;
+grant all on public.rsvps to postgres;
+grant insert on public.rsvps to anon;
 ```
 
-## 🚀 Deployment
+`days_attending` stores canonical ids (`day1`, `day2`, `day3`) mapped to real event names/dates in `lib/wedding-days.ts` — the single source of truth used by both the RSVP form and the admin dashboard.
 
-### Vercel (Recommended)
+## 🚀 Deployment (Vercel)
 
-1. **Push to GitHub**
 ```bash
 git add .
-git commit -m "Wedding RSVP system"
+git commit -m "Deploy"
 git push origin main
 ```
 
-2. **Deploy to Vercel**
-   - Go to [vercel.com](https://vercel.com)
-   - Import your repository
-   - Add environment variables
-   - Deploy!
+1. Import the repo at [vercel.com](https://vercel.com)
+2. Add the four environment variables from `.env.local` in **Project Settings → Environment Variables**
+3. Deploy
 
-3. **Add Environment Variables in Vercel**
-   - Go to Project Settings → Environment Variables
-   - Add all variables from `.env.local`
+Live at **[farzeen-bilal.vercel.app](https://farzeen-bilal.vercel.app/)**.
 
 ## 📱 Routes
 
-| Route | Description | Type |
-|-------|-------------|------|
-| `/` | Landing/Invitation page | Public |
-| `/itinerary` | Wedding event timeline | Public |
+| Route | Description | Access |
+|---|---|---|
+| `/` | Treasure chest → invitation landing | Public |
+| `/itinerary` | Wedding events timeline | Public |
 | `/rsvp` | RSVP form | Public |
-| `/rsvp/confirmation` | Confirmation page | Public |
-| `/admin` | Admin login | Protected |
-| `/admin/dashboard` | RSVP management | Protected |
+| `/rsvp/confirmation` | Submission confirmation | Public |
+| `/admin` | Admin login | Public (form only) |
+| `/admin/dashboard` | RSVP management | Protected (middleware) |
+| `/api/rsvp/submit` | RSVP submission endpoint | Public POST |
+| `/api/admin/login` | Admin auth | Public POST |
+| `/api/admin/logout` | Admin session clear | Protected POST |
 
-## 🎨 Theme & Design
+## 🎨 Theme
 
-### Colors
-- **Background**: `#ebe1d6` (Elegant cream)
-- **Primary**: `#a6814e` (Luxury gold)
-- **Text**: `#433b34` (Deep brown)
+**Colors**
+- Background (cream): `#ebe1d6`
+- Gold accent: `#a6814e`
+- Ink / body text: `#433b34`
+- Deep burgundy (invitation cover): `#3A0712`
 
-### Typography
-- **Headings**: Cormorant Garamond (serif)
-- **Body**: Inter (sans-serif)
+**Typography**
+- Headings: Cormorant Garamond
+- Body / UI: Geist Sans
+- Names (accent only): Brittany Signature
 
-### Animations
-- **Mobile**: Simplified, `once: true` viewport triggers
-- **Desktop**: Full parallax and scroll-linked effects
-- **Performance**: Hardware-accelerated, 60fps target
+**Icons & PWA**
+- `app/icon.tsx` / `app/apple-icon.tsx` — generated F&B monogram favicon and Apple touch icon (`next/og`)
+- `app/opengraph-image.tsx` — generated Open Graph share card, no static image needed
+- `app/manifest.ts` — PWA manifest for install-to-home-screen
 
-## 📊 Performance Optimizations
+## ⚡ Performance Notes
 
-- ✅ **Lazy loading** - Heavy components load on demand
-- ✅ **Mobile optimizations** - Reduced animations, no parallax
-- ✅ **Image optimization** - Next.js Image component
-- ✅ **Code splitting** - Automatic route-based splitting
-- ✅ **CSS optimization** - will-change hints, hardware acceleration
-- ✅ **Server-side rendering** - Fast initial page loads
+- Images served as WebP/AVIF via `next/image`, sized per breakpoint
+- Heavy components (`TreasureChestScene`, `RealisticButterflies`, particle backdrops) are dynamically imported and deferred past first paint
+- The chest's WebGL canvas is sized to fit its full animation envelope (not just the resting chest) — nothing clips off-frustum, and a smaller canvas footprint means less fragment shading, not more
+- `frameloop="demand"` + capped device pixel ratio on all Three.js canvases
+- Ambient effects pause via `IntersectionObserver` / `visibilitychange` when off-screen or the tab is hidden
+- Route-level skeleton loaders (`loading.tsx`) and streamed Suspense boundaries on the admin dashboard
+- Self-hosted fonts with `font-display: swap` and a `<link rel="preload">` for the signature font
 
-## 🔒 Security Features
+## 🔒 Security Notes
 
-### RSVP Submission
-- Server-side validation
-- API route with service_role key
-- Input sanitization
-- Rate limiting via Supabase RLS
-
-### Admin Panel
-- Password authentication (bcrypt alternative via env)
-- HttpOnly session cookies
-- Secure flag in production
-- SameSite CSRF protection
-- Session expiry (24 hours)
-- Middleware route protection
-
-## 📝 Scripts
-
-```bash
-# Development
-npm run dev          # Start dev server (localhost:3000)
-
-# Production
-npm run build        # Build for production
-npm start            # Start production server
-
-# Code Quality
-npm run lint         # Run ESLint
-```
+- RSVP submissions are validated with Zod on both the client (fast feedback) and the server (source of truth) — the server never trusts client input
+- Duplicate phone numbers are rejected both at the application layer and via a database unique constraint (belt-and-braces against race conditions)
+- Admin session is an HttpOnly, SameSite cookie; the dashboard route is gated by `middleware.ts`, not just a client-side check
+- The Supabase service-role key is used server-side only and is never sent to the browser
+- Search input on the admin dashboard is sanitized before being interpolated into a PostgREST filter string
 
 ## 🐛 Troubleshooting
 
-### RSVP Submission Fails
-- Verify `SUPABASE_SECRET_KEY` is set
-- Check `rsvps` table exists in Supabase
-- Ensure service_role has permissions
+**RSVP submission fails** — confirm `SUPABASE_SECRET_KEY` is set, the `rsvps` table exists with the schema above, and the `days_attending` column exists (older tables created before this feature will need it added via `alter table`).
 
-### Admin Login Not Working
-- Verify `ADMIN_PASSWORD` in environment variables
-- Clear browser cookies
-- Check browser console for errors
+**Admin login fails** — confirm `ADMIN_PASSWORD` is set in the environment actually running the app (not just `.env.local` if deployed), and clear cookies if a stale session is stuck.
 
-### Butterflies Not Appearing
-- Check browser console for WebGL errors
-- Verify `/butterfly.png` exists in `public/`
-- Some browsers don't support WebGL (fallback: no butterflies)
+**Music doesn't autoplay** — expected browser behaviour. Autoplay without a prior gesture is blocked by Chrome/Safari; the first tap anywhere on the page (including opening the chest) unlocks it. The toggle always reflects the real playback state, not just intent.
 
-### Performance Issues on Mobile
-- Animations automatically simplified on mobile
-- Parallax effects disabled below 768px
-- Check Chrome DevTools Performance tab
+**Treasure chest / butterflies don't render** — check the browser console for WebGL errors. Devices without WebGL automatically get the CSS-only chest fallback; there's no butterfly fallback, they simply don't render (harmless).
+
+**Build fails with a CSS parse error mentioning `@layer`** — check `app/globals.css` for a UTF-8 BOM at the top of the file; some editors/tools reintroduce it. Strip it and rebuild.
 
 ## 📄 License
 
-Private project for Farzeen & Bilal's wedding.
-
-## 👨‍💻 Built With
-
-Created with ❤️ using:
-- Next.js 16.3.5
-- React 19.2.8
-- TypeScript 5
-- Supabase
-- Framer Motion 13
-- Three.js
-- Tailwind CSS 4
+Private project — built for Farzeen & Bilal's wedding. Not for reuse or redistribution.
 
 ---
 
-**For support or questions, contact the development team.**
-
-Made with love for Farzeen & Bilal's special day 💍✨
+Made with ♥ by [UNSP](https://wa.me/919633693160)
