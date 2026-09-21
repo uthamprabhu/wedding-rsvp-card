@@ -306,7 +306,7 @@ export default function TreasureChestScene({
       className="chest-canvas"
       frameloop="demand"
       dpr={dpr}
-      shadows={quality === 'high' ? 'soft' : false}
+      shadows={quality === 'high' ? true : false}
       gl={{
         alpha: true,
         antialias: quality === 'high',

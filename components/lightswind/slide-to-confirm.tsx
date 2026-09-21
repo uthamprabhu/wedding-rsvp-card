@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useId, useState, useRef } from "react";
 import { motion, useAnimation, useMotionValue, useTransform } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,9 @@ interface SlideToConfirmProps {
   resetSignal?: number;
 }
 
+/** Fraction of the track a keyboard press moves per Arrow key tap. */
+const KEYBOARD_STEP = 0.12;
+
 export function SlideToConfirm({
   text = "Slide to confirm",
   successText = "Confirmed",
@@ -42,6 +45,7 @@ export function SlideToConfirm({
   const containerRef = useRef<HTMLDivElement>(null);
   const trackWidth = width - height; // Total drag distance
   const thumbSize = height - 8; // Margin inside
+  const labelId = useId();
 
   const x = useMotionValue(0);
   const controls = useAnimation();
@@ -51,37 +55,81 @@ export function SlideToConfirm({
   // Background gradient progresses as you drag
   const bgWidth = useTransform(x, [0, trackWidth], [height, width]);
 
+  /** Shared "the slide/press committed" path — used by both drag and keyboard. */
+  const commit = async () => {
+    controls.start({ x: trackWidth, transition: { type: "spring", stiffness: 400, damping: 30 } });
+    setState("loading");
+
+    try {
+      await onConfirm();
+      setState("success");
+    } catch {
+      // Reset on failure. We deliberately swallow here rather than re-throw:
+      // Framer Motion does not await `onDragEnd`, so a re-throw would surface
+      // as an unhandled promise rejection. The parent owns error reporting.
+      setState("idle");
+      x.set(0);
+      controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
+    }
+  };
+
   const handleDragEnd = async () => {
     if (state !== "idle" || disabled) return;
 
     if (x.get() >= trackWidth * 0.9) {
-      // Completed drag
-      controls.start({ x: trackWidth, transition: { type: "spring", stiffness: 400, damping: 30 } });
-      setState("loading");
-
-      try {
-        await onConfirm();
-        setState("success");
-      } catch {
-        // Reset on failure. We deliberately swallow here rather than re-throw:
-        // Framer Motion does not await `onDragEnd`, so a re-throw would surface
-        // as an unhandled promise rejection. The parent owns error reporting.
-        setState("idle");
-        x.set(0);
-        controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
-      }
+      await commit();
     } else {
       // Reset if not fully dragged
       controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
     }
   };
 
-  const handleReset = () => {
-    if (state === "success") {
-      setState("idle");
-      x.set(0);
-      controls.start({ x: 0 });
+  /** Keyboard equivalent of dragging: Arrow keys nudge, Enter/Space commits
+   *  from wherever the thumb currently sits. Without this, a keyboard or
+   *  screen-reader user has no way to operate the control at all — the only
+   *  other path into `onConfirm` is the surrounding <form>'s Enter-to-submit,
+   *  which is unlabelled and bypasses this component's own gating. */
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (state !== "idle" || disabled) return;
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      x.set(trackWidth);
+      void commit();
+      return;
     }
+
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+      e.preventDefault();
+      x.set(Math.min(trackWidth, x.get() + trackWidth * KEYBOARD_STEP));
+      return;
+    }
+
+    if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+      e.preventDefault();
+      x.set(Math.max(0, x.get() - trackWidth * KEYBOARD_STEP));
+      return;
+    }
+
+    if (e.key === "Home") {
+      e.preventDefault();
+      x.set(0);
+      return;
+    }
+
+    if (e.key === "End") {
+      e.preventDefault();
+      x.set(trackWidth);
+    }
+  };
+
+  const handleReset = () => {
+    // Once confirmed, the RSVP is already saved server-side. A stray tap here
+    // previously reverted the UI to "Slide to confirm your place" with no
+    // guard, which reads as "it failed" for something that already
+    // succeeded — the guest would resubmit and hit a duplicate-entry error
+    // on their own first, successful attempt. Success is now terminal.
+    return;
   };
 
   /* Parent-driven reset: snap back to idle whenever `resetSignal` changes.
@@ -104,8 +152,8 @@ export function SlideToConfirm({
     <div
       ref={containerRef}
       className={cn(
-        "relative flex items-center justify-center overflow-hidden rounded-full border bg-muted select-none",
-        state === "success" ? "cursor-pointer border-green-500/50" : "",
+        "relative flex items-center justify-center overflow-hidden rounded-full border border-border bg-[#f8f0e2] select-none",
+        state === "success" ? "border-green-500/50" : "",
         disabled ? "opacity-50 cursor-not-allowed" : "",
         className
       )}
@@ -120,8 +168,8 @@ export function SlideToConfirm({
         className="absolute left-0 top-0 h-full rounded-full"
         style={{
           width: state === "success" ? width : bgWidth,
-          backgroundColor: state === "success" ? "#22c55e" : "var(--primary)",
-          opacity: state === "success" ? 0.1 : 0.05,
+          backgroundColor: state === "success" ? "#22c55e" : "#a6814e",
+          opacity: state === "success" ? 0.14 : 0.1,
         }}
         animate={{ width: state === "success" ? width : undefined }}
         transition={{ duration: 0.3 }}
@@ -129,6 +177,7 @@ export function SlideToConfirm({
 
       {/* Main Text */}
       <motion.span
+        id={labelId}
         className={cn(
           "absolute font-medium text-sm z-0",
           state === "success" ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
@@ -151,8 +200,17 @@ export function SlideToConfirm({
         {successText}
       </motion.span>
 
-      {/* Draggable Thumb */}
+      {/* Draggable Thumb — also a keyboard-operable slider control */}
       <motion.div
+        role="slider"
+        tabIndex={disabled || state !== "idle" ? -1 : 0}
+        aria-label={state === "success" ? successText : text}
+        aria-labelledby={labelId}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={state === "success" ? 100 : Math.round((x.get() / trackWidth) * 100)}
+        aria-disabled={disabled}
+        onKeyDown={handleKeyDown}
         drag={state === "idle" && !disabled ? "x" : false}
         dragConstraints={{ left: 0, right: trackWidth }}
         dragElastic={0.05}
@@ -160,6 +218,7 @@ export function SlideToConfirm({
         onDragEnd={handleDragEnd}
         className={cn(
           "absolute left-1 z-10 flex cursor-grab items-center justify-center rounded-full bg-background shadow-md active:cursor-grabbing",
+          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a6814e]",
           state !== "idle" && "cursor-default",
           disabled && "cursor-not-allowed opacity-50"
         )}

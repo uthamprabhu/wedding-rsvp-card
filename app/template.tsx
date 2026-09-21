@@ -1,20 +1,13 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
-
+/**
+ * Route template — intentionally no transition wrapper.
+ *
+ * A previous version wrapped every page in a Framer Motion opacity fade,
+ * which caused a black flash on navigation: the new route rendered at
+ * opacity:0 over the dark invitation background while the loading.tsx
+ * file was invisible underneath it. Each page owns its own entrance
+ * animation, and the loading.tsx files for /rsvp and /itinerary show
+ * immediately at full opacity so the user always sees something.
+ */
 export default function Template({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-
-  return (
-    <motion.div
-      key={pathname}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5, ease: 'easeInOut' }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <>{children}</>;
 }

@@ -165,6 +165,13 @@ export default function RSVPPage() {
     }));
 
   const confirmRsvp = async (): Promise<void> => {
+    // Guards against a double submit: the form's onSubmit fires on Enter from
+    // any text field, bypassing the slider entirely. Without this, pressing
+    // Enter twice quickly (or Enter then a completed slide) fires two POSTs —
+    // the second always fails with "you already submitted" on the guest's
+    // own first attempt, which reads as broken from their side.
+    if (isSubmitting) return;
+
     closeError();
     setIsSubmitting(true);
 
@@ -214,6 +221,7 @@ export default function RSVPPage() {
         email: formData.email.trim(),
         guestCount: formData.guestCount.toString(),
         accommodation: formData.accommodation,
+        days: formData.daysAttending.join(','),
       });
 
       setTimeout(() => router.push(`/rsvp/confirmation?${params.toString()}`), 400);

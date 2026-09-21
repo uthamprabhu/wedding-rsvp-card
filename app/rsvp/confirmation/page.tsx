@@ -3,11 +3,12 @@
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Check, Mail, Users, BedDouble, ArrowLeft, Heart, ExternalLink } from 'lucide-react';
+import { Check, Mail, Users, BedDouble, ArrowLeft, Heart, ExternalLink, CalendarDays } from 'lucide-react';
 import PaperBackground from '@/components/PaperBackground';
 import CelestialBackdrop, { AdaptiveLantern } from '@/components/CelestialBackdrop';
 import InvitationParticles from '@/components/InvitationParticles';
 import dynamic from 'next/dynamic';
+import { formatDays, parseDayParam } from '@/lib/wedding-days';
 
 const RsvpCelebration = dynamic(() => import('@/components/RsvpCelebration'), {
   ssr: false,
@@ -22,6 +23,7 @@ function ConfirmationContent() {
   const email = searchParams.get('email') || '';
   const guestCount = parseInt(searchParams.get('guestCount') || '1', 10);
   const accommodation = searchParams.get('accommodation') || '';
+  const daysAttending = parseDayParam(searchParams.get('days') ?? undefined);
 
   useEffect(() => {
     if (!name || !phone) {
@@ -50,6 +52,11 @@ function ConfirmationContent() {
     { icon: Users, label: 'Your party', value: `${data.guestCount} ${data.guestCount === 1 ? 'guest' : 'guests'}` },
     { icon: BedDouble, label: 'Accommodation', value: data.accommodation === 'yes' ? 'Assistance requested' : 'Not needed' },
   ];
+  if (daysAttending.length > 0) {
+    // Confirms back what the guest actually selected — they picked which of
+    // the three events they'll attend, and had no way to verify it stuck.
+    details.unshift({ icon: CalendarDays, label: 'Attending', value: formatDays(daysAttending) });
+  }
   if (data.email.trim()) {
     details.splice(1, 0, { icon: Mail, label: 'Confirmation email', value: data.email });
   }
@@ -114,15 +121,6 @@ function ConfirmationContent() {
               Made with <Heart size={11} className="zorscode-heart" aria-hidden="true" /> by <span className="zorscode-name">UNSP<ExternalLink size={10} className="zorscode-ext" aria-label="Open chat" strokeWidth={2} /></span>
             </a>
           </div>
-
-          <a
-            href="https://wa.me/919633693160"
-            target="_blank"
-            rel="noreferrer"
-            className="zorscode-credit"
-          >
-            Made with <Heart size={11} className="zorscode-heart" aria-hidden="true" /> by <span className="zorscode-name">UNSP<ExternalLink size={10} className="zorscode-ext" aria-label="Open chat" strokeWidth={2} /></span>
-          </a>
         </motion.div>
       </div>
     </main>
