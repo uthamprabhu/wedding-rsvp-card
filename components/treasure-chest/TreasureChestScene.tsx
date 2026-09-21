@@ -43,6 +43,8 @@ interface Props {
   boosted: boolean;
   reducedMotion: boolean;
   onCompleted: () => void;
+  /** Fired once the WebGL context exists, so the loader can be dismissed. */
+  onReady?: () => void;
 }
 
 /* ------------------------------------------------------------------ *
@@ -107,14 +109,41 @@ function RenderDriver({ fps, onSlow }: { fps: number; onSlow: () => void }) {
  * Responsive fit
  * ------------------------------------------------------------------ */
 
+/**
+ * Horizontal footprint: chest width (CHEST.W = 2.0) plus a little side margin.
+ */
+const SPAN_X = 2.15;
+
+/**
+ * Vertical envelope of the *entire reveal*, in chest-local units — not just the
+ * closed chest.
+ *
+ *   logo crown   ≈ Y_CLEAR (2.0) + half the logo plane at settle scale (~0.81)
+ *                  − the align offset (0.825)               →  about +2.0
+ *   sunken floor ≈ align offset (−0.825) − the settle descent (−0.9)
+ *                                                            →  about −1.73
+ *
+ * so the reveal needs roughly 3.8 units end to end.
+ *
+ * This previously budgeted 1.75 — the height of the closed chest alone. A WebGL
+ * canvas cannot draw outside its own bounds, so the lid swing, the rising logo
+ * and the chest's descent were all rendered past the frustum edge and simply
+ * never seen. Sizing to the full envelope keeps every beat on screen, and as a
+ * bonus the chest covers fewer fragments, so it is marginally *cheaper* to
+ * shade rather than more expensive.
+ */
+const SPAN_Y = 3.8;
+
 function useFitScale() {
   const viewport = useThree((s) => s.viewport);
   return useMemo(() => {
-    // Width keeps the chest comfortable on small phones (it never exceeds ~78%
-    // of the frame); height reserves the headroom the logo needs to rise into.
-    const byWidth = (viewport.width * 0.78) / 2.15;
-    const byHeight = (viewport.height * 0.66) / 1.75;
-    return THREE.MathUtils.clamp(Math.min(byWidth, byHeight), 0.4, 1.15);
+    // Width still guards narrow phones so the chest never kisses the edges.
+    const byWidth = (viewport.width * 0.82) / SPAN_X;
+    // Height budgets for the whole animation, not just the resting chest.
+    const byHeight = (viewport.height * 0.94) / SPAN_Y;
+    // Floor lowered from 0.4: the taller budget legitimately lands below it on
+    // short landscape viewports, and clamping there would reintroduce clipping.
+    return THREE.MathUtils.clamp(Math.min(byWidth, byHeight), 0.3, 1.15);
   }, [viewport.width, viewport.height]);
 }
 
@@ -262,6 +291,7 @@ export default function TreasureChestScene({
   boosted,
   reducedMotion,
   onCompleted,
+  onReady,
 }: Props) {
   const [dpr, setDpr] = useState<number>(quality === 'high' ? 1.75 : 1.25);
   const handleSlow = useCallback(() => setDpr(1), []);
@@ -289,6 +319,9 @@ export default function TreasureChestScene({
         gl.toneMapping = THREE.ACESFilmicToneMapping;
         gl.toneMappingExposure = 1.06;
         camera.lookAt(0, 0, 0);
+        // Context is live and the first frame is about to paint — safe to
+        // fade the loader out now rather than leaving the area blank.
+        onReady?.();
       }}
       // the DOM wrapper owns the interaction, so the canvas stays inert
       style={{ pointerEvents: 'none', touchAction: 'pan-y' }}

@@ -7,7 +7,7 @@
    connection. */
 @font-face {
   font-family: 'Brittany Signature';
-  src: url('/fonts/BrittanySignature.ttf') format('truetype');
+  src: url('/fonts/BrittanySignature.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -284,8 +284,15 @@ body {
 .rsvp-submit-row p { max-width: 290px; margin: 0; color: #93867a; font: italic 18px var(--font-cormorant), Georgia, serif; line-height: 1.35; }
 .rsvp-slide-confirm { max-width: 100%; border-color: rgba(166, 129, 78, .62) !important; background: rgba(248, 240, 226, .33) !important; color: #6f563b; box-shadow: 0 10px 24px rgba(98, 73, 47, .08), inset 0 1px rgba(255, 252, 246, .58); }.rsvp-slide-confirm > div:first-of-type { background: linear-gradient(90deg, #b0834d, #d7b87d) !important; opacity: .16 !important; }.rsvp-slide-confirm > div:nth-of-type(2) { background: linear-gradient(145deg, #fff9ef, #e9d7bc) !important; color: #8b673a; box-shadow: 0 5px 12px rgba(92, 65, 36, .14) !important; }.rsvp-slide-confirm > span { color: #74583b !important; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
 .rsvp-error { margin: 26px 0 0; color: #9e4e42; font-size: 13px; }
-.rsvp-footer { margin: 52px 0 0; color: #93867a; font: italic 18px var(--font-cormorant), Georgia, serif; text-align: center; }
+.rsvp-footer { margin: 52px 0 0; color: #93867a; font: italic 18px var(--font-editorial); text-align: center; }
 .rsvp-footer span { padding: 0 8px; color: #a6814e; }
+/* Wrapper that centres the footer line + credit as a column */
+.rsvp-footer-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 52px;
+}
 .rsvp-glow { position: fixed; width: 280px; height: 280px; border-radius: 50%; background: rgba(255, 250, 240, .45); filter: blur(60px); pointer-events: none; }
 .rsvp-glow-left { top: 10%; left: -180px; }.rsvp-glow-right { right: -180px; bottom: 10%; }
 .rsvp-confirmation { position: relative; z-index: 2; min-height: 100vh; padding: 80px 16px 44px; }
@@ -553,13 +560,12 @@ body {
 }
 
 /* Fabi logo — small, below the lantern */
-.invitation-fabi-logo { margin-bottom: 18px; }
+.invitation-fabi-logo { margin-bottom: 38px; }
 .invitation-fabi-logo-img {
   width: clamp(54px, 14vw, 72px) !important;
   height: auto !important;
   object-fit: contain;
   opacity: .88;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,.25));
 }
 
 /* Hero couple names */
@@ -583,17 +589,17 @@ body {
 }
 
 /* Bismillah at bottom of opening — tiny, just above the scroll cue */
-.invitation-opening-bismillah { margin-top: 14px; }
+.invitation-opening-bismillah { margin-top: 38px; }
 .invitation-opening-bismillah .invitation-arabic {
   margin: 0;
   color: #9b7849;
-  font-size: clamp(0.95rem, 3.4vw, 1.15rem);
+  font-size: clamp(0.72rem, 2.6vw, 0.88rem);
   line-height: 1.5;
 }
 .invitation-opening-bismillah .invitation-translation {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: #7a6a57;
-  font-size: 9.5px;
+  font-size: 8px;
   font-weight: 500;
   letter-spacing: .18em;
   line-height: 1.85;
@@ -609,14 +615,14 @@ body {
 
 .invitation-message-section { display: grid; min-height: 78svh; padding: 110px 25px; place-items: center; text-align: center; }
 .invitation-message { max-width: 680px; }.section-eyebrow { margin: 0 0 19px; color: #a6814e; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
-.invitation-message blockquote { margin: 0; color: #49392d; font: 400 clamp(2rem, 5vw, 4.1rem)/1.04 var(--font-editorial); letter-spacing: -.025em; text-wrap: balance; }
+.invitation-message blockquote { margin: 0; color: #49392d; font: 400 clamp(1.45rem, 4vw, 4.1rem)/1.08 var(--font-editorial); letter-spacing: -.025em; text-wrap: balance; }
 .invitation-from { margin: 34px 0 0; color: #7d6c5d; font-size: 12px; line-height: 1.8; }.invitation-from strong { color: #624c36; font-family: var(--font-editorial); font-size: 19px; font-weight: 500; }.invitation-from em { color: #9a815e; font-size: .8em; font-style: italic; }.invitation-from-and { display: block; margin: 8px 0 4px; color: #a6814e; font-size: 11px; font-style: italic; letter-spacing: .1em; }.invitation-from-family { display: block; margin: 0 0 3px; color: #9a7d5e; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
 
 .invitation-names { padding: 100px 24px 88px; text-align: center; }.invitation-names h1, .invitation-names h2 { margin: 0; color: #3d2e26; font-family: var(--font-signature); font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 400; line-height: 1.45; letter-spacing: -.01em; }.invitation-names h1 { margin-top: 22px; }.invitation-names h1 span, .invitation-names h2 span { display: block; font-size: .62em; font-style: italic; letter-spacing: -.01em; }.invitation-with { margin: 38px 0 14px; color: #aa814d; font: italic 400 clamp(1.5rem, 4vw, 2.5rem)/1 var(--font-editorial); }.invitation-names h2 { color: #5e4633; margin-top: 14px; }.invitation-event-label { margin: 36px 0 0; color: #846947; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
 
-.wedding-countdown { width: min(100% - 40px, 840px); margin: 0 auto; padding: clamp(42px, 7vw, 72px) clamp(18px, 5vw, 54px); border-top: 1px solid rgba(166, 129, 78, .34); border-bottom: 1px solid rgba(166, 129, 78, .34); text-align: center; }.wedding-countdown .section-eyebrow { margin-bottom: 27px; }.countdown-clock { display: grid; grid-template-columns: repeat(4, 1fr); align-items: start; }.countdown-unit { position: relative; display: grid; gap: 9px; place-items: center; min-width: 0; }.countdown-unit:not(:last-child)::after { position: absolute; top: clamp(22px, 3.2vw, 37px); right: -1px; width: 3px; height: 3px; border-radius: 50%; background: #b08751; box-shadow: 0 9px #b08751; content: ''; }.countdown-unit strong { color: #49372b; font: 400 clamp(2.5rem, 6.4vw, 5.1rem)/.82 var(--font-editorial); font-variant-numeric: tabular-nums; letter-spacing: -.045em; }.countdown-unit span { color: #937552; font-size: 9px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; }.countdown-note { margin: 28px 0 0; color: #7c6b59; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }.countdown-arrived { margin: 0; color: #5e4633; font: italic clamp(2rem, 5vw, 3.5rem)/1 var(--font-editorial); }
+.wedding-countdown { width: min(100% - 40px, 840px); margin: 0 auto; padding: clamp(42px, 7vw, 72px) clamp(18px, 5vw, 54px); border-top: 1px solid rgba(166, 129, 78, .34); border-bottom: none; text-align: center; }.wedding-countdown .section-eyebrow { margin-bottom: 27px; }.countdown-clock { display: grid; grid-template-columns: repeat(4, 1fr); align-items: start; }.countdown-unit { position: relative; display: grid; gap: 14px; place-items: center; min-width: 0; }.countdown-unit:not(:last-child)::after { position: absolute; top: clamp(22px, 3.2vw, 37px); right: -1px; width: 3px; height: 3px; border-radius: 50%; background: #b08751; box-shadow: 0 9px #b08751; content: ''; }.countdown-unit strong { color: #49372b; font: 400 clamp(2.5rem, 6.4vw, 5.1rem)/.82 var(--font-editorial); font-variant-numeric: tabular-nums; letter-spacing: -.045em; }.countdown-unit span { color: #937552; font-size: 9px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; }.countdown-note { margin: 28px 0 0; color: #7c6b59; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }.countdown-arrived { margin: 0; color: #5e4633; font: italic clamp(2rem, 5vw, 3.5rem)/1 var(--font-editorial); }
 
-.invitation-portrait-section { padding: 24px 20px 116px; }.couple-portrait-story { position: relative; width: min(100%, 1020px); margin: 0 auto; padding: 62px 40px 18px; isolation: isolate; }.couple-presentation { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr); align-items: center; gap: clamp(18px, 4vw, 52px); perspective: 1100px; }.couple-profile { min-width: 0; text-align: center; transform-style: preserve-3d; will-change: transform; }.couple-portrait-frame { position: relative; width: min(100%, 370px); aspect-ratio: .667; margin: 0 auto; overflow: hidden; border: 1px solid rgba(167, 125, 68, .62); background: #d8c7b2; box-shadow: 0 27px 52px rgba(73, 50, 30, .18); }.couple-profile-bride .couple-portrait-frame { border-radius: 999px 999px 10px 10px; padding: 8px; }.couple-profile-groom .couple-portrait-frame { border-radius: 10px 10px 999px 999px; padding: 8px; }.couple-portrait-frame img { object-position: center; }.couple-profile-bride .couple-portrait-frame img { border-radius: 999px 999px 4px 4px; }.couple-profile-groom .couple-portrait-frame img { border-radius: 4px 4px 999px 999px; }.portrait-role { margin: 19px 0 8px; color: #a6814e; font-size: 9px; font-weight: 600; letter-spacing: .21em; text-transform: uppercase; }.couple-profile h3 { margin: 0; color: #47352a; font: 400 clamp(2.5rem, 5vw, 4.5rem)/.78 var(--font-editorial); letter-spacing: -.045em; }.couple-profile h3 span { display: block; color: #7f6040; font-size: .59em; font-style: italic; letter-spacing: -.03em; }.couple-union { display: grid; gap: 10px; place-items: center; color: #aa814d; text-align: center; }.couple-union span { color: #b48c59; font-size: 12px; }.couple-union i { display: block; width: 1px; height: clamp(45px, 8vw, 82px); background: linear-gradient(transparent, rgba(166, 129, 78, .72), transparent); }.couple-union p { margin: 0; color: #79654b; font: italic 17px/1.05 var(--font-editorial); }.portrait-memory { position: absolute; z-index: 3; display: grid; overflow: hidden; width: clamp(116px, 17vw, 176px); aspect-ratio: .667; padding: 5px; border: 1px solid rgba(167, 125, 68, .46); background: rgba(250, 244, 235, .76); box-shadow: 0 16px 34px rgba(71, 49, 31, .13); }.portrait-memory-left { top: 8%; left: -118px; }.portrait-memory-right { right: -112px; bottom: 24%; }.portrait-memory img { filter: saturate(.88) sepia(.04); }.couple-hands-portrait { position: relative; z-index: 3; width: 126px; height: 146px; margin: 28px auto 0; overflow: hidden; border: 5px solid rgba(249, 243, 233, .9); background: #d5c5b0; box-shadow: 0 16px 30px rgba(73, 50, 30, .15); }.couple-hands-portrait img { object-position: center 56%; }.couple-weds { position: relative; z-index: 2; margin: 24px 0 0; color: #563f2f; font: 400 clamp(2rem, 4vw, 3.45rem)/1 var(--font-editorial); letter-spacing: -.035em; text-align: center; }.couple-weds span { margin: 0 .24em; color: #aa814d; font-size: .56em; font-style: italic; letter-spacing: 0; }.mobile-person-switch { display: none; }
+.invitation-portrait-section { padding: 24px 20px 40px; }.couple-portrait-story { position: relative; width: min(100%, 1020px); margin: 0 auto; padding: 62px 40px 18px; isolation: isolate; }.couple-presentation { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr); align-items: center; gap: clamp(18px, 4vw, 52px); perspective: 1100px; }.couple-profile { min-width: 0; text-align: center; transform-style: preserve-3d; will-change: transform; }.couple-portrait-frame { position: relative; width: min(100%, 370px); aspect-ratio: .667; margin: 0 auto; overflow: hidden; border: 1px solid rgba(167, 125, 68, .62); background: #d8c7b2; box-shadow: 0 27px 52px rgba(73, 50, 30, .18); }.couple-profile-bride .couple-portrait-frame { border-radius: 999px 999px 10px 10px; padding: 8px; }.couple-profile-groom .couple-portrait-frame { border-radius: 10px 10px 999px 999px; padding: 8px; }.couple-portrait-frame img { object-position: center; }.couple-profile-bride .couple-portrait-frame img { border-radius: 999px 999px 4px 4px; }.couple-profile-groom .couple-portrait-frame img { border-radius: 4px 4px 999px 999px; }.portrait-role { margin: 19px 0 8px; color: #a6814e; font-size: 9px; font-weight: 600; letter-spacing: .21em; text-transform: uppercase; }.couple-profile h3 { margin: 0; color: #47352a; font: 400 clamp(2.5rem, 5vw, 4.5rem)/.78 var(--font-editorial); letter-spacing: -.045em; }.couple-profile h3 span { display: block; color: #7f6040; font-size: .59em; font-style: italic; letter-spacing: -.03em; }.couple-union { display: grid; gap: 10px; place-items: center; color: #aa814d; text-align: center; }.couple-union span { color: #b48c59; font-size: 12px; }.couple-union i { display: block; width: 1px; height: clamp(45px, 8vw, 82px); background: linear-gradient(transparent, rgba(166, 129, 78, .72), transparent); }.couple-union p { margin: 0; color: #79654b; font: italic 17px/1.05 var(--font-editorial); }.portrait-memory { position: absolute; z-index: 3; display: grid; overflow: hidden; width: clamp(116px, 17vw, 176px); aspect-ratio: .667; padding: 5px; border: 1px solid rgba(167, 125, 68, .46); background: rgba(250, 244, 235, .76); box-shadow: 0 16px 34px rgba(71, 49, 31, .13); }.portrait-memory-left { top: 8%; left: -118px; }.portrait-memory-right { right: -112px; bottom: 24%; }.portrait-memory img { filter: saturate(.88) sepia(.04); }.couple-hands-portrait { position: relative; z-index: 3; width: 126px; height: 146px; margin: 28px auto 0; overflow: hidden; border: 5px solid rgba(249, 243, 233, .9); background: #d5c5b0; box-shadow: 0 16px 30px rgba(73, 50, 30, .15); }.couple-hands-portrait img { object-position: center 56%; }.couple-weds { position: relative; z-index: 2; margin: 24px 0 0; color: #563f2f; font: 400 clamp(2rem, 4vw, 3.45rem)/1 var(--font-editorial); letter-spacing: -.035em; text-align: center; }.couple-weds span { margin: 0 .24em; color: #aa814d; font-size: .56em; font-style: italic; letter-spacing: 0; }.mobile-person-switch { display: none; }
 
 .invitation-event-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(38px, 8vw, 110px); max-width: 930px; margin: 0 auto; padding: 95px 30px; border-top: 1px solid rgba(166, 129, 78, .3); border-bottom: 1px solid rgba(166, 129, 78, .3); }.event-heading h2 { margin: 0; color: #49372b; font: 400 clamp(3rem, 6vw, 5.4rem)/.84 var(--font-editorial); letter-spacing: -.04em; }.event-heading h2 span { color: #806446; font-size: .6em; font-style: italic; }.event-heading > p:last-child { margin: 20px 0 0; color: #8d7557; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; }.event-details { display: grid; align-content: center; gap: 31px; }.event-details div { padding-left: 18px; border-left: 1px solid rgba(166, 129, 78, .5); }.event-details span { display: block; margin-bottom: 8px; color: #a6814e; font-size: 10px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; }.event-details strong { display: block; color: #4e3e31; font: 500 23px/1.05 var(--font-editorial); }.event-details p { display: flex; align-items: flex-start; gap: 7px; margin: 9px 0 0; color: #7c6d61; font-size: 12px; line-height: 1.6; }.event-details p svg { flex: 0 0 auto; margin-top: 2px; color: #a6814e; }.event-map { grid-column: 1 / -1; width: min(100%, 760px); margin: 2px auto 0; overflow: hidden; border: 1px solid rgba(166, 129, 78, .4); background: rgba(255, 252, 246, .38); box-shadow: 0 18px 38px rgba(85, 60, 38, .09); }.event-map iframe { display: block; width: 100%; height: clamp(260px, 38vw, 370px); border: 0; filter: saturate(.74) sepia(.08) contrast(.94); }.event-map-link { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; color: #725534; font-size: 10px; font-weight: 600; letter-spacing: .15em; text-decoration: none; text-transform: uppercase; transition: background .25s ease, color .25s ease; }.event-map-link:hover { background: #a6814e; color: #fffdf9; }
 
@@ -642,11 +648,11 @@ body {
     padding: max(82px, calc(54px + env(safe-area-inset-top))) 24px max(68px, calc(38px + env(safe-area-inset-bottom)));
   }
   .invitation-opening-inner { gap: 0; }
-  .invitation-fabi-logo { margin-bottom: 14px; }
+  .invitation-fabi-logo { margin-bottom: 38px; }
   .invitation-hero-names { font-size: clamp(3.2rem, 15vw, 5rem); }
   .invitation-hero-weds { font-size: .38em; }
-  .invitation-opening-bismillah { margin-top: 12px; }
-  .invitation-opening-bismillah .invitation-arabic { font-size: clamp(0.88rem, 3.2vw, 1.05rem); }
+  .invitation-opening-bismillah { margin-top: 30px; }
+  .invitation-opening-bismillah .invitation-arabic { font-size: clamp(0.68rem, 2.8vw, 0.82rem); }
   .invitation-opening-bismillah .invitation-translation { font-size: 7.5px; }
   .invitation-arabic { font-size: clamp(1.7rem, 8.2vw, 2.35rem); line-height: 1.48; }
   .invitation-arabic-mobile-break { display: block; }
@@ -663,7 +669,7 @@ body {
   .invitation-message-section { min-height: auto; padding: 100px 24px 92px; }
   .invitation-message { width: min(100%, 450px); }
   .section-eyebrow { margin-bottom: 16px; font-size: 9px; letter-spacing: .18em; }
-  .invitation-message blockquote { font-size: clamp(2.15rem, 10vw, 3.35rem); line-height: 1.02; }
+  .invitation-message blockquote { font-size: clamp(1.35rem, 7.5vw, 2.8rem); line-height: 1.06; }
   .invitation-from { margin-top: 29px; font-size: 11px; }
   .invitation-from strong { font-size: 18px; }
 
@@ -675,12 +681,12 @@ body {
 
   .wedding-countdown { width: calc(100% - 28px); padding: 36px 8px 34px; }
   .wedding-countdown .section-eyebrow { margin-bottom: 23px; }
-  .countdown-unit { gap: 7px; }
+  .countdown-unit { gap: 11px; }
   .countdown-unit strong { font-size: clamp(2.15rem, 11vw, 3.45rem); }
   .countdown-unit:not(:last-child)::after { right: -1px; }
   .countdown-note { margin-top: 24px; font-size: 8px; letter-spacing: .11em; }
 
-  .invitation-portrait-section { padding: 34px 10px 82px; }
+  .invitation-portrait-section { padding: 34px 10px 32px; }
   .couple-portrait-story { width: min(100%, 470px); padding: 28px 0 12px; }
   .couple-portrait-frame { width: min(78vw, 360px); box-shadow: 0 22px 38px rgba(73, 50, 30, .17); }
   .portrait-memory { width: clamp(74px, 24vw, 104px); padding: 4px; opacity: .92; }
@@ -696,11 +702,37 @@ body {
   .couple-hands-portrait { width: 140px; height: 124px; margin-top: 22px; }
   .couple-weds { margin-top: 22px; font-size: clamp(2.05rem, 9.6vw, 3rem); }
 
-  .invitation-event-section { gap: 37px; padding: 75px 22px; }
-  .event-heading h2 { font-size: clamp(3.25rem, 14vw, 4.5rem); }
-  .event-heading > p:last-child { margin-top: 16px; font-size: 10px; line-height: 1.6; }
-  .event-details { gap: 25px; }
-  .event-details strong { font-size: 22px; }
+  .invitation-event-section { gap: 37px; padding: 70px 22px; }
+  .event-heading { text-align: center; }
+
+  /* Heading — bigger, more presence on a phone screen */
+  .event-heading h2 { font-size: clamp(3.4rem, 15vw, 4.8rem); letter-spacing: -.03em; }
+  .event-heading h2 span { font-size: .58em; }
+
+  /* Hijri date — nudge up, make it feel like a subtitle not an afterthought */
+  .event-heading > p:last-child {
+    margin-top: 14px;
+    font-size: 10.5px;
+    letter-spacing: .16em;
+    line-height: 1.7;
+    color: #8d7557;
+  }
+
+  /* Thin gold rule between eyebrow and day — purely decorative, very subtle */
+  .event-heading .section-eyebrow::after {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    margin: 11px auto 0;
+    background: linear-gradient(90deg, transparent, rgba(166, 129, 78, .55), transparent);
+  }
+
+  /* Details — slightly looser, easier to scan at a glance */
+  .event-details { gap: 28px; }
+  .event-details strong { font-size: 21px; line-height: 1.2; }
+  .event-details span { letter-spacing: .2em; }
+  .event-details div { padding-left: 14px; }
   .event-map { width: 100%; margin-top: 0; }
   .event-map iframe { height: min(64vw, 250px); min-height: 210px; }
   .event-map-link { min-height: 52px; padding: 0 13px; font-size: 9px; letter-spacing: .12em; }
@@ -722,7 +754,7 @@ body {
 @media (max-width: 360px) {
   .invitation-opening { padding-inline: 18px; }
   .invitation-message-section, .invitation-names, .invitation-event-section, .invitation-closing { padding-inline: 18px; }
-  .invitation-message blockquote { font-size: 2.05rem; }
+  .invitation-message blockquote { font-size: 1.25rem; }
   .countdown-unit strong { font-size: 2.05rem; }
   .countdown-unit span { font-size: 7px; }
   .portrait-memory { width: 70px; }
@@ -1664,21 +1696,6 @@ body {
   -webkit-transform: translateZ(0);
 }
 
-/* Reduce motion on mobile for better performance */
-@media (max-width: 768px) {
-  * {
-    animation-duration: 0.5s !important;
-    transition-duration: 0.5s !important;
-  }
-  
-  .portrait-memory,
-  .couple-portrait-frame {
-    will-change: auto;
-    transform: none !important;
-  }
-}
-
-
 /* Ensure paper background covers full scrollable page, not just viewport */
 .rsvp-page > div:first-child {
   position: absolute !important;
@@ -2267,8 +2284,12 @@ body {
 
 /* Zorscode credit */
 .zorscode-credit {
-  display: inline-block;
-  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: 14px;
   color: #a49483;
   font-size: 10px;
   font-family: var(--font-supporting);
@@ -2278,6 +2299,32 @@ body {
   transition: opacity .25s ease;
 }
 .zorscode-credit:hover { opacity: 1; }
+
+/* "UNSP" — underlined with a subtle gold tint so it reads as a link */
+.zorscode-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #b08c5e;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-decoration: underline;
+  text-decoration-color: rgba(166, 129, 78, .45);
+  text-underline-offset: 2px;
+}
+
+/* ExternalLink icon — same cap-height as the surrounding text */
+.zorscode-ext {
+  display: inline-block;
+  vertical-align: middle;
+  color: #b08c5e;
+  opacity: .8;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.zorscode-credit:hover .zorscode-ext {
+  opacity: 1;
+  transform: translate(1px, -1px);
+}
 .zorscode-heart {
   display: inline-block;
   color: #c0786a;
@@ -3105,4 +3152,168 @@ body {
   .admin-day-stat-card { align-items: flex-start; flex-direction: column; gap: 12px; }
   .admin-day-stat-figures { width: 100%; }
   .admin-card-footer { flex-wrap: wrap; }
+}
+
+/* ==========================================================================
+   Couple portrait — Quranic verse (replaces duplicate "Farzeen weds Bilal")
+   ========================================================================== */
+.couple-verse {
+  position: relative;
+  z-index: 2;
+  max-width: 520px;
+  margin: 32px auto 0;
+  padding: 26px 32px 22px;
+  text-align: center;
+  border-top: 1px solid rgba(166, 129, 78, .22);
+  border-bottom: 1px solid rgba(166, 129, 78, .22);
+}
+
+.couple-verse-arabic {
+  margin: 0 0 12px;
+  color: #7a5c38;
+  font: 400 clamp(1.1rem, 3.2vw, 1.5rem)/1.65 var(--font-editorial);
+  letter-spacing: .01em;
+}
+
+.couple-verse-text {
+  margin: 0 0 8px;
+  color: #5e4b39;
+  font: italic 400 clamp(0.82rem, 2vw, 0.98rem)/1.7 var(--font-editorial);
+  letter-spacing: .01em;
+}
+
+.couple-verse-ref {
+  margin: 0;
+  color: #a6814e;
+  font: 500 9.5px/1 var(--font-supporting);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .couple-verse {
+    margin-top: 24px;
+    padding: 20px 20px 18px;
+  }
+
+  .couple-verse-arabic {
+    font-size: clamp(1rem, 4.8vw, 1.22rem);
+  }
+
+  .couple-verse-text {
+    font-size: clamp(0.78rem, 3.2vw, 0.9rem);
+  }
+}
+
+/* ==========================================================================
+   Treasure chest loader — fills the hero while the 3D scene warms up
+   ========================================================================== */
+.chest-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  pointer-events: none;
+  animation: chest-loader-in .5s ease-out both;
+}
+
+@keyframes chest-loader-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Slow-turning gold ring with a single gem riding its edge */
+.chest-loader-ring {
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(226, 186, 128, .28);
+  border-top-color: rgba(238, 205, 156, .85);
+  border-radius: 50%;
+  animation: chest-loader-spin 2.4s linear infinite;
+}
+
+.chest-loader-gem {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  background: #f0d69b;
+  border-radius: 50%;
+  box-shadow: 0 0 9px rgba(240, 214, 155, .9);
+}
+
+@keyframes chest-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Text with a soft gold sheen sweeping across it */
+.chest-loader-text {
+  margin: 0;
+  font: 400 clamp(0.95rem, 3.4vw, 1.15rem)/1.4 var(--font-editorial);
+  font-style: italic;
+  letter-spacing: .02em;
+  text-align: center;
+  background: linear-gradient(
+    100deg,
+    rgba(223, 188, 138, .62) 28%,
+    rgba(253, 235, 200, 1) 48%,
+    rgba(223, 188, 138, .62) 68%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: chest-loader-sheen 2.8s ease-in-out infinite;
+}
+
+@keyframes chest-loader-sheen {
+  0%   { background-position: 130% 50%; }
+  100% { background-position: -30% 50%; }
+}
+
+/* Three dots, staggered */
+.chest-loader-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.chest-loader-dots i {
+  width: 3px;
+  height: 3px;
+  background: rgba(226, 186, 128, .85);
+  border-radius: 50%;
+  animation: chest-loader-dot 1.3s ease-in-out infinite;
+}
+
+.chest-loader-dots i:nth-child(2) { animation-delay: .18s; }
+.chest-loader-dots i:nth-child(3) { animation-delay: .36s; }
+
+@keyframes chest-loader-dot {
+  0%, 100% { opacity: .25; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-3px); }
+}
+
+/* Respect reduced motion: keep it legible, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .chest-loader,
+  .chest-loader-ring,
+  .chest-loader-text,
+  .chest-loader-dots i {
+    animation: none !important;
+  }
+  .chest-loader-text {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: #e3bd8d;
+  }
+  .chest-loader-dots i { opacity: .7; }
 }

@@ -85,10 +85,16 @@ export function SlideToConfirm({
   };
 
   /* Parent-driven reset: snap back to idle whenever `resetSignal` changes.
-     Skips the initial render so the slider isn't animated on mount. */
+     Skips the initial render (resetSignal === 0) so no animation on mount.
+     The setState call is intentional and safe here: it synchronises this
+     component's internal animation state with an external imperative signal
+     (the parent bumping a counter on API failure), which is exactly the
+     "sync with external system" use case that effects are designed for.
+     The linter rule targets accidental cascades; this is a deliberate,
+     bounded reset with a guarded early-return. */
   useEffect(() => {
     if (resetSignal === 0) return;
-    setState("idle");
+    setState("idle"); // eslint-disable-line react-hooks/set-state-in-effect
     x.set(0);
     controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -35,6 +35,8 @@ export const metadata: Metadata = {
   publisher: 'Farzeen & Bilal',
   
   // Open Graph metadata for Facebook, WhatsApp, LinkedIn
+  // og:image is auto-generated from app/opengraph-image.tsx — no manual
+  // image declaration needed here; adding one would override the tsx file.
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -42,22 +44,6 @@ export const metadata: Metadata = {
     siteName: 'Farzeen & Bilal Wedding',
     title: 'Farzeen & Bilal - Wedding Invitation',
     description: 'You are cordially invited to celebrate the wedding of Farzeen and Bilal. Join us for this blessed occasion filled with love, joy, and cherished moments.',
-    images: [
-      {
-        url: '/images/humans/couple-pose-side.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Farzeen & Bilal - Wedding Invitation',
-        type: 'image/jpeg',
-      },
-      {
-        url: '/images/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Farzeen & Bilal Wedding Celebration',
-        type: 'image/jpeg',
-      }
-    ],
   },
   
   // Twitter Card metadata
@@ -65,7 +51,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Farzeen & Bilal - Wedding Invitation',
     description: 'You are cordially invited to celebrate the wedding of Farzeen and Bilal. Join us for this blessed occasion.',
-    images: ['/images/humans/couple-pose-side.jpg'],
     creator: '@farzbilalwedding',
   },
   
@@ -82,11 +67,8 @@ export const metadata: Metadata = {
     },
   },
   
-  // Icons and manifest
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/images/logo.jpeg',
-  },
+  // Icons are generated from app/icon.tsx and app/apple-icon.tsx —
+  // Next.js App Router auto-wires them, no manual declaration needed.
   
   // Verification (add your verification codes here if needed)
   verification: {
@@ -106,6 +88,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${cormorantGaramond.variable} h-full antialiased`}
     >
       <head>
+        {/* Preload Brittany Signature so it arrives before the couple names
+            paint — reduces the fallback-to-script swap flash on first visit. */}
+        <link
+          rel="preload"
+          href="/fonts/BrittanySignature.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         {/* Brittany Signature is self-hosted in public/fonts/ — no CDN
             dependency, no build-time @import parsing issues. */}
         <StructuredData />

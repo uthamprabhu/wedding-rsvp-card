@@ -21,12 +21,12 @@ export default function InvitationParticles() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [assetsReady, setAssetsReady] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  // `isMounted` gates SSR: false on the server, true after first client effect.
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // Mark component as mounted to enable particles
-    setIsMounted(true);
-    
+    setIsMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
+
     const update = () => {
       setIsCompact(window.innerWidth < 700);
       setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -69,7 +69,10 @@ export default function InvitationParticles() {
     return () => { 
       cancelled = true; 
     };
-  }, [isMounted]);
+  // isMounted is intentionally excluded: this effect runs once after mount
+  // to preload assets; by definition isMounted is already true at that point.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const options: ISourceOptions = useMemo(() => ({
     fullScreen: { enable: false },

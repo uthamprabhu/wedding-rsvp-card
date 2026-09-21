@@ -85,11 +85,11 @@ function CouplePortraitStory() {
     <section className="couple-portrait-story" aria-label="Meet the couple">
       {/* Floating memory photos — desktop/tablet only */}
       <div className="portrait-memory portrait-memory-left" style={{ transform: 'rotate(-9deg)' }} aria-hidden="true">
-        <Image src="/images/humans/couple-pose-straight-full.jpg" alt="" fill
+        <Image src="/images/humans/couple-pose-straight-full.webp" alt="" fill
           sizes="(max-width: 640px) 0px, 190px" className="object-contain" />
       </div>
       <div className="portrait-memory portrait-memory-right" style={{ transform: 'rotate(8deg)' }} aria-hidden="true">
-        <Image src="/images/humans/couple-pose-look-eachother.jpg" alt="" fill
+        <Image src="/images/humans/couple-pose-look-eachother.webp" alt="" fill
           sizes="(max-width: 640px) 0px, 185px" className="object-contain" />
       </div>
 
@@ -97,7 +97,7 @@ function CouplePortraitStory() {
       <div className="couple-presentation">
         <article className="couple-profile couple-profile-bride">
           <figure className="couple-portrait-frame">
-            <Image src="/images/humans/bride-pose-straight.jpg" alt="Farzeen Fathima Firoz" fill
+            <Image src="/images/humans/bride-pose-straight.webp" alt="Farzeen Fathima Firoz" fill
               sizes="(max-width: 640px) 80vw, (max-width: 1024px) 38vw, 390px" className="object-cover" />
           </figure>
           <p className="portrait-role">The bride</p>
@@ -110,7 +110,7 @@ function CouplePortraitStory() {
 
         <article className="couple-profile couple-profile-groom">
           <figure className="couple-portrait-frame">
-            <Image src="/images/humans/groom-pose-straight.jpg" alt="Bilal Nasimudeen" fill
+            <Image src="/images/humans/groom-pose-straight.webp" alt="Bilal Nasimudeen" fill
               sizes="(max-width: 640px) 80vw, (max-width: 1024px) 38vw, 390px" className="object-cover" />
           </figure>
           <p className="portrait-role">The groom</p>
@@ -119,19 +119,26 @@ function CouplePortraitStory() {
       </div>
 
       <figure className="couple-hands-portrait">
-        <Image src="/images/humans/couple-handsholding-only.jpg" alt="Farzeen and Bilal holding hands"
+        <Image src="/images/humans/couple-handsholding-only.webp" alt="Farzeen and Bilal holding hands"
           fill sizes="(max-width: 640px) 148px, 132px" className="object-cover" />
       </figure>
-      <p className="couple-weds">Farzeen <span>weds</span> Bilal</p>
+
+      {/* Quran 30:21 — replaces the repeated "Farzeen weds Bilal" line */}
+      <div className="couple-verse">
+        <p className="couple-verse-arabic" lang="ar" dir="rtl">
+          وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا
+        </p>
+        <p className="couple-verse-text">
+          &ldquo;And of His signs is that He created for you from yourselves mates,
+          that you may find tranquillity in them.&rdquo;
+        </p>
+        <p className="couple-verse-ref">— Quran 30:21</p>
+      </div>
     </section>
   );
 }
 
 export default function LuxuryInvitation() {
-  const scrollToMessage = () => {
-    document.getElementById('invitation-message')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
   return (
     <main className="luxury-invitation">
       <DeferredPaperBackground />
@@ -154,7 +161,7 @@ export default function LuxuryInvitation() {
               transition={{ delay: 0.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
               <Image
-                src="/images/fabi-logo.png"
+                src="/images/fabi-logo.webp"
                 alt="Fabi — Farzeen & Bilal"
                 width={72}
                 height={36}
@@ -287,7 +294,7 @@ export default function LuxuryInvitation() {
               rel="noreferrer"
               className="zorscode-credit"
             >
-              Made with <Heart size={11} className="zorscode-heart" aria-hidden="true" /> by Zorscode
+              Made with <Heart size={11} className="zorscode-heart" aria-hidden="true" /> by <span className="zorscode-name">UNSP<ExternalLink size={10} className="zorscode-ext" aria-label="Open chat" strokeWidth={2} /></span>
             </a>
           </Reveal>
         </section>

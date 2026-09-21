@@ -2,7 +2,7 @@
 
 import { FormEvent, useSyncExternalStore, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Check, Minus, Plus, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, Check, ExternalLink, Heart, Minus, Plus, Sparkles, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import dynamic from 'next/dynamic';
@@ -328,7 +328,17 @@ export default function RSVPPage() {
               />
             </motion.div>
           </form>
-          <p className="rsvp-footer">With love, Farzeen & Bilal <span>•</span> 2026</p>
+          <div className="rsvp-footer-block">
+            <p className="rsvp-footer">With love, Farzeen &amp; Bilal <span>•</span> 2026</p>
+            <a
+              href="https://wa.me/919633693160"
+              target="_blank"
+              rel="noreferrer"
+              className="zorscode-credit"
+            >
+              Made with <Heart size={11} className="zorscode-heart" aria-hidden="true" /> by <span className="zorscode-name">UNSP<ExternalLink size={10} className="zorscode-ext" aria-label="Open chat" strokeWidth={2} /></span>
+            </a>
+          </div>
         </motion.div>
       </main>
 

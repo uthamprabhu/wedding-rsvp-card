@@ -27,6 +27,7 @@ import { useChestAudio } from './useChestAudio';
 import { unlockAudio } from '@/lib/audio-player';
 import TreasureChestFallback from './TreasureChestFallback';
 import MotionUnlockSheet from './MotionUnlockSheet';
+import ChestLoader from './ChestLoader';
 
 const loadScene = () => import('./TreasureChestScene');
 const TreasureChestScene = dynamic(loadScene, { ssr: false, loading: () => null });
@@ -52,6 +53,10 @@ export default function TreasureChest({ onOpen }: Props) {
   const askNeeded = useMotionAskNeeded();
 
   const [open, setOpen] = useState(false);
+  // False until the WebGL context is live. Keeps a loader in the chest area
+  // instead of the blank gap that showed while the 3D chunk downloaded and
+  // the canvas warmed up. Set from the scene's onCreated event handler.
+  const [sceneReady, setSceneReady] = useState(false);
   // Closes the sheet the instant a button is pressed, without waiting for the
   // async permission round-trip (enableMotion) or the storage-listener replay
   // (declineMotion) to flip `askNeeded`. Set only from direct event handlers,
@@ -81,6 +86,8 @@ export default function TreasureChest({ onOpen }: Props) {
     playLatch();
     window.setTimeout(playOpen, reducedMotion ? 40 : 150);
   }, [playLatch, playOpen, reducedMotion]);
+
+  const handleSceneReady = useCallback(() => setSceneReady(true), []);
 
   const handleCompleted = useCallback(() => {
     if (handedOff.current) return;
@@ -198,13 +205,18 @@ export default function TreasureChest({ onOpen }: Props) {
         onKeyDown={onKeyDown}
       >
         {webgl ? (
-          <TreasureChestScene
-            runtimeRef={runtimeRef}
-            quality={quality}
-            boosted={open}
-            reducedMotion={reducedMotion}
-            onCompleted={handleCompleted}
-          />
+          <>
+            <TreasureChestScene
+              runtimeRef={runtimeRef}
+              quality={quality}
+              boosted={open}
+              reducedMotion={reducedMotion}
+              onCompleted={handleCompleted}
+              onReady={handleSceneReady}
+            />
+            {/* Sits over the empty canvas until the first frame paints. */}
+            {!sceneReady && <ChestLoader />}
+          </>
         ) : (
           <TreasureChestFallback
             open={open}
@@ -217,7 +229,7 @@ export default function TreasureChest({ onOpen }: Props) {
       {/* Mutually exclusive by construction: shakeHintable and the tap hint
           can never both be true, so "shake to open" and "tap to open" never
           appear together (requirement #8). */}
-      <div className={`chest-caption${open ? ' is-hidden' : ''}`}>
+      <div className={`chest-caption${open || (webgl && !sceneReady) ? ' is-hidden' : ''}`}>
         <p className="chest-hint">
           {open
             ? 'Opening your invitation'

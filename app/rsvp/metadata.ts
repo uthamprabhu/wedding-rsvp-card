@@ -6,11 +6,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'RSVP - Farzeen & Bilal Wedding',
     description: 'Reserve your place at our wedding celebration. We would be honored to celebrate with you.',
-    images: ['/images/humans/couple-pose-side.jpg'],
+    images: ['/images/humans/couple-pose-side.webp'],
   },
   twitter: {
     title: 'RSVP - Farzeen & Bilal Wedding',
     description: 'Reserve your place at our wedding celebration.',
-    images: ['/images/humans/couple-pose-side.jpg'],
+    images: ['/images/humans/couple-pose-side.webp'],
   },
 };

@@ -1,9 +1,9 @@
-﻿'use client';
+'use client';
 
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Check, Mail, Users, BedDouble, ArrowLeft, Heart } from 'lucide-react';
+import { Check, Mail, Users, BedDouble, ArrowLeft, Heart, ExternalLink } from 'lucide-react';
 import PaperBackground from '@/components/PaperBackground';
 import CelestialBackdrop, { AdaptiveLantern } from '@/components/CelestialBackdrop';
 import InvitationParticles from '@/components/InvitationParticles';
@@ -103,7 +103,17 @@ function ConfirmationContent() {
             We have your RSVP details for {data.phone}.
           </p>
 
-          <p className="rsvp-footer">With love, Farzeen & Bilal <span>•</span> 2026</p>
+          <div className="rsvp-footer-block">
+            <p className="rsvp-footer" style={{ marginTop: 0 }}>With love, Farzeen & Bilal <span>•</span> 2026</p>
+            <a
+              href="https://wa.me/919633693160"
+              target="_blank"
+              rel="noreferrer"
+              className="zorscode-credit"
+            >
+              Made with <Heart size={11} className="zorscode-heart" aria-hidden="true" /> by <span className="zorscode-name">UNSP<ExternalLink size={10} className="zorscode-ext" aria-label="Open chat" strokeWidth={2} /></span>
+            </a>
+          </div>
 
           <a
             href="https://wa.me/919633693160"
@@ -111,7 +121,7 @@ function ConfirmationContent() {
             rel="noreferrer"
             className="zorscode-credit"
           >
-            Made with <Heart size={11} className="zorscode-heart" aria-hidden="true" /> by Zorscode
+            Made with <Heart size={11} className="zorscode-heart" aria-hidden="true" /> by <span className="zorscode-name">UNSP<ExternalLink size={10} className="zorscode-ext" aria-label="Open chat" strokeWidth={2} /></span>
           </a>
         </motion.div>
       </div>

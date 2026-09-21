@@ -11,8 +11,8 @@ export default function StructuredData() {
       name: 'Farzeen & Bilal',
     },
     image: [
-      'https://farzeen-bilal.vercel.app/images/humans/couple-pose-side.jpg',
-      'https://farzeen-bilal.vercel.app/images/og-image.jpg'
+      'https://farzeen-bilal.vercel.app/images/humans/couple-pose-side.webp',
+      'https://farzeen-bilal.vercel.app/opengraph-image'
     ],
     url: 'https://farzeen-bilal.vercel.app',
   };

@@ -8,8 +8,8 @@ interface InvitationHeroProps {
   onOpen: () => void;
 }
 
-const TOP_DECOR = '/images/decor/top-left-hero-decor.png';
-const BOT_DECOR = '/images/decor/bottom-left-hero-decor.png';
+const TOP_DECOR = '/images/decor/top-left-hero-decor.webp';
+const BOT_DECOR = '/images/decor/bottom-left-hero-decor.webp';
 
 const corners = [
   { key: 'tl', src: TOP_DECOR, style: {}, objPos: 'top left' },
@@ -54,7 +54,7 @@ export default function InvitationHero({ onOpen }: InvitationHeroProps) {
         transition={{ delay: 0.35, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       >
         <Image
-          src="/images/fabi-logo.png"
+          src="/images/fabi-logo.webp"
           alt="Farzeen & Bilal"
           width={160}
           height={80}

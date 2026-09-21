@@ -6,11 +6,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Wedding Itinerary - Farzeen & Bilal',
     description: 'Join us for a day filled with love, celebration, and cherished moments. View our wedding schedule.',
-    images: ['/images/humans/couple-pose-side.jpg'],
+    images: ['/images/humans/couple-pose-side.webp'],
   },
   twitter: {
     title: 'Wedding Itinerary - Farzeen & Bilal',
     description: 'View the wedding schedule and event timeline.',
-    images: ['/images/humans/couple-pose-side.jpg'],
+    images: ['/images/humans/couple-pose-side.webp'],
   },
 };
