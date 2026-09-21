@@ -1,6 +1,18 @@
-@import url('https://fonts.cdnfonts.com/css/brittany-signature');
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
+
+/* Self-hosted Brittany Signature — loaded from public/fonts/ so there is no
+   CDN dependency and no Turbopack @import-inlining problem. font-display:swap
+   means the fallback serif renders immediately and the script swaps in once
+   the ~40 KB TTF is fetched, which is typically imperceptible on any decent
+   connection. */
+@font-face {
+  font-family: 'Brittany Signature';
+  src: url('/fonts/BrittanySignature.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 
 :root {
   --background: #ffffff;
@@ -51,7 +63,7 @@ html, body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-family: var(--font-editorial);
 }
 
 /* Disable text selection on interactive elements for cleaner UX */
@@ -119,7 +131,7 @@ body {
   gap: 22px;
   color: #78634d;
 }
-.invitation-handoff-loader p { font: 500 10px/1.3 var(--font-geist-sans), Inter, sans-serif; letter-spacing: .24em; text-transform: uppercase; }
+.invitation-handoff-loader p { font: 500 10px/1.3 var(--font-supporting); letter-spacing: .24em; text-transform: uppercase; }
 
 /* Used after the opening logo: a restrained silver ring with a diamond stone. */
 .diamond-ring-loader {
@@ -147,7 +159,7 @@ body {
 .diamond-ring-loader-mark::before { position: absolute; inset: 8px; border: 1px solid rgba(142, 149, 162, .52); border-left-color: transparent; border-radius: inherit; content: ''; animation: diamond-ring-fallback-spin 3.8s linear infinite; }.diamond-ring-loader-mark::after { position: absolute; top: 7px; left: 50%; width: 7px; height: 7px; border: 1px solid #8e96a2; background: #fff; box-shadow: 0 0 12px rgba(255, 255, 255, .96); content: ''; transform: translateX(-50%) rotate(45deg); }
 .diamond-ring-loader-orbit { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; opacity: .9; }
 .diamond-ring-loader-stone { position: relative; z-index: 2; width: 40px; height: 40px; }
-.diamond-ring-loader p { margin: 0; font: 500 10px/1.3 var(--font-geist-sans), Inter, sans-serif; letter-spacing: .22em; text-align: center; text-transform: uppercase; }
+.diamond-ring-loader p { margin: 0; font: 500 10px/1.3 var(--font-supporting); letter-spacing: .22em; text-align: center; text-transform: uppercase; }
 @keyframes diamond-ring-fallback-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 640px) {
@@ -519,7 +531,7 @@ body {
 .invitation-entry .loading-experience { background: radial-gradient(circle at 50% 44%, #5a1320, #400b15 52%, #300509 100%); }
 .invitation-entry .loading-experience p { color: #e3bd8d; }
 
-.luxury-invitation { position: relative; isolation: isolate; min-height: 100svh; overflow: clip; background: transparent; color: #46372d; font-family: var(--font-geist-sans), Inter, sans-serif; }
+.luxury-invitation { position: relative; isolation: isolate; min-height: 100svh; overflow: clip; background: transparent; color: #46372d; font-family: var(--font-supporting); }
 .invitation-particles { position: fixed !important; inset: 0; z-index: 0; width: 100% !important; height: 100% !important; opacity: 0; pointer-events: none; transition: opacity 1.15s cubic-bezier(.22, 1, .36, 1); }.invitation-particles.is-visible { opacity: 1; }
 .invitation-story { position: relative; z-index: 2; width: min(100%, 1220px); margin: 0 auto; }
 .invitation-ornaments { position: fixed; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
@@ -554,7 +566,7 @@ body {
 .invitation-hero-names {
   margin: 0;
   color: #3d2e26;
-  font-family: 'Brittany Signature', 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-signature);
   font-size: clamp(3.6rem, 14vw, 7.2rem);
   font-weight: 400;
   line-height: 1.18;
@@ -563,7 +575,7 @@ body {
 .invitation-hero-weds {
   display: inline-block;
   color: #a6814e;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: .38em;
   font-style: italic;
   font-weight: 400;
@@ -587,7 +599,7 @@ body {
   line-height: 1.85;
   text-transform: uppercase;
 }
-.invitation-arabic { margin: 0; color: #8f6739; font: 400 clamp(1.8rem, 8vw, 3.5rem)/1.55 'Cormorant Garamond', Georgia, serif; text-wrap: balance; }
+.invitation-arabic { margin: 0; color: #8f6739; font: 400 clamp(1.8rem, 8vw, 3.5rem)/1.55 var(--font-editorial); text-wrap: balance; }
 .invitation-arabic-opening { display: inline-block; direction: rtl; unicode-bidi: plaintext; }.invitation-arabic-opening span { display: inline-block; will-change: opacity, transform, filter; }
 .invitation-arabic-mobile-break { display: none; }
 .invitation-starline { display: flex; align-items: center; justify-content: center; gap: 13px; margin: 25px 0 20px; color: #b08751; font-size: 13px; }.invitation-starline span { width: 56px; height: 1px; background: linear-gradient(to right, transparent, rgba(176, 135, 81, .7)); }.invitation-starline span:last-child { transform: scaleX(-1); }
@@ -597,20 +609,20 @@ body {
 
 .invitation-message-section { display: grid; min-height: 78svh; padding: 110px 25px; place-items: center; text-align: center; }
 .invitation-message { max-width: 680px; }.section-eyebrow { margin: 0 0 19px; color: #a6814e; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
-.invitation-message blockquote { margin: 0; color: #49392d; font: 400 clamp(2rem, 5vw, 4.1rem)/1.04 'Cormorant Garamond', Georgia, serif; letter-spacing: -.025em; text-wrap: balance; }
-.invitation-from { margin: 34px 0 0; color: #7d6c5d; font-size: 12px; line-height: 1.8; }.invitation-from strong { color: #624c36; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 19px; font-weight: 500; }.invitation-from em { color: #9a815e; font-size: .8em; font-style: italic; }.invitation-from-and { display: block; margin: 8px 0 4px; color: #a6814e; font-size: 11px; font-style: italic; letter-spacing: .1em; }.invitation-from-family { display: block; margin: 0 0 3px; color: #9a7d5e; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.invitation-message blockquote { margin: 0; color: #49392d; font: 400 clamp(2rem, 5vw, 4.1rem)/1.04 var(--font-editorial); letter-spacing: -.025em; text-wrap: balance; }
+.invitation-from { margin: 34px 0 0; color: #7d6c5d; font-size: 12px; line-height: 1.8; }.invitation-from strong { color: #624c36; font-family: var(--font-editorial); font-size: 19px; font-weight: 500; }.invitation-from em { color: #9a815e; font-size: .8em; font-style: italic; }.invitation-from-and { display: block; margin: 8px 0 4px; color: #a6814e; font-size: 11px; font-style: italic; letter-spacing: .1em; }.invitation-from-family { display: block; margin: 0 0 3px; color: #9a7d5e; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
 
-.invitation-names { padding: 100px 24px 88px; text-align: center; }.invitation-names h1, .invitation-names h2 { margin: 0; color: #3d2e26; font-family: 'Brittany Signature', 'Cormorant Garamond', Georgia, serif; font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 400; line-height: 1.45; letter-spacing: -.01em; }.invitation-names h1 { margin-top: 22px; }.invitation-names h1 span, .invitation-names h2 span { display: block; font-size: .62em; font-style: italic; letter-spacing: -.01em; }.invitation-with { margin: 38px 0 14px; color: #aa814d; font: italic 400 clamp(1.5rem, 4vw, 2.5rem)/1 'Cormorant Garamond', Georgia, serif; }.invitation-names h2 { color: #5e4633; margin-top: 14px; }.invitation-event-label { margin: 36px 0 0; color: #846947; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
+.invitation-names { padding: 100px 24px 88px; text-align: center; }.invitation-names h1, .invitation-names h2 { margin: 0; color: #3d2e26; font-family: var(--font-signature); font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 400; line-height: 1.45; letter-spacing: -.01em; }.invitation-names h1 { margin-top: 22px; }.invitation-names h1 span, .invitation-names h2 span { display: block; font-size: .62em; font-style: italic; letter-spacing: -.01em; }.invitation-with { margin: 38px 0 14px; color: #aa814d; font: italic 400 clamp(1.5rem, 4vw, 2.5rem)/1 var(--font-editorial); }.invitation-names h2 { color: #5e4633; margin-top: 14px; }.invitation-event-label { margin: 36px 0 0; color: #846947; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
 
-.wedding-countdown { width: min(100% - 40px, 840px); margin: 0 auto; padding: clamp(42px, 7vw, 72px) clamp(18px, 5vw, 54px); border-top: 1px solid rgba(166, 129, 78, .34); border-bottom: 1px solid rgba(166, 129, 78, .34); text-align: center; }.wedding-countdown .section-eyebrow { margin-bottom: 27px; }.countdown-clock { display: grid; grid-template-columns: repeat(4, 1fr); align-items: start; }.countdown-unit { position: relative; display: grid; gap: 9px; place-items: center; min-width: 0; }.countdown-unit:not(:last-child)::after { position: absolute; top: clamp(22px, 3.2vw, 37px); right: -1px; width: 3px; height: 3px; border-radius: 50%; background: #b08751; box-shadow: 0 9px #b08751; content: ''; }.countdown-unit strong { color: #49372b; font: 400 clamp(2.5rem, 6.4vw, 5.1rem)/.82 'Cormorant Garamond', Georgia, serif; font-variant-numeric: tabular-nums; letter-spacing: -.045em; }.countdown-unit span { color: #937552; font-size: 9px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; }.countdown-note { margin: 28px 0 0; color: #7c6b59; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }.countdown-arrived { margin: 0; color: #5e4633; font: italic clamp(2rem, 5vw, 3.5rem)/1 'Cormorant Garamond', Georgia, serif; }
+.wedding-countdown { width: min(100% - 40px, 840px); margin: 0 auto; padding: clamp(42px, 7vw, 72px) clamp(18px, 5vw, 54px); border-top: 1px solid rgba(166, 129, 78, .34); border-bottom: 1px solid rgba(166, 129, 78, .34); text-align: center; }.wedding-countdown .section-eyebrow { margin-bottom: 27px; }.countdown-clock { display: grid; grid-template-columns: repeat(4, 1fr); align-items: start; }.countdown-unit { position: relative; display: grid; gap: 9px; place-items: center; min-width: 0; }.countdown-unit:not(:last-child)::after { position: absolute; top: clamp(22px, 3.2vw, 37px); right: -1px; width: 3px; height: 3px; border-radius: 50%; background: #b08751; box-shadow: 0 9px #b08751; content: ''; }.countdown-unit strong { color: #49372b; font: 400 clamp(2.5rem, 6.4vw, 5.1rem)/.82 var(--font-editorial); font-variant-numeric: tabular-nums; letter-spacing: -.045em; }.countdown-unit span { color: #937552; font-size: 9px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; }.countdown-note { margin: 28px 0 0; color: #7c6b59; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }.countdown-arrived { margin: 0; color: #5e4633; font: italic clamp(2rem, 5vw, 3.5rem)/1 var(--font-editorial); }
 
-.invitation-portrait-section { padding: 24px 20px 116px; }.couple-portrait-story { position: relative; width: min(100%, 1020px); margin: 0 auto; padding: 62px 40px 18px; isolation: isolate; }.couple-presentation { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr); align-items: center; gap: clamp(18px, 4vw, 52px); perspective: 1100px; }.couple-profile { min-width: 0; text-align: center; transform-style: preserve-3d; will-change: transform; }.couple-portrait-frame { position: relative; width: min(100%, 370px); aspect-ratio: .667; margin: 0 auto; overflow: hidden; border: 1px solid rgba(167, 125, 68, .62); background: #d8c7b2; box-shadow: 0 27px 52px rgba(73, 50, 30, .18); }.couple-profile-bride .couple-portrait-frame { border-radius: 999px 999px 10px 10px; padding: 8px; }.couple-profile-groom .couple-portrait-frame { border-radius: 10px 10px 999px 999px; padding: 8px; }.couple-portrait-frame img { object-position: center; }.couple-profile-bride .couple-portrait-frame img { border-radius: 999px 999px 4px 4px; }.couple-profile-groom .couple-portrait-frame img { border-radius: 4px 4px 999px 999px; }.portrait-role { margin: 19px 0 8px; color: #a6814e; font-size: 9px; font-weight: 600; letter-spacing: .21em; text-transform: uppercase; }.couple-profile h3 { margin: 0; color: #47352a; font: 400 clamp(2.5rem, 5vw, 4.5rem)/.78 'Cormorant Garamond', Georgia, serif; letter-spacing: -.045em; }.couple-profile h3 span { display: block; color: #7f6040; font-size: .59em; font-style: italic; letter-spacing: -.03em; }.couple-union { display: grid; gap: 10px; place-items: center; color: #aa814d; text-align: center; }.couple-union span { color: #b48c59; font-size: 12px; }.couple-union i { display: block; width: 1px; height: clamp(45px, 8vw, 82px); background: linear-gradient(transparent, rgba(166, 129, 78, .72), transparent); }.couple-union p { margin: 0; color: #79654b; font: italic 17px/1.05 'Cormorant Garamond', Georgia, serif; }.portrait-memory { position: absolute; z-index: 3; display: grid; overflow: hidden; width: clamp(116px, 17vw, 176px); aspect-ratio: .667; padding: 5px; border: 1px solid rgba(167, 125, 68, .46); background: rgba(250, 244, 235, .76); box-shadow: 0 16px 34px rgba(71, 49, 31, .13); }.portrait-memory-left { top: 8%; left: -118px; }.portrait-memory-right { right: -112px; bottom: 24%; }.portrait-memory img { filter: saturate(.88) sepia(.04); }.couple-hands-portrait { position: relative; z-index: 3; width: 126px; height: 146px; margin: 28px auto 0; overflow: hidden; border: 5px solid rgba(249, 243, 233, .9); background: #d5c5b0; box-shadow: 0 16px 30px rgba(73, 50, 30, .15); }.couple-hands-portrait img { object-position: center 56%; }.couple-weds { position: relative; z-index: 2; margin: 24px 0 0; color: #563f2f; font: 400 clamp(2rem, 4vw, 3.45rem)/1 'Cormorant Garamond', Georgia, serif; letter-spacing: -.035em; text-align: center; }.couple-weds span { margin: 0 .24em; color: #aa814d; font-size: .56em; font-style: italic; letter-spacing: 0; }.mobile-person-switch { display: none; }
+.invitation-portrait-section { padding: 24px 20px 116px; }.couple-portrait-story { position: relative; width: min(100%, 1020px); margin: 0 auto; padding: 62px 40px 18px; isolation: isolate; }.couple-presentation { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr); align-items: center; gap: clamp(18px, 4vw, 52px); perspective: 1100px; }.couple-profile { min-width: 0; text-align: center; transform-style: preserve-3d; will-change: transform; }.couple-portrait-frame { position: relative; width: min(100%, 370px); aspect-ratio: .667; margin: 0 auto; overflow: hidden; border: 1px solid rgba(167, 125, 68, .62); background: #d8c7b2; box-shadow: 0 27px 52px rgba(73, 50, 30, .18); }.couple-profile-bride .couple-portrait-frame { border-radius: 999px 999px 10px 10px; padding: 8px; }.couple-profile-groom .couple-portrait-frame { border-radius: 10px 10px 999px 999px; padding: 8px; }.couple-portrait-frame img { object-position: center; }.couple-profile-bride .couple-portrait-frame img { border-radius: 999px 999px 4px 4px; }.couple-profile-groom .couple-portrait-frame img { border-radius: 4px 4px 999px 999px; }.portrait-role { margin: 19px 0 8px; color: #a6814e; font-size: 9px; font-weight: 600; letter-spacing: .21em; text-transform: uppercase; }.couple-profile h3 { margin: 0; color: #47352a; font: 400 clamp(2.5rem, 5vw, 4.5rem)/.78 var(--font-editorial); letter-spacing: -.045em; }.couple-profile h3 span { display: block; color: #7f6040; font-size: .59em; font-style: italic; letter-spacing: -.03em; }.couple-union { display: grid; gap: 10px; place-items: center; color: #aa814d; text-align: center; }.couple-union span { color: #b48c59; font-size: 12px; }.couple-union i { display: block; width: 1px; height: clamp(45px, 8vw, 82px); background: linear-gradient(transparent, rgba(166, 129, 78, .72), transparent); }.couple-union p { margin: 0; color: #79654b; font: italic 17px/1.05 var(--font-editorial); }.portrait-memory { position: absolute; z-index: 3; display: grid; overflow: hidden; width: clamp(116px, 17vw, 176px); aspect-ratio: .667; padding: 5px; border: 1px solid rgba(167, 125, 68, .46); background: rgba(250, 244, 235, .76); box-shadow: 0 16px 34px rgba(71, 49, 31, .13); }.portrait-memory-left { top: 8%; left: -118px; }.portrait-memory-right { right: -112px; bottom: 24%; }.portrait-memory img { filter: saturate(.88) sepia(.04); }.couple-hands-portrait { position: relative; z-index: 3; width: 126px; height: 146px; margin: 28px auto 0; overflow: hidden; border: 5px solid rgba(249, 243, 233, .9); background: #d5c5b0; box-shadow: 0 16px 30px rgba(73, 50, 30, .15); }.couple-hands-portrait img { object-position: center 56%; }.couple-weds { position: relative; z-index: 2; margin: 24px 0 0; color: #563f2f; font: 400 clamp(2rem, 4vw, 3.45rem)/1 var(--font-editorial); letter-spacing: -.035em; text-align: center; }.couple-weds span { margin: 0 .24em; color: #aa814d; font-size: .56em; font-style: italic; letter-spacing: 0; }.mobile-person-switch { display: none; }
 
-.invitation-event-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(38px, 8vw, 110px); max-width: 930px; margin: 0 auto; padding: 95px 30px; border-top: 1px solid rgba(166, 129, 78, .3); border-bottom: 1px solid rgba(166, 129, 78, .3); }.event-heading h2 { margin: 0; color: #49372b; font: 400 clamp(3rem, 6vw, 5.4rem)/.84 'Cormorant Garamond', Georgia, serif; letter-spacing: -.04em; }.event-heading h2 span { color: #806446; font-size: .6em; font-style: italic; }.event-heading > p:last-child { margin: 20px 0 0; color: #8d7557; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; }.event-details { display: grid; align-content: center; gap: 31px; }.event-details div { padding-left: 18px; border-left: 1px solid rgba(166, 129, 78, .5); }.event-details span { display: block; margin-bottom: 8px; color: #a6814e; font-size: 10px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; }.event-details strong { display: block; color: #4e3e31; font: 500 23px/1.05 'Cormorant Garamond', Georgia, serif; }.event-details p { display: flex; align-items: flex-start; gap: 7px; margin: 9px 0 0; color: #7c6d61; font-size: 12px; line-height: 1.6; }.event-details p svg { flex: 0 0 auto; margin-top: 2px; color: #a6814e; }.event-map { grid-column: 1 / -1; width: min(100%, 760px); margin: 2px auto 0; overflow: hidden; border: 1px solid rgba(166, 129, 78, .4); background: rgba(255, 252, 246, .38); box-shadow: 0 18px 38px rgba(85, 60, 38, .09); }.event-map iframe { display: block; width: 100%; height: clamp(260px, 38vw, 370px); border: 0; filter: saturate(.74) sepia(.08) contrast(.94); }.event-map-link { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; color: #725534; font-size: 10px; font-weight: 600; letter-spacing: .15em; text-decoration: none; text-transform: uppercase; transition: background .25s ease, color .25s ease; }.event-map-link:hover { background: #a6814e; color: #fffdf9; }
+.invitation-event-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(38px, 8vw, 110px); max-width: 930px; margin: 0 auto; padding: 95px 30px; border-top: 1px solid rgba(166, 129, 78, .3); border-bottom: 1px solid rgba(166, 129, 78, .3); }.event-heading h2 { margin: 0; color: #49372b; font: 400 clamp(3rem, 6vw, 5.4rem)/.84 var(--font-editorial); letter-spacing: -.04em; }.event-heading h2 span { color: #806446; font-size: .6em; font-style: italic; }.event-heading > p:last-child { margin: 20px 0 0; color: #8d7557; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; }.event-details { display: grid; align-content: center; gap: 31px; }.event-details div { padding-left: 18px; border-left: 1px solid rgba(166, 129, 78, .5); }.event-details span { display: block; margin-bottom: 8px; color: #a6814e; font-size: 10px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; }.event-details strong { display: block; color: #4e3e31; font: 500 23px/1.05 var(--font-editorial); }.event-details p { display: flex; align-items: flex-start; gap: 7px; margin: 9px 0 0; color: #7c6d61; font-size: 12px; line-height: 1.6; }.event-details p svg { flex: 0 0 auto; margin-top: 2px; color: #a6814e; }.event-map { grid-column: 1 / -1; width: min(100%, 760px); margin: 2px auto 0; overflow: hidden; border: 1px solid rgba(166, 129, 78, .4); background: rgba(255, 252, 246, .38); box-shadow: 0 18px 38px rgba(85, 60, 38, .09); }.event-map iframe { display: block; width: 100%; height: clamp(260px, 38vw, 370px); border: 0; filter: saturate(.74) sepia(.08) contrast(.94); }.event-map-link { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; color: #725534; font-size: 10px; font-weight: 600; letter-spacing: .15em; text-decoration: none; text-transform: uppercase; transition: background .25s ease, color .25s ease; }.event-map-link:hover { background: #a6814e; color: #fffdf9; }
 
-.invitation-families { padding: 118px 30px; text-align: center; }.family-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(35px, 9vw, 120px); max-width: 850px; margin: 45px auto 0; }.family-note { padding: 0 15px; }.family-note > span { display: block; margin-bottom: 15px; color: #a6814e; font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }.family-note h3 { margin: 0; color: #523f30; font: 400 clamp(2.1rem, 4vw, 3.4rem)/.94 'Cormorant Garamond', Georgia, serif; }.family-note p { margin: 17px 0 0; color: #796b5d; font-size: 13px; line-height: 1.75; }.family-note .family-address { font-size: 12px; }
+.invitation-families { padding: 118px 30px; text-align: center; }.family-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(35px, 9vw, 120px); max-width: 850px; margin: 45px auto 0; }.family-note { padding: 0 15px; }.family-note > span { display: block; margin-bottom: 15px; color: #a6814e; font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }.family-note h3 { margin: 0; color: #523f30; font: 400 clamp(2.1rem, 4vw, 3.4rem)/.94 var(--font-editorial); }.family-note p { margin: 17px 0 0; color: #796b5d; font-size: 13px; line-height: 1.75; }.family-note .family-address { font-size: 12px; }
 
-.invitation-closing { padding: 105px 26px 135px; text-align: center; }.invitation-closing > div { max-width: 570px; margin: 0 auto; }.invitation-closing-arabic { font-size: clamp(1.25rem, 4vw, 2rem); }.closing-copy { max-width: 430px; margin: 23px auto 0; color: #68594b; font: italic clamp(1.5rem, 3vw, 2rem)/1.25 'Cormorant Garamond', Georgia, serif; }.closing-links { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 37px; }.closing-links a { display: inline-flex; align-items: center; gap: 9px; min-height: 46px; padding: 0 18px; border: 1px solid rgba(166, 129, 78, .62); color: #60482f; font-size: 10px; font-weight: 600; letter-spacing: .13em; text-decoration: none; text-transform: uppercase; transition: background .25s ease, color .25s ease, transform .25s ease; }.closing-links a:hover { background: #a6814e; color: #fffdf9; transform: translateY(-2px); }.closing-links .closing-rsvp { background: #a6814e; color: #fffdf9; }.closing-links .closing-rsvp:hover { background: #876437; }.closing-support { margin: 35px 0 0; color: #887867; font-size: 11px; line-height: 1.9; }.closing-support a { color: #795c3a; text-decoration: none; }
+.invitation-closing { padding: 105px 26px 135px; text-align: center; }.invitation-closing > div { max-width: 570px; margin: 0 auto; }.invitation-closing-arabic { font-size: clamp(1.25rem, 4vw, 2rem); }.closing-copy { max-width: 430px; margin: 23px auto 0; color: #68594b; font: italic clamp(1.5rem, 3vw, 2rem)/1.25 var(--font-editorial); }.closing-links { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 37px; }.closing-links a { display: inline-flex; align-items: center; gap: 9px; min-height: 46px; padding: 0 18px; border: 1px solid rgba(166, 129, 78, .62); color: #60482f; font-size: 10px; font-weight: 600; letter-spacing: .13em; text-decoration: none; text-transform: uppercase; transition: background .25s ease, color .25s ease, transform .25s ease; }.closing-links a:hover { background: #a6814e; color: #fffdf9; transform: translateY(-2px); }.closing-links .closing-rsvp { background: #a6814e; color: #fffdf9; }.closing-links .closing-rsvp:hover { background: #876437; }.closing-support { margin: 35px 0 0; color: #887867; font-size: 11px; line-height: 1.9; }.closing-support a { color: #795c3a; text-decoration: none; }
 
 @media (max-width: 640px) {
   .lantern-pendulum-container { top: 1px; width: 40px; }.rsvp-corner { width: 78px; height: 78px; }.rsvp-corner-tl { top: 13px; left: 13px; }.rsvp-corner-tr { top: 13px; right: 13px; }.rsvp-corner-bl { bottom: 13px; left: 13px; }.rsvp-corner-br { right: 13px; bottom: 13px; }
@@ -839,7 +851,7 @@ body {
   min-height: 100vh;
   padding: 20px;
   background: #ebe1d6;
-  font-family: var(--font-geist-sans), Inter, sans-serif;
+  font-family: var(--font-supporting);
 }
 
 .admin-login-bg {
@@ -879,7 +891,7 @@ body {
 .admin-login-monogram {
   margin-bottom: 16px;
   color: #a6814e;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 32px;
   font-weight: 400;
   letter-spacing: 0.08em;
@@ -894,7 +906,7 @@ body {
 .admin-login-header h1 {
   margin: 0 0 8px;
   color: #433b34;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 26px;
   font-weight: 500;
   letter-spacing: 0.03em;
@@ -1031,7 +1043,7 @@ body {
 .admin-dashboard {
   min-height: 100vh;
   background: #f8f5f2;
-  font-family: var(--font-geist-sans), Inter, sans-serif;
+  font-family: var(--font-supporting);
 }
 
 .admin-dashboard-header {
@@ -1051,7 +1063,7 @@ body {
 .admin-dashboard-monogram {
   margin-bottom: 8px;
   color: #a6814e;
-  font-family: ''Cormorant Garamond'', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 28px;
   font-weight: 400;
   letter-spacing: 0.08em;
@@ -1066,7 +1078,7 @@ body {
 .admin-dashboard-header h1 {
   margin: 0 0 4px;
   color: #433b34;
-  font-family: ''Cormorant Garamond'', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 32px;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -1179,7 +1191,7 @@ body {
 .admin-rsvp-header h2 {
   margin: 0 0 4px;
   color: #433b34;
-  font-family: ''Cormorant Garamond'', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 24px;
   font-weight: 500;
 }
@@ -1542,7 +1554,7 @@ body {
 .admin-modal h3 {
   margin: 0 0 24px;
   color: #433b34;
-  font-family: ''Cormorant Garamond'', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 24px;
   font-weight: 500;
 }
@@ -1747,7 +1759,7 @@ body {
 
 .invitation-hero-monogram {
   margin: 0;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: clamp(15px, 3.4vw, 21px);
   font-weight: 400;
   letter-spacing: .34em;
@@ -1821,7 +1833,7 @@ body {
 
 .chest-hint {
   margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-supporting);
   font-size: clamp(10px, 2.5vw, 12px);
   font-weight: 300;
   letter-spacing: .26em;
@@ -2097,7 +2109,7 @@ body {
   position: relative;
   z-index: 1;
   margin: 14px 0 0;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: clamp(21px, 5.6vw, 28px);
   font-weight: 500;
   letter-spacing: .01em;
@@ -2110,7 +2122,7 @@ body {
   z-index: 1;
   max-width: 300px;
   margin: 8px 0 0;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-supporting);
   font-size: 13px;
   font-weight: 300;
   line-height: 1.55;
@@ -2136,7 +2148,7 @@ body {
   min-width: 0;
   padding: 12px 14px;
   border-radius: 999px;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-supporting);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: .06em;
@@ -2878,7 +2890,7 @@ body {
 .admin-error-card h2 {
   margin: 0 0 10px;
   color: #433b34;
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 23px;
   font-weight: 500;
 }

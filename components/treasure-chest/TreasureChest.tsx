@@ -24,6 +24,7 @@ import {
 } from './useCapabilities';
 import { useDeviceShake } from './useDeviceShake';
 import { useChestAudio } from './useChestAudio';
+import { unlockAudio } from '@/lib/audio-player';
 import TreasureChestFallback from './TreasureChestFallback';
 import MotionUnlockSheet from './MotionUnlockSheet';
 
@@ -99,11 +100,17 @@ export default function TreasureChest({ onOpen }: Props) {
   // This is the single motion ask for the whole invitation: the lantern on the
   // RSVP and itinerary screens inherits the answer and stays silent.
   const enableMotion = useCallback(async () => {
+    // Must run BEFORE the await: user activation does not survive an async
+    // boundary, so unlocking after `requestMotionAccess()` resolves would be
+    // too late. On iOS this button is frequently the only tap that happens
+    // before the guest shakes the phone open.
+    unlockAudio();
     setDismissed(true);
     await requestMotionAccess();
   }, []);
 
   const dismissMotion = useCallback(() => {
+    unlockAudio();
     setDismissed(true);
     declineMotion();
   }, []);
@@ -118,6 +125,13 @@ export default function TreasureChest({ onOpen }: Props) {
   const pointerStart = useRef<{ x: number; y: number; id: number } | null>(null);
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
+    // Earliest genuine user gesture in the whole invitation. Browsers only
+    // grant audio activation from a real input event, and `devicemotion` (the
+    // shake path below) does NOT count — so this is where background music
+    // gets its chance to start. Called before any guard so it still fires when
+    // the touch turns into a scroll rather than a tap.
+    unlockAudio();
+
     pointerStart.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
     runtimeRef.current.pressed = true;
   }, []);
@@ -161,6 +175,7 @@ export default function TreasureChest({ onOpen }: Props) {
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+      unlockAudio(); // keyboard activation counts as a gesture too
       e.preventDefault();
       handleOpen();
     },

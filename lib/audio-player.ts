@@ -193,14 +193,40 @@ export function initAudio(): void {
 /* Public API                                                          */
 /* ------------------------------------------------------------------ */
 
-/** Call from any user-gesture handler to guarantee unlock. */
+/**
+ * Call synchronously from inside a real user-gesture handler to start playback.
+ *
+ * This is the primary way music actually begins on mobile. Autoplay on mount
+ * is refused by Android Chrome and iOS Safari, and the shake-to-open gesture
+ * on the landing chest fires `devicemotion`, which grants no user activation —
+ * so without an explicit call from a tap/key handler there may be no qualifying
+ * gesture for the entire visit.
+ *
+ * Must not be awaited or deferred by the caller: user activation is consumed at
+ * the end of the current task, so `await something(); unlockAudio()` is too late.
+ */
 export function unlockAudio(): void {
-  if (!enabled) return;
+  if (typeof window === 'undefined') return;
+
+  // Defensive: if the provider's mount effect has not run yet, initialise now
+  // so the stored on/off preference is respected rather than assumed.
+  if (!initialized) {
+    initAudio();
+    return; // initAudio already attempts playback
+  }
+
+  if (!enabled) return; // guest chose silence — respect it
+
   const el = getAudio();
-  if (!el.paused) return;
+  if (!el.paused) return; // already playing
+
   const p = el.play();
   if (p && typeof p.then === 'function') {
-    p.then(() => disarmGestureListeners()).catch(() => {});
+    p.then(() => disarmGestureListeners()).catch(() => {
+      // Still refused; leave the listeners armed for the next gesture.
+      publish({ playing: false });
+      armGestureListeners();
+    });
   }
 }
 

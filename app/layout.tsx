@@ -106,6 +106,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${cormorantGaramond.variable} h-full antialiased`}
     >
       <head>
+        {/* Brittany Signature is self-hosted in public/fonts/ — no CDN
+            dependency, no build-time @import parsing issues. */}
         <StructuredData />
       </head>
       <body 
