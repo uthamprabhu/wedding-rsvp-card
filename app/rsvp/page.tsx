@@ -10,7 +10,7 @@ import dynamic from 'next/dynamic';
 const PaperBackground = dynamic(() => import('@/components/PaperBackground'), { ssr: false, loading: () => null });
 const CelestialBackdrop = dynamic(() => import('@/components/CelestialBackdrop').then(m => ({ default: m.default })), { ssr: false, loading: () => null });
 const AdaptiveLantern = dynamic(() => import('@/components/CelestialBackdrop').then(m => ({ default: m.AdaptiveLantern })), { ssr: false, loading: () => null });
-const InvitationParticles = dynamic(() => import('@/components/InvitationParticles'), { ssr: false, loading: () => null });
+import DeferredButterflies from '@/components/DeferredButterflies';
 import { SlideToConfirm } from '@/components/lightswind/slide-to-confirm';
 import { WEDDING_DAYS } from '@/lib/wedding-days';
 
@@ -241,7 +241,7 @@ export default function RSVPPage() {
       <main className="rsvp-page">
         <PaperBackground zIndex={0} />
         <CelestialBackdrop page="rsvp" />
-        <InvitationParticles />
+        <DeferredButterflies />
         <AdaptiveLantern />
         <div className="rsvp-glow rsvp-glow-left" aria-hidden="true" />
         <div className="rsvp-glow rsvp-glow-right" aria-hidden="true" />

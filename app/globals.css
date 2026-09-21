@@ -220,8 +220,12 @@ body {
    MotionUnlockSheet (see the "Landing hero" section below) is the single
    place that request is ever made for the whole invitation. */
 .rsvp-corner-lines { position: absolute; inset: 0; z-index: 0; color: rgba(158, 117, 62, .38); }.rsvp-corner { position: absolute; display: block; width: clamp(86px, 12vw, 154px); height: clamp(86px, 12vw, 154px); border: solid currentColor; border-width: 1px 0 0 1px; }.rsvp-corner::before { position: absolute; inset: 8px; border: solid rgba(191, 152, 94, .58); border-width: 1px 0 0 1px; content: ''; }.rsvp-corner::after { position: absolute; top: 19px; left: 19px; width: 10px; height: 10px; border: 1px solid rgba(181, 137, 77, .72); transform: rotate(45deg); content: ''; }.rsvp-corner-tl { top: 21px; left: 21px; }.rsvp-corner-tr { top: 21px; right: 21px; transform: scaleX(-1); }.rsvp-corner-bl { bottom: 21px; left: 21px; transform: scaleY(-1); }.rsvp-corner-br { right: 21px; bottom: 21px; transform: scale(-1); }
-.realistic-butterflies { position: absolute !important; inset: 0; z-index: 1; width: 100% !important; height: 100% !important; pointer-events: none; }
-.luxury-invitation .realistic-butterflies { position: fixed !important; }
+/* Always viewport-fixed: this is an ambient effect, not scroll-bound content.
+   Previously only fixed inside .luxury-invitation, so on any other page
+   (itinerary, rsvp) it was `absolute` against a `position: relative`
+   container whose height depends on content — on a tall scrollable page
+   like the itinerary that collapses the canvas to near-nothing. */
+.realistic-butterflies { position: fixed !important; inset: 0; z-index: 1; width: 100% !important; height: 100% !important; pointer-events: none; }
 
 .rsvp-wrap {
   position: relative;
@@ -539,7 +543,6 @@ body {
 .invitation-entry .loading-experience p { color: #e3bd8d; }
 
 .luxury-invitation { position: relative; isolation: isolate; min-height: 100svh; overflow: clip; background: transparent; color: #46372d; font-family: var(--font-supporting); }
-.invitation-particles { position: fixed !important; inset: 0; z-index: 0; width: 100% !important; height: 100% !important; opacity: 0; pointer-events: none; transition: opacity 1.15s cubic-bezier(.22, 1, .36, 1); }.invitation-particles.is-visible { opacity: 1; }
 .invitation-story { position: relative; z-index: 2; width: min(100%, 1220px); margin: 0 auto; }
 .invitation-ornaments { position: fixed; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
 .invitation-corner { position: absolute; width: clamp(88px, 13vw, 150px); color: rgba(151, 112, 59, .3); }

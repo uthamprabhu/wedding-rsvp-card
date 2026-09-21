@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Check, Mail, Users, BedDouble, ArrowLeft, Heart, ExternalLink, CalendarDays } from 'lucide-react';
 import PaperBackground from '@/components/PaperBackground';
 import CelestialBackdrop, { AdaptiveLantern } from '@/components/CelestialBackdrop';
-import InvitationParticles from '@/components/InvitationParticles';
+import DeferredButterflies from '@/components/DeferredButterflies';
 import dynamic from 'next/dynamic';
 import { formatDays, parseDayParam } from '@/lib/wedding-days';
 
@@ -65,7 +65,7 @@ function ConfirmationContent() {
     <main className="rsvp-page">
       <PaperBackground zIndex={0} />
       <CelestialBackdrop page="rsvp" />
-      <InvitationParticles />
+      <DeferredButterflies />
       <AdaptiveLantern />
       <RsvpCelebration />
       
