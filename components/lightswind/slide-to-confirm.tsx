@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion, useAnimation, useMotionValue, useTransform } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,12 @@ interface SlideToConfirmProps {
   className?: string;
   /** Disable the slider */
   disabled?: boolean;
+  /**
+   * Increment this counter to force the slider back to its idle state.
+   * Useful when `onConfirm` resolves without throwing but the parent still
+   * treated the attempt as a failure (e.g. it surfaced a validation modal).
+   */
+  resetSignal?: number;
 }
 
 export function SlideToConfirm({
@@ -30,6 +36,7 @@ export function SlideToConfirm({
   height = 56,
   className,
   disabled = false,
+  resetSignal = 0,
 }: SlideToConfirmProps) {
   const [state, setState] = useState<"idle" | "loading" | "success">("idle");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,12 +62,13 @@ export function SlideToConfirm({
       try {
         await onConfirm();
         setState("success");
-      } catch (error) {
-        // If error, reset
+      } catch {
+        // Reset on failure. We deliberately swallow here rather than re-throw:
+        // Framer Motion does not await `onDragEnd`, so a re-throw would surface
+        // as an unhandled promise rejection. The parent owns error reporting.
         setState("idle");
+        x.set(0);
         controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
-        // Re-throw to let parent handle
-        throw error;
       }
     } else {
       // Reset if not fully dragged
@@ -75,6 +83,16 @@ export function SlideToConfirm({
       controls.start({ x: 0 });
     }
   };
+
+  /* Parent-driven reset: snap back to idle whenever `resetSignal` changes.
+     Skips the initial render so the slider isn't animated on mount. */
+  useEffect(() => {
+    if (resetSignal === 0) return;
+    setState("idle");
+    x.set(0);
+    controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetSignal]);
 
   return (
     <div

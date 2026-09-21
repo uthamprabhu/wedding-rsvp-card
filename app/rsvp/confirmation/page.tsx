@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Check, Mail, Users, BedDouble, ArrowLeft } from 'lucide-react';
+import { Check, Mail, Users, BedDouble, ArrowLeft, Heart } from 'lucide-react';
 import PaperBackground from '@/components/PaperBackground';
 import CelestialBackdrop, { AdaptiveLantern } from '@/components/CelestialBackdrop';
 import InvitationParticles from '@/components/InvitationParticles';
@@ -104,6 +104,15 @@ function ConfirmationContent() {
           </p>
 
           <p className="rsvp-footer">With love, Farzeen & Bilal <span>•</span> 2026</p>
+
+          <a
+            href="https://wa.me/919633693160"
+            target="_blank"
+            rel="noreferrer"
+            className="zorscode-credit"
+          >
+            Made with <Heart size={11} className="zorscode-heart" aria-hidden="true" /> by Zorscode
+          </a>
         </motion.div>
       </div>
     </main>

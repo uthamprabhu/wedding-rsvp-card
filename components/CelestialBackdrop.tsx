@@ -112,9 +112,10 @@ export function AdaptiveLantern() {
     const orientationSwing = (event: DeviceOrientationEvent) => {
       if (event.gamma == null) return; // iOS sends empty events without a grant
       delivered = true;
-      // gamma is left-right tilt (-90..90); scale to a believable pendulum arc
-      const gamma = Math.max(-30, Math.min(30, event.gamma));
-      scheduleRotation(gamma * 0.27);
+      // gamma is left-right tilt (-90..90); gentle scale so a big phone tilt
+      // produces only a small, pendulum-like arc in the lantern.
+      const gamma = Math.max(-20, Math.min(20, event.gamma));
+      scheduleRotation(gamma * 0.18);
     };
 
     window.addEventListener('deviceorientation', orientationSwing, { passive: true });

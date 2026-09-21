@@ -19,15 +19,11 @@ const PaperBackground = dynamic(() => import('@/components/PaperBackground'), {
   ssr: false,
   loading: () => null,
 });
-const CelestialBackdrop = dynamic(() => import('@/components/CelestialBackdrop').then(mod => ({ default: mod.default })), {
-  ssr: false,
-  loading: () => null,
-});
-const AdaptiveLantern = dynamic(() => import('@/components/CelestialBackdrop').then(mod => ({ default: mod.AdaptiveLantern })), {
-  ssr: false,
-  loading: () => null,
-});
-const FluidBackground = dynamic(() => import('@/components/FluidBackground'), {
+const AdaptiveLantern = dynamic(
+  () => import('@/components/CelestialBackdrop').then(mod => ({ default: mod.AdaptiveLantern })),
+  { ssr: false, loading: () => null },
+);
+const DeferredButterflies = dynamic(() => import('@/components/DeferredButterflies'), {
   ssr: false,
   loading: () => null,
 });
@@ -43,19 +39,16 @@ export default function ItineraryPage() {
   }, []);
 
   return (
-    <main className="relative w-full min-h-screen overflow-x-hidden overflow-y-auto">
+    <main className="itinerary-page relative w-full min-h-screen overflow-x-hidden">
       {!isLoaded && (
         <div className="simple-loader">
           <p>Loading your experience...</p>
         </div>
       )}
-      {/* Paper background - z-0 */}
+      {/* Paper background */}
       <PaperBackground />
-      <CelestialBackdrop page="itinerary" />
       <AdaptiveLantern />
-      
-      {/* Fluid background - z-5 (always behind content) */}
-      <FluidBackground className="itinerary-fluid" variant="itinerary" />
+      <DeferredButterflies delay={1500} />
 
       {/* Content - z-20 */}
       <motion.div

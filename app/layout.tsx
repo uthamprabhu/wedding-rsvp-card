@@ -4,6 +4,7 @@ import "./globals.css";
 import 'lenis/dist/lenis.css';
 import SmoothScroll from '@/components/SmoothScroll';
 import StructuredData from '@/components/StructuredData';
+import AudioProvider from '@/components/AudioProvider';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -113,6 +114,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       >
         <SmoothScroll />
         {children}
+        <AudioProvider />
       </body>
     </html>
   );

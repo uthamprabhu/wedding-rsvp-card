@@ -1,107 +1,176 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import type { LucideIcon } from 'lucide-react';
-import { HeartHandshake, MoonStar, Sparkles, Utensils, UsersRound } from 'lucide-react';
+/**
+ * The itinerary: a simple 3-day swipeable experience.
+ *
+ * Uses native CSS scroll-snap for the swipe instead of hand-rolled drag
+ * physics - the browser handles momentum, elasticity and touch smoothness
+ * far better than any custom implementation, and it's a fraction of the code.
+ */
 
-interface TimelineEvent {
-  time: string;
+import { motion, useReducedMotion } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+interface ItineraryDay {
+  day: string;
+  date: string;
   title: string;
   description: string;
-  note: string;
-  icon: LucideIcon;
+  timing: string;
+  location: string;
 }
 
-const events: TimelineEvent[] = [
+const DAYS: ItineraryDay[] = [
   {
-    time: '4:00 PM',
-    title: 'Welcome & Mehndi',
-    description: 'Begin the evening with warm greetings, delicate henna, and sweet refreshments with the people we love most.',
-    note: 'Gather & greet',
-    icon: Sparkles,
+    day: 'Day 1',
+    date: '30 October 2026',
+    title: 'Fabi Mehandi',
+    description:
+      "An evening where two families come together and the celebrations officially begin. As Bilal's family presents Farzeen with her wedding attire, an intimate family tradition unfolds. Then comes the colour, the mehendi, the music and the celebration, as everyone gathers around Farzeen for the first chapter of FABI.",
+    timing: '6:00 PM \u2013 9:00 PM',
+    location: "Farzeen's Residence",
   },
   {
-    time: '5:00 PM',
-    title: 'The Nikah',
-    description: 'Join us as we begin our marriage with a beautiful ceremony surrounded by family, blessings, and dua.',
-    note: 'The ceremony',
-    icon: MoonStar,
+    day: 'Day 2',
+    date: '31 October 2026',
+    title: "Molutty's Haldi & Sangeeth",
+    description:
+      "One last evening before she becomes a bride. Farzeen's closest family and friends gather in yellow for an intimate celebration filled with haldi, music, games, laughter, good food and a little chaos. A night for her favourite people to celebrate Molutty before tomorrow changes everything.",
+    timing: '5:00 PM \u2013 9:00 PM',
+    location: 'Location to be confirmed',
   },
   {
-    time: '6:30 PM',
-    title: 'Family Portraits',
-    description: 'A quiet moment for photographs, embraces, and memories we will carry with us long after the evening ends.',
-    note: 'Together in joy',
-    icon: UsersRound,
-  },
-  {
-    time: '7:30 PM',
-    title: 'Dinner & Walima',
-    description: 'Share a generous feast of favourite flavours as we celebrate the beginning of our life together.',
-    note: 'A blessed feast',
-    icon: Utensils,
-  },
-  {
-    time: '9:00 PM',
-    title: 'An Evening of Joy',
-    description: 'Stay with us for warm conversation, sweet memories, and a final celebration beneath the evening sky.',
-    note: 'Celebrate with us',
-    icon: HeartHandshake,
+    day: 'Day 3',
+    date: '01 November 2026',
+    title: 'The Fabi Big Day',
+    description:
+      'The day we have been waiting for. Join Farzeen and Bilal as they begin their next chapter surrounded by the people who matter most.',
+    timing: 'Arrival 11:30 AM \u00b7 Nikah 12:00 PM \u2013 12:30 PM',
+    location: 'M Convention Centre',
   },
 ];
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+};
+
 export default function InteractiveItinerary() {
+  const [active, setActive] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // Track which card is currently snapped into view, purely from native
+  // scroll position - no drag state, no motion values.
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const index = Math.round(el.scrollLeft / el.clientWidth);
+        setActive(Math.max(0, Math.min(DAYS.length - 1, index)));
+      });
+    };
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  const goTo = useCallback((index: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollTo({
+      left: index * el.clientWidth,
+      behavior: 'smooth',
+    });
+  }, []);
+
   return (
     <section className="itinerary-experience" aria-labelledby="itinerary-title">
       <div className="itinerary-shell">
         <motion.header
           className="itinerary-header"
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
+          initial={prefersReducedMotion ? undefined : 'hidden'}
+          animate="visible"
+          variants={fadeUp}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
-          <p className="itinerary-bismillah">بِسْمِ ٱللَّٰهِ <span>•</span> with gratitude</p>
-          <p className="itinerary-monogram">F <span>&</span> B</p>
-          <h1 id="itinerary-title">A day of blessings</h1>
-          <p className="itinerary-lead">A thoughtful sequence of moments, shared with the people who make our story complete.</p>
+          <h1 id="itinerary-title">The Itinerary</h1>
+          <motion.p
+            className="itinerary-lead"
+            initial={prefersReducedMotion ? undefined : 'hidden'}
+            animate="visible"
+            variants={fadeUp}
+            transition={{ duration: 0.5, delay: 0.08, ease: 'easeOut' }}
+          >
+            Three days. Three celebrations. One story.
+          </motion.p>
         </motion.header>
 
-        <div className="itinerary-timeline">
-          <motion.div
-            className="itinerary-line"
-            aria-hidden="true"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.05 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-          />
-          {events.map((event, index) => {
-            const Icon = event.icon;
-            return (
-              <motion.article
-                className={`itinerary-event ${index % 2 === 0 ? 'is-left' : 'is-right'}`}
-                key={event.title}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.45, ease: 'easeOut' }}
-              >
+        <motion.div
+          className="itinerary-carousel"
+          initial={prefersReducedMotion ? undefined : 'hidden'}
+          animate="visible"
+          variants={fadeUp}
+          transition={{ duration: 0.5, delay: 0.16, ease: 'easeOut' }}
+        >
+          <div className="itinerary-track" ref={trackRef}>
+            {DAYS.map((entry) => (
+              <article className="itinerary-slide" key={entry.title}>
                 <div className="itinerary-card">
-                  <div className="itinerary-card-meta"><span>{event.note}</span><time>{event.time}</time></div>
-                  <h2>{event.title}</h2>
-                  <p>{event.description}</p>
+                  <p className="itinerary-card-day">
+                    {entry.day} <span>&middot;</span> {entry.date}
+                  </p>
+                  <h2>{entry.title}</h2>
+                  <p className="itinerary-card-description">{entry.description}</p>
+                  <div className="itinerary-card-meta">
+                    <span>{entry.timing}</span>
+                    <span>{entry.location}</span>
+                  </div>
                 </div>
-                <div className="itinerary-marker" aria-hidden="true"><Icon size={18} strokeWidth={1.4} /></div>
-                <div className="itinerary-spacer" aria-hidden="true" />
-              </motion.article>
-            );
-          })}
-        </div>
+              </article>
+            ))}
+          </div>
+        </motion.div>
 
-        <motion.p className="itinerary-closing" initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.5, ease: 'easeOut' }}>May Allah fill this gathering with peace, love, and barakah.</motion.p>
-        <div className="itinerary-ornament" aria-hidden="true"><span /><i>✦</i><span /></div>
-        <div className="itinerary-bottom-space" aria-hidden="true" />
+        <motion.div
+          className="itinerary-dots"
+          role="tablist"
+          aria-label="Choose a day"
+          initial={prefersReducedMotion ? undefined : 'hidden'}
+          animate="visible"
+          variants={fadeUp}
+          transition={{ duration: 0.5, delay: 0.22, ease: 'easeOut' }}
+        >
+          {DAYS.map((entry, index) => (
+            <button
+              key={entry.title}
+              type="button"
+              role="tab"
+              aria-selected={index === active}
+              aria-label={`${entry.day}: ${entry.title}`}
+              className={`itinerary-dot${index === active ? ' is-active' : ''}`}
+              onClick={() => goTo(index)}
+            />
+          ))}
+        </motion.div>
+
+        <motion.p
+          className="itinerary-swipe-hint"
+          initial={prefersReducedMotion ? undefined : 'hidden'}
+          animate="visible"
+          variants={fadeUp}
+          transition={{ duration: 0.5, delay: 0.28, ease: 'easeOut' }}
+        >
+          Swipe to discover the next celebration
+        </motion.p>
       </div>
     </section>
   );

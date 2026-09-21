@@ -22,6 +22,7 @@ export interface RsvpSubmission {
   email?: string;
   guest_count: number;
   accommodation_needed: boolean;
+  days_attending: string[];
   created_at?: string;
 }
 

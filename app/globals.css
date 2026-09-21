@@ -1,9 +1,26 @@
+@import url('https://fonts.cdnfonts.com/css/brittany-signature');
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* --------------------------------------------------------------------
+     Global typography tokens.
+     These simply point at the fonts already loaded elsewhere (Cormorant
+     Garamond and Geist via next/font in app/layout.tsx, Brittany Signature
+     via the CDN @import above), so changing a token here changes it
+     everywhere it's used - without touching any existing hardcoded
+     `var(--font-cormorant)` / `var(--font-geist-sans)` references, which
+     keep working exactly as before.
+     -------------------------------------------------------------------- */
+  /* Editorial serif: major wedding/event headings. */
+  --font-editorial: var(--font-cormorant), Georgia, serif;
+  /* Clean supporting sans: metadata, UI, labels, body copy. */
+  --font-supporting: var(--font-geist-sans), Inter, sans-serif;
+  /* Decorative handwritten script: small accents only, never body text. */
+  --font-signature: 'Brittany Signature', var(--font-editorial);
 }
 
 @theme inline {
@@ -171,21 +188,20 @@ body {
   width: 100%;
   height: auto;
   overflow: visible;
-  /* Pendulum pivot point at top of lantern */
   transform-origin: 50% 0;
-  /* Combine natural sway animation with device motion */
   transform: rotate(var(--lantern-swing-rotation));
-  /* Smooth pendulum-like transition */
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Slow, pendulum-like easing — matches the physical weight of the lantern.
+     The long duration means rapid sensor updates are smoothed out rather than
+     making the lantern snap back and forth on mobile. */
+  transition: transform 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
-  /* Default gentle sway animation (always active) */
-  animation: lantern-natural-sway 4.5s ease-in-out infinite;
+  animation: lantern-natural-sway 7s ease-in-out infinite;
 }
 
 @keyframes lantern-natural-sway {
-  0% { transform: rotate(calc(var(--lantern-swing-rotation) - 2.5deg)); }
-  50% { transform: rotate(calc(var(--lantern-swing-rotation) + 2.5deg)); }
-  100% { transform: rotate(calc(var(--lantern-swing-rotation) - 2.5deg)); }
+  0%   { transform: rotate(calc(var(--lantern-swing-rotation) - 1.8deg)); }
+  50%  { transform: rotate(calc(var(--lantern-swing-rotation) + 1.8deg)); }
+  100% { transform: rotate(calc(var(--lantern-swing-rotation) - 1.8deg)); }
 }
 
 /* The lantern never asks for motion access itself - the treasure chest's
@@ -277,52 +293,159 @@ body {
 .rsvp-confirmation-actions p { margin: 0; color: #93867a; font: italic 17px var(--font-cormorant), Georgia, serif; }
 .rsvp-confirmation-note { margin: 36px auto 0; color: #76695d; font: italic 20px var(--font-cormorant), Georgia, serif; }
 
-/* Itinerary timeline */
-.itinerary-experience { position: relative; z-index: 2; min-height: 100vh; padding: 76px 20px 40px; color: #433b34; }
-.itinerary-shell { width: min(100%, 1020px); margin: 0 auto; }
-.itinerary-header { max-width: 620px; margin: 0 auto 76px; text-align: center; }
-.itinerary-bismillah { margin: 0 0 22px; color: #9b7849; font: 500 10px/1 var(--font-geist-sans), sans-serif; letter-spacing: .22em; text-transform: uppercase; }
-.itinerary-bismillah span { padding: 0 8px; color: #c3a16c; }
-.itinerary-monogram { margin: 0 0 10px; color: #a6814e; font: 500 26px/1 var(--font-cormorant), Georgia, serif; letter-spacing: .18em; }
-.itinerary-monogram span { color: #c3a16c; font-style: italic; }
-.itinerary-header h1 { margin: 0; color: #433b34; font: 400 clamp(3.5rem, 7vw, 6rem)/.9 var(--font-cormorant), Georgia, serif; }
-.itinerary-lead { max-width: 420px; margin: 23px auto 0; color: #76695d; font-size: 14px; line-height: 1.8; }
-.itinerary-timeline { position: relative; }
-.itinerary-line { position: absolute; top: 20px; bottom: 20px; left: calc(50% - .5px); width: 1px; background: linear-gradient(to bottom, transparent, rgba(166, 129, 78, .6) 8%, rgba(166, 129, 78, .6) 92%, transparent); transform-origin: top; }
-.itinerary-event { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr); align-items: center; min-height: 190px; }
-.itinerary-event.is-left .itinerary-card { grid-column: 1; grid-row: 1; text-align: right; }
-.itinerary-event.is-left .itinerary-marker { grid-column: 2; grid-row: 1; }
-.itinerary-event.is-left .itinerary-spacer { grid-column: 3; grid-row: 1; }
-.itinerary-event.is-right .itinerary-spacer { grid-column: 1; grid-row: 1; }
-.itinerary-event.is-right .itinerary-marker { grid-column: 2; grid-row: 1; }
-.itinerary-event.is-right .itinerary-card { grid-column: 3; grid-row: 1; text-align: left; }
-.itinerary-card { width: min(100%, 360px); padding: 25px 28px; border: 1px solid rgba(166, 129, 78, .32); background: rgba(255, 253, 249, .58); box-shadow: 0 16px 36px rgba(100, 75, 48, .08); backdrop-filter: blur(10px); }
-.itinerary-event.is-left .itinerary-card { justify-self: end; }.itinerary-event.is-right .itinerary-card { justify-self: start; }
-.itinerary-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; color: #a6814e; font-size: 9px; letter-spacing: .15em; text-transform: uppercase; }
-.itinerary-event.is-left .itinerary-card-meta { flex-direction: row-reverse; }
-.itinerary-card-meta span { color: #a49483; }.itinerary-card-meta time { white-space: nowrap; color: #a6814e; }
-.itinerary-card h2 { margin: 0 0 9px; color: #433b34; font: 400 31px/1 var(--font-cormorant), Georgia, serif; }
-.itinerary-card p { margin: 0; color: #76695d; font-size: 13px; line-height: 1.75; }
-.itinerary-marker { position: relative; z-index: 1; display: grid; width: 48px; height: 48px; place-items: center; justify-self: center; border: 1px solid #b18a52; border-radius: 50%; background: #ebe1d6; color: #a6814e; box-shadow: 0 0 0 8px rgba(235, 225, 214, .7); }
-.itinerary-closing { margin: 62px auto 0; color: #76695d; font: italic 20px var(--font-cormorant), Georgia, serif; text-align: center; }
-.itinerary-ornament { display: flex; align-items: center; justify-content: center; gap: 13px; margin: 20px auto 0; color: #a6814e; }
-.itinerary-ornament span { width: 45px; height: 1px; background: rgba(166, 129, 78, .4); }.itinerary-ornament i { font-size: 13px; font-style: normal; }.itinerary-bottom-space { height: 100px; }
+/* ==========================================================================
+   Itinerary: 3-day swipeable editorial carousel
+   Mobile-first: base rules below target phones (the ~99% case), then two
+   media blocks expand the exact same structure for tablet and desktop.
+   Background is intentionally untouched here - PaperBackground, the celestial
+   backdrop and the fluid canvas all sit behind this content exactly as before.
+   ========================================================================== */
 
-@media (max-width: 700px) {
-  .itinerary-experience { padding: 76px 18px 24px; }
-  .itinerary-header { margin-bottom: 48px; }
-  .itinerary-header h1 { font-size: clamp(3.4rem, 16vw, 5rem); }
-  .itinerary-lead { font-size: 13px; }
-  .itinerary-line { top: 20px; bottom: 20px; left: 22px; }
-  .itinerary-event, .itinerary-event.is-left, .itinerary-event.is-right { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: start; min-height: 0; padding-bottom: 26px; }
-  .itinerary-event .itinerary-card, .itinerary-event.is-left .itinerary-card, .itinerary-event.is-right .itinerary-card { grid-column: 2; grid-row: 1; width: 100%; justify-self: stretch; padding: 21px 19px; text-align: left; }
-  .itinerary-event .itinerary-marker, .itinerary-event.is-left .itinerary-marker, .itinerary-event.is-right .itinerary-marker { grid-column: 1; grid-row: 1; width: 44px; height: 44px; }
-  .itinerary-event .itinerary-spacer { display: none; }
-  .itinerary-event.is-left .itinerary-card-meta { flex-direction: row; }
-  .itinerary-card h2 { font-size: 28px; }
-  .itinerary-card p { font-size: 12px; line-height: 1.7; }
-  .itinerary-closing { margin-top: 38px; font-size: 19px; }
-  .itinerary-bottom-space { height: 120px; }
+.itinerary-experience { position: relative; z-index: 2; min-height: 100vh; padding: 64px 0 32px; color: #433b34; }
+.itinerary-shell { width: 100%; margin: 0 auto; }
+
+.itinerary-header { max-width: 560px; margin: 0 auto 6px; padding: 0 22px; text-align: center; }
+.itinerary-header h1 { margin: 0; color: #433b34; font: 400 clamp(2.6rem, 11vw, 3.6rem)/1.05 var(--font-editorial); letter-spacing: -.01em; }
+.itinerary-lead {
+  margin: 14px 0 0;
+  color: #8a7457;
+  font: 500 10.5px/1.6 var(--font-supporting);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+/* -------------------------------- carousel -------------------------------- */
+/* Native CSS scroll-snap: the browser handles momentum, touch smoothness and
+   elasticity, which is simpler and feels better than hand-rolled drag physics. */
+
+.itinerary-carousel { margin-top: 40px; }
+.itinerary-track {
+  display: flex;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.itinerary-track::-webkit-scrollbar { display: none; }
+
+.itinerary-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.itinerary-card {
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(360px, 68vh, 480px);
+  padding: 34px 26px 28px;
+  border: 1px solid rgba(166, 129, 78, .28);
+  border-radius: 14px;
+  background: rgba(255, 253, 249, .74);
+  overflow: hidden;
+}
+
+.itinerary-card-day {
+  margin: 0;
+  color: #a6814e;
+  font: 600 10px/1 var(--font-supporting);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.itinerary-card-day span { margin: 0 7px; color: #c3a16c; }
+
+.itinerary-card h2 {
+  margin: 14px 0 0;
+  color: #433b34;
+  font: 400 clamp(1.9rem, 8vw, 2.5rem)/1.08 var(--font-editorial);
+  letter-spacing: -.01em;
+}
+
+.itinerary-card-description {
+  flex: 1 1 auto;
+  margin: 18px 0 0;
+  color: #6f6053;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.itinerary-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(166, 129, 78, .22);
+  color: #8a7457;
+  font: 500 11.5px/1.5 var(--font-supporting);
+  letter-spacing: .02em;
+}
+
+/* ---------------------------------- dots ---------------------------------- */
+
+.itinerary-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+.itinerary-dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(166, 129, 78, .32);
+  cursor: pointer;
+  transition: background-color .3s ease, transform .3s ease;
+}
+.itinerary-dot.is-active { background: #a6814e; transform: scale(1.5); }
+
+.itinerary-swipe-hint {
+  margin: 18px 0 0;
+  color: #a49483;
+  font: 400 11px/1 var(--font-supporting);
+  letter-spacing: .1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* --------------------------------- tablet --------------------------------- */
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  .itinerary-experience { padding: 80px 0 44px; }
+  .itinerary-header { max-width: 620px; }
+  .itinerary-header h1 { font-size: clamp(3rem, 7vw, 3.8rem); }
+  .itinerary-carousel { margin-top: 52px; }
+  .itinerary-track { max-width: 460px; }
+  .itinerary-card { min-height: clamp(340px, 52vh, 420px); padding: 42px 38px 34px; }
+  .itinerary-card h2 { font-size: 2.6rem; }
+  .itinerary-card-description { font-size: 14.5px; }
+}
+
+/* --------------------------------- desktop --------------------------------- */
+
+@media (min-width: 1024px) {
+  .itinerary-experience { padding: 96px 0 56px; }
+  .itinerary-header { max-width: 680px; }
+  .itinerary-header h1 { font-size: clamp(3.4rem, 4.6vw, 4.4rem); }
+  .itinerary-lead { font-size: 11px; }
+
+  .itinerary-carousel { margin-top: 58px; }
+  .itinerary-track { max-width: 520px; }
+  .itinerary-card { min-height: 400px; padding: 48px 44px 38px; }
+  .itinerary-card h2 { font-size: 2.9rem; }
+  .itinerary-card-description { font-size: 15px; line-height: 1.8; }
+  .itinerary-card-meta { flex-direction: row; justify-content: space-between; gap: 18px; font-size: 12px; }
+
+  .itinerary-swipe-hint { margin-top: 22px; }
 }
 
 /* Shared journey navigation */
@@ -387,7 +510,7 @@ body {
    the loader or invitation black. */
 .invitation-entry { position: relative; min-height: 100svh; background: #3A0712; color: #f0dcc4; }
 .invitation-entry-hero { position: fixed; z-index: 5; inset: 0; overflow: hidden; isolation: isolate; background: #3A0712; }
-.invitation-entry-story { position: relative; z-index: 10; }
+.invitation-entry-story { position: relative; z-index: 10; background: #ebe1d6; }
 /* Warm pool of light behind the chest so it sits clearly above the burgundy. */
 .invitation-entry-glow { position: absolute; top: 50%; left: 50%; width: min(96vw, 760px); height: min(96vw, 760px); border-radius: 50%; background: radial-gradient(circle, rgba(196, 118, 56, .26), rgba(122, 40, 32, .16) 44%, transparent 72%); filter: blur(22px); transform: translate(-50%, -50%); pointer-events: none; }
 
@@ -395,13 +518,8 @@ body {
    on the landing route only, so there is no cream-to-burgundy flash. */
 .invitation-entry .loading-experience { background: radial-gradient(circle at 50% 44%, #5a1320, #400b15 52%, #300509 100%); }
 .invitation-entry .loading-experience p { color: #e3bd8d; }
-.invitation-opening-fluid, .itinerary-fluid { mix-blend-mode: multiply; transition: opacity .7s ease; }.invitation-opening-fluid { opacity: .58; }.itinerary-fluid { opacity: .56; }
 
-@media (max-width: 640px) {
-  .invitation-opening-fluid { opacity: .44; }.itinerary-fluid { opacity: .42; }
-}
-
-.luxury-invitation { position: relative; isolation: isolate; min-height: 100svh; overflow: clip; background: #ebe1d6; color: #46372d; font-family: var(--font-geist-sans), Inter, sans-serif; }
+.luxury-invitation { position: relative; isolation: isolate; min-height: 100svh; overflow: clip; background: transparent; color: #46372d; font-family: var(--font-geist-sans), Inter, sans-serif; }
 .invitation-particles { position: fixed !important; inset: 0; z-index: 0; width: 100% !important; height: 100% !important; opacity: 0; pointer-events: none; transition: opacity 1.15s cubic-bezier(.22, 1, .36, 1); }.invitation-particles.is-visible { opacity: 1; }
 .invitation-story { position: relative; z-index: 2; width: min(100%, 1220px); margin: 0 auto; }
 .invitation-ornaments { position: fixed; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
@@ -411,6 +529,64 @@ body {
 .invitation-opening, .invitation-message-section, .invitation-names, .invitation-portrait-section, .invitation-event-section, .invitation-families, .invitation-closing { position: relative; }
 .invitation-opening { display: grid; min-height: 100svh; padding: 112px 28px 58px; place-items: center; text-align: center; }
 .invitation-opening > div { max-width: 450px; }
+
+/* New opening inner layout */
+.invitation-opening-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: min(100%, 480px);
+  text-align: center;
+}
+
+/* Fabi logo — small, below the lantern */
+.invitation-fabi-logo { margin-bottom: 18px; }
+.invitation-fabi-logo-img {
+  width: clamp(54px, 14vw, 72px) !important;
+  height: auto !important;
+  object-fit: contain;
+  opacity: .88;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.25));
+}
+
+/* Hero couple names */
+.invitation-hero-names {
+  margin: 0;
+  color: #3d2e26;
+  font-family: 'Brittany Signature', 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(3.6rem, 14vw, 7.2rem);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -.01em;
+}
+.invitation-hero-weds {
+  display: inline-block;
+  color: #a6814e;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: .38em;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: .08em;
+}
+
+/* Bismillah at bottom of opening — tiny, just above the scroll cue */
+.invitation-opening-bismillah { margin-top: 14px; }
+.invitation-opening-bismillah .invitation-arabic {
+  margin: 0;
+  color: #9b7849;
+  font-size: clamp(0.95rem, 3.4vw, 1.15rem);
+  line-height: 1.5;
+}
+.invitation-opening-bismillah .invitation-translation {
+  margin: 5px 0 0;
+  color: #7a6a57;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  line-height: 1.85;
+  text-transform: uppercase;
+}
 .invitation-arabic { margin: 0; color: #8f6739; font: 400 clamp(1.8rem, 8vw, 3.5rem)/1.55 'Cormorant Garamond', Georgia, serif; text-wrap: balance; }
 .invitation-arabic-opening { display: inline-block; direction: rtl; unicode-bidi: plaintext; }.invitation-arabic-opening span { display: inline-block; will-change: opacity, transform, filter; }
 .invitation-arabic-mobile-break { display: none; }
@@ -422,9 +598,9 @@ body {
 .invitation-message-section { display: grid; min-height: 78svh; padding: 110px 25px; place-items: center; text-align: center; }
 .invitation-message { max-width: 680px; }.section-eyebrow { margin: 0 0 19px; color: #a6814e; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
 .invitation-message blockquote { margin: 0; color: #49392d; font: 400 clamp(2rem, 5vw, 4.1rem)/1.04 'Cormorant Garamond', Georgia, serif; letter-spacing: -.025em; text-wrap: balance; }
-.invitation-from { margin: 34px 0 0; color: #7d6c5d; font-size: 12px; line-height: 1.8; }.invitation-from strong { color: #624c36; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 19px; font-weight: 500; }.invitation-from em { color: #9a815e; font-size: .8em; font-style: italic; }
+.invitation-from { margin: 34px 0 0; color: #7d6c5d; font-size: 12px; line-height: 1.8; }.invitation-from strong { color: #624c36; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 19px; font-weight: 500; }.invitation-from em { color: #9a815e; font-size: .8em; font-style: italic; }.invitation-from-and { display: block; margin: 8px 0 4px; color: #a6814e; font-size: 11px; font-style: italic; letter-spacing: .1em; }.invitation-from-family { display: block; margin: 0 0 3px; color: #9a7d5e; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
 
-.invitation-names { padding: 100px 24px 88px; text-align: center; }.invitation-names h1, .invitation-names h2 { margin: 0; color: #3d2e26; font: 400 clamp(4rem, 12vw, 9rem)/.78 'Cormorant Garamond', Georgia, serif; letter-spacing: -.055em; }.invitation-names h1 span, .invitation-names h2 span { display: block; font-size: .64em; font-style: italic; letter-spacing: -.035em; }.invitation-with { margin: 28px 0; color: #aa814d; font: italic 400 clamp(1.5rem, 4vw, 2.5rem)/1 'Cormorant Garamond', Georgia, serif; }.invitation-names h2 { color: #5e4633; }.invitation-event-label { margin: 36px 0 0; color: #846947; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
+.invitation-names { padding: 100px 24px 88px; text-align: center; }.invitation-names h1, .invitation-names h2 { margin: 0; color: #3d2e26; font-family: 'Brittany Signature', 'Cormorant Garamond', Georgia, serif; font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 400; line-height: 1.45; letter-spacing: -.01em; }.invitation-names h1 { margin-top: 22px; }.invitation-names h1 span, .invitation-names h2 span { display: block; font-size: .62em; font-style: italic; letter-spacing: -.01em; }.invitation-with { margin: 38px 0 14px; color: #aa814d; font: italic 400 clamp(1.5rem, 4vw, 2.5rem)/1 'Cormorant Garamond', Georgia, serif; }.invitation-names h2 { color: #5e4633; margin-top: 14px; }.invitation-event-label { margin: 36px 0 0; color: #846947; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
 
 .wedding-countdown { width: min(100% - 40px, 840px); margin: 0 auto; padding: clamp(42px, 7vw, 72px) clamp(18px, 5vw, 54px); border-top: 1px solid rgba(166, 129, 78, .34); border-bottom: 1px solid rgba(166, 129, 78, .34); text-align: center; }.wedding-countdown .section-eyebrow { margin-bottom: 27px; }.countdown-clock { display: grid; grid-template-columns: repeat(4, 1fr); align-items: start; }.countdown-unit { position: relative; display: grid; gap: 9px; place-items: center; min-width: 0; }.countdown-unit:not(:last-child)::after { position: absolute; top: clamp(22px, 3.2vw, 37px); right: -1px; width: 3px; height: 3px; border-radius: 50%; background: #b08751; box-shadow: 0 9px #b08751; content: ''; }.countdown-unit strong { color: #49372b; font: 400 clamp(2.5rem, 6.4vw, 5.1rem)/.82 'Cormorant Garamond', Georgia, serif; font-variant-numeric: tabular-nums; letter-spacing: -.045em; }.countdown-unit span { color: #937552; font-size: 9px; font-weight: 600; letter-spacing: .17em; text-transform: uppercase; }.countdown-note { margin: 28px 0 0; color: #7c6b59; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }.countdown-arrived { margin: 0; color: #5e4633; font: italic clamp(2rem, 5vw, 3.5rem)/1 'Cormorant Garamond', Georgia, serif; }
 
@@ -438,7 +614,8 @@ body {
 
 @media (max-width: 640px) {
   .lantern-pendulum-container { top: 1px; width: 40px; }.rsvp-corner { width: 78px; height: 78px; }.rsvp-corner-tl { top: 13px; left: 13px; }.rsvp-corner-tr { top: 13px; right: 13px; }.rsvp-corner-bl { bottom: 13px; left: 13px; }.rsvp-corner-br { right: 13px; bottom: 13px; }
-  .invitation-corner { width: 72px; }.invitation-opening { padding: 94px 22px 56px; }.invitation-message-section { min-height: 70svh; padding: 86px 24px; }.invitation-message blockquote { font-size: clamp(2rem, 9vw, 3.3rem); }.invitation-names { padding: 76px 20px 58px; }.invitation-names h1, .invitation-names h2 { font-size: clamp(3.7rem, 17vw, 5.6rem); }.wedding-countdown { width: min(100% - 32px, 560px); padding: 40px 10px; }.countdown-unit strong { font-size: clamp(2.45rem, 12vw, 3.6rem); }.countdown-unit:not(:last-child)::after { top: 25px; right: -1px; }.countdown-unit span { font-size: 8px; letter-spacing: .1em; }.countdown-note { font-size: 9px; letter-spacing: .1em; }.invitation-portrait-section { padding: 2px 12px 82px; }.couple-portrait-story { width: min(100% - 4px, 560px); padding: 46px 0 10px; }.couple-presentation { display: block; perspective: none; }.couple-profile { display: none; }.couple-presentation[data-featured='bride'] .couple-profile-bride, .couple-presentation[data-featured='groom'] .couple-profile-groom { display: block; }.couple-portrait-frame { width: min(80vw, 372px); }.couple-profile h3 { font-size: clamp(3.3rem, 14vw, 4.8rem); }.couple-union { display: none; }.portrait-memory { width: 92px; padding: 4px; }.portrait-memory-left { top: 13%; left: -13px; }.portrait-memory-right { right: -12px; bottom: 27%; }.mobile-person-switch { position: relative; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 13px; margin: 29px auto 0; }.mobile-person-switch button { min-height: 34px; padding: 0 7px; border: 0; border-bottom: 1px solid transparent; background: transparent; color: #8d765a; font: 400 18px 'Cormorant Garamond', Georgia, serif; cursor: pointer; }.mobile-person-switch button[aria-selected='true'] { border-color: #a6814e; color: #533b2a; }.mobile-person-switch span { color: #b48c59; font-size: 10px; }.couple-hands-portrait { width: 148px; height: 132px; margin-top: 24px; }.couple-weds { margin-top: 24px; font-size: clamp(2.1rem, 10vw, 3.2rem); }.invitation-event-section { grid-template-columns: 1fr; gap: 43px; padding: 70px 22px; }.event-map { margin-top: -3px; }.event-map iframe { height: 245px; }.invitation-families { padding: 84px 18px; }.family-columns { grid-template-columns: 1fr; gap: 48px; margin-top: 38px; }.invitation-closing { padding: 80px 20px 112px; }.closing-links { flex-direction: column; }.closing-links a { width: min(100%, 260px); justify-content: center; }
+  .invitation-corner { width: 72px; }.invitation-opening { padding: 94px 22px 56px; }.invitation-message-section { min-height: 70svh; padding: 86px 24px; }.invitation-message blockquote { font-size: clamp(2rem, 9vw, 3.3rem); }.invitation-names { padding: 76px 20px 58px; }.invitation-names h1, .invitation-names h2 { font-size: clamp(2.2rem, 13vw, 3.8rem); line-height: 1.45; }
+  .invitation-with { margin: 28px 0 10px; }.wedding-countdown { width: min(100% - 32px, 560px); padding: 40px 10px; }.countdown-unit strong { font-size: clamp(2.45rem, 12vw, 3.6rem); }.countdown-unit:not(:last-child)::after { top: 25px; right: -1px; }.countdown-unit span { font-size: 8px; letter-spacing: .1em; }.countdown-note { font-size: 9px; letter-spacing: .1em; }.invitation-portrait-section { padding: 2px 12px 82px; }.couple-portrait-story { width: min(100% - 4px, 560px); padding: 46px 0 10px; }.couple-presentation { display: flex; flex-direction: column; gap: 52px; perspective: none; }.couple-profile { display: block; }.couple-portrait-frame { width: min(78vw, 340px); }.couple-profile h3 { font-size: clamp(2.8rem, 12vw, 3.8rem); }.couple-union { margin: 0; }.portrait-memory { display: none; }.mobile-person-switch { display: none; }.couple-hands-portrait { width: 148px; height: 132px; margin-top: 24px; }.couple-weds { margin-top: 24px; font-size: clamp(2.1rem, 10vw, 3.2rem); }.invitation-event-section { grid-template-columns: 1fr; gap: 43px; padding: 70px 22px; }.event-map { margin-top: -3px; }.event-map iframe { height: 245px; }.invitation-families { padding: 84px 18px; }.family-columns { grid-template-columns: 1fr; gap: 48px; margin-top: 38px; }.invitation-closing { padding: 80px 20px 112px; }.closing-links { flex-direction: column; }.closing-links a { width: min(100%, 260px); justify-content: center; }
 }
 
 @media (min-width: 641px) and (max-width: 900px) {
@@ -452,7 +629,13 @@ body {
     min-height: 100dvh;
     padding: max(82px, calc(54px + env(safe-area-inset-top))) 24px max(68px, calc(38px + env(safe-area-inset-bottom)));
   }
-  .invitation-opening > div { width: min(100%, 390px); }
+  .invitation-opening-inner { gap: 0; }
+  .invitation-fabi-logo { margin-bottom: 14px; }
+  .invitation-hero-names { font-size: clamp(3.2rem, 15vw, 5rem); }
+  .invitation-hero-weds { font-size: .38em; }
+  .invitation-opening-bismillah { margin-top: 12px; }
+  .invitation-opening-bismillah .invitation-arabic { font-size: clamp(0.88rem, 3.2vw, 1.05rem); }
+  .invitation-opening-bismillah .invitation-translation { font-size: 7.5px; }
   .invitation-arabic { font-size: clamp(1.7rem, 8.2vw, 2.35rem); line-height: 1.48; }
   .invitation-arabic-mobile-break { display: block; }
   .invitation-starline { gap: 11px; margin: 21px 0 17px; }
@@ -473,7 +656,8 @@ body {
   .invitation-from strong { font-size: 18px; }
 
   .invitation-names { padding: 84px 22px 66px; }
-  .invitation-names h1, .invitation-names h2 { font-size: clamp(3.55rem, 16vw, 5.25rem); line-height: .8; }
+  .invitation-names h1, .invitation-names h2 { font-size: clamp(2.4rem, 11vw, 4rem); line-height: 1.45; }
+  .invitation-with { margin: 32px 0 12px; }
   .invitation-with { margin: 24px 0; }
   .invitation-event-label { margin-top: 30px; font-size: 9px; letter-spacing: .17em; }
 
@@ -541,23 +725,10 @@ body {
 /* RSVP paper must sit inside the RSVP stacking context, beneath its content. */
 .rsvp-page { isolation: isolate; background: #ebe1d6; }
 
-/* A composed timeline on small screens: rail, markers, and cards retain the editorial rhythm. */
-.itinerary-card { transform-origin: center; }
-.itinerary-marker { transform-origin: center; }
+/* Reserve room for the fixed journey-nav bar at the very bottom of small
+   phones, so the swipe hint / dots are never crowded by it. */
 @media (max-width: 700px) {
-  .itinerary-experience { min-height: 100dvh; padding-bottom: 34px; }
-  .itinerary-header { max-width: 420px; margin-bottom: 54px; }
-  .itinerary-bismillah { margin-bottom: 18px; font-size: 9px; letter-spacing: .18em; }
-  .itinerary-monogram { margin-bottom: 12px; }
-  .itinerary-line { left: 21px; background: linear-gradient(to bottom, transparent, rgba(166, 129, 78, .72) 6%, rgba(166, 129, 78, .72) 94%, transparent); }
-  .itinerary-event, .itinerary-event.is-left, .itinerary-event.is-right { grid-template-columns: 43px minmax(0, 1fr); padding-bottom: 34px; }
-  .itinerary-event .itinerary-marker, .itinerary-event.is-left .itinerary-marker, .itinerary-event.is-right .itinerary-marker { width: 42px; height: 42px; box-shadow: 0 0 0 6px rgba(235, 225, 214, .84); }
-  .itinerary-event .itinerary-card, .itinerary-event.is-left .itinerary-card, .itinerary-event.is-right .itinerary-card { padding: 22px 18px 21px; border-color: rgba(166, 129, 78, .38); background: rgba(255, 253, 249, .72); box-shadow: 0 13px 26px rgba(100, 75, 48, .09); backdrop-filter: none; }
-  .itinerary-card-meta { margin-bottom: 11px; font-size: 8px; letter-spacing: .13em; }
-  .itinerary-card h2 { margin-bottom: 10px; font-size: clamp(1.7rem, 7.8vw, 2.1rem); }
-  .itinerary-card p { font-size: 12px; line-height: 1.72; }
-  .itinerary-closing { max-width: 300px; margin-top: 28px; line-height: 1.28; }
-  .itinerary-bottom-space { height: max(112px, calc(82px + env(safe-area-inset-bottom))); }
+  .itinerary-experience { min-height: 100dvh; padding-bottom: max(108px, calc(78px + env(safe-area-inset-bottom))); }
 }
 
 /* RSVP gets a compact invitation-like surface rather than a stretched form. */
@@ -1464,8 +1635,6 @@ body {
 
 /* Performance optimizations - will-change hints for animated elements */
 .rsvp-wrap,
-.itinerary-event,
-.itinerary-card,
 .couple-portrait-frame,
 .portrait-memory {
   will-change: transform, opacity;
@@ -1834,18 +2003,22 @@ body {
 
 .motion-sheet {
   position: fixed;
-  left: 50%;
+  /* Centred with auto margins rather than translateX(-50%): Framer Motion
+     animates `y` on this element and writes its own `transform`, which would
+     wipe out any transform-based centring and shunt the card off-screen. */
+  left: 0;
+  right: 0;
   bottom: 0;
   z-index: 71;
   /* True side gutters on every phone width, capped so it reads as a floating
-     card (not edge-to-edge) once there is enough room - and centred as a
-     proper modal card on tablet rather than pinned to the bottom edge. */
+     card (not edge-to-edge) once there is enough room. */
   width: calc(100% - 32px);
   max-width: 400px;
   max-height: min(80vh, 540px);
   padding: 8px 22px calc(24px + env(safe-area-inset-bottom));
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: max(14px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2003,19 +2176,17 @@ body {
   .motion-sheet-btn { width: 100%; }
 }
 
-/* Tablets (iPad, Android tablets): the sheet stops behaving like a bottom
-   sheet pinned to the screen edge and becomes a centred floating card, which
-   reads correctly on a large touch screen instead of looking like a stray
-   phone-sized strip glued to the bottom. */
+/* Tablets (iPad, Android tablets): stays a bottom-anchored, horizontally
+   centred sheet — just roomier padding and larger type. It deliberately does
+   NOT switch to vertical centring, because that needs a transform and Framer
+   Motion owns `transform` here for the slide-up animation. */
 @media (min-width: 600px) {
   .motion-sheet {
-    bottom: 50%;
     max-width: 440px;
     padding: 14px 34px calc(30px + env(safe-area-inset-bottom));
-    transform: translate(-50%, 50%);
+    margin-bottom: max(28px, env(safe-area-inset-bottom));
     border-radius: 28px;
   }
-  .motion-sheet-handle { display: none; }
   .motion-sheet-title { font-size: 30px; }
   .motion-sheet-copy { max-width: 340px; font-size: 14px; }
   .motion-sheet-actions { max-width: 340px; }
@@ -2024,4 +2195,902 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .motion-sheet-sparkle { animation: none; opacity: .5; }
   .motion-sheet-btn { transition: none; }
+}
+
+/* ==========================================================================
+   Music toggle — fixed bottom-right, all viewports
+   ========================================================================== */
+
+.music-toggle {
+  position: fixed;
+  right:  max(18px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  width:  42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(214, 178, 118, .38);
+  border-radius: 50%;
+  background: rgba(44, 32, 22, .72);
+  color: #e8cfa0;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .28);
+  transition: color .25s ease, background .25s ease, border-color .25s ease, transform .2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.music-toggle:hover {
+  color: #f8e4bc;
+  background: rgba(60, 44, 28, .86);
+  border-color: rgba(230, 192, 140, .6);
+}
+
+.music-toggle:active { transform: scale(.93); }
+
+.music-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(224, 186, 128, .7), 0 4px 18px rgba(0, 0, 0, .28);
+}
+
+.music-toggle svg {
+  width:  19px;
+  height: 19px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-toggle { transition: none; }
+}
+
+/* Itinerary lantern: scrolls with the page instead of staying fixed */
+.itinerary-page { position: relative; }
+.itinerary-page .lantern-pendulum-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+}
+
+/* Zorscode credit */
+.zorscode-credit {
+  display: inline-block;
+  margin-top: 28px;
+  color: #a49483;
+  font-size: 10px;
+  font-family: var(--font-supporting);
+  letter-spacing: .1em;
+  text-decoration: none;
+  opacity: .7;
+  transition: opacity .25s ease;
+}
+.zorscode-credit:hover { opacity: 1; }
+.zorscode-heart {
+  display: inline-block;
+  color: #c0786a;
+  vertical-align: middle;
+  fill: #c0786a;
+  animation: zorscode-pulse 3.6s ease-in-out infinite;
+}
+@keyframes zorscode-pulse {
+  0%, 100% { transform: scale(1);    opacity: .75; }
+  50%       { transform: scale(1.18); opacity: 1;   }
+}
+
+/* ==========================================================================
+   RSVP — days-attending chip selector
+   ========================================================================== */
+
+.rsvp-days-hint {
+  margin: 0 0 20px;
+  color: #93867a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.rsvp-days-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rsvp-day-chip {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: start;
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid rgba(166, 129, 78, .3);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .2s ease, background .2s ease, transform .15s ease;
+}
+
+.rsvp-day-chip:hover {
+  border-color: rgba(166, 129, 78, .7);
+  transform: translateY(-1px);
+}
+
+.rsvp-day-chip.is-selected {
+  border-color: #a6814e;
+  background: rgba(166, 129, 78, .09);
+}
+
+.rsvp-day-chip-mark {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(166, 129, 78, .5);
+  color: transparent;
+  transition: background .2s ease, color .2s ease;
+  flex-shrink: 0;
+}
+
+.rsvp-day-chip.is-selected .rsvp-day-chip-mark {
+  background: #a6814e;
+  color: #fffdf9;
+  border-color: #a6814e;
+}
+
+.rsvp-day-chip-date {
+  grid-column: 2;
+  grid-row: 1;
+  color: #a6814e;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.rsvp-day-chip-label {
+  grid-column: 2;
+  grid-row: 2;
+  color: #5d4d40;
+  font: 500 16px/1.2 var(--font-editorial);
+}
+
+/* Admin: days column */
+.admin-table-days {
+  font-size: 12px;
+  color: #6b5a4a;
+  max-width: 240px;
+}
+.admin-card-days {
+  margin: 6px 0 4px;
+  font-size: 12px;
+  color: #6b5a4a;
+}
+
+@media (max-width: 640px) {
+  .rsvp-day-chip { padding: 14px 15px; }
+  .rsvp-day-chip-label { font-size: 15px; }
+}
+
+/* ==========================================================================
+   RSVP — error modal (validation + duplicate-phone)
+   ========================================================================== */
+
+.rsvp-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(10, 4, 2, .55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.rsvp-modal {
+  position: fixed;
+  /* Auto-margin centring, not translateX(-50%) — Framer Motion animates `y`
+     and overwrites `transform`, which would break horizontal centring. */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 81;
+  width: calc(100% - 28px);
+  max-width: 420px;
+  padding: 30px 26px calc(30px + env(safe-area-inset-bottom));
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: max(14px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 1px solid rgba(214, 178, 118, .28);
+  border-radius: 22px;
+  background: linear-gradient(175deg, #4a160e 0%, #3a0d07 55%, #2c0804 100%);
+  box-shadow: 0 -18px 56px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,220,180,.12);
+}
+
+.rsvp-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: rgba(255,230,200,.5);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color .2s ease, background .2s ease;
+}
+.rsvp-modal-close:hover { color: #f0d8bc; background: rgba(255,255,255,.08); }
+
+.rsvp-modal-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(220, 178, 120, .4);
+  border-radius: 50%;
+  color: #e8c090;
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.rsvp-modal-title {
+  margin: 0 0 12px;
+  color: #f7e6cc;
+  font: 500 clamp(1.3rem, 5vw, 1.6rem)/1.15 var(--font-editorial);
+  letter-spacing: .01em;
+}
+
+.rsvp-modal-message {
+  margin: 0 0 24px;
+  color: #d6b896;
+  font-family: var(--font-supporting);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.rsvp-modal-btn {
+  width: 100%;
+  max-width: 280px;
+  padding: 13px 20px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #e6c079, #b0813c);
+  color: #2c0f08;
+  font-family: var(--font-supporting);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .25s ease;
+}
+.rsvp-modal-btn:hover { background: linear-gradient(180deg, #f0cf8e, #bd8d45); }
+.rsvp-modal-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(236,200,148,.7); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rsvp-modal-btn { transition: none; }
+}
+
+/* ==========================================================================
+   ADMIN — Wedding-day attendance: pills, filter chips, per-day stats
+   Palette follows the existing admin theme: #433b34 ink, #a6814e gold,
+   #f8f5f2 tint, 3px radii.
+   ========================================================================== */
+
+/* ---------- Day pills (read-only, shown in rows/cards/modal) ---------- */
+.admin-day-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.admin-day-pill {
+  --pill-accent: #a6814e;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  max-width: 100%;
+  padding: 3px 9px 3px 8px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  white-space: nowrap;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--pill-accent) 28%, transparent);
+  background: color-mix(in srgb, var(--pill-accent) 9%, #fff);
+  color: color-mix(in srgb, var(--pill-accent) 72%, #2f2a25);
+}
+
+.admin-day-pill-date {
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.admin-day-pill-label {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  opacity: .82;
+}
+
+.admin-day-pills.is-compact .admin-day-pill {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.admin-day-pills-empty {
+  color: #b3a89d;
+  font-size: 13px;
+}
+
+/* Fallback for browsers without color-mix(): still legible, just flatter. */
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  .admin-day-pill {
+    border-color: rgba(166, 129, 78, .3);
+    background: rgba(166, 129, 78, .08);
+    color: #6d5631;
+  }
+}
+
+/* ---------- Per-day stat cards (also act as one-click filters) ---------- */
+.admin-day-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.admin-day-stat-card {
+  --day-accent: #a6814e;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 20px;
+  font: inherit;
+  text-align: left;
+  background: #fff;
+  border: 1px solid rgba(166, 129, 78, .12);
+  border-top: 3px solid var(--day-accent);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(67, 59, 52, .04);
+  cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+.admin-day-stat-card:hover {
+  border-color: rgba(166, 129, 78, .28);
+  box-shadow: 0 4px 14px rgba(67, 59, 52, .08);
+}
+
+.admin-day-stat-card:focus-visible {
+  outline: 2px solid var(--day-accent);
+  outline-offset: 2px;
+}
+
+.admin-day-stat-card.is-active {
+  background: #fdfbf8;
+  border-color: color-mix(in srgb, var(--day-accent) 45%, transparent);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--day-accent) 18%, transparent);
+}
+
+.admin-day-stat-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.admin-day-dot {
+  width: 9px;
+  height: 9px;
+  margin-top: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.admin-day-stat-date {
+  color: #433b34;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.admin-day-stat-label {
+  margin-top: 1px;
+  color: #78695c;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.admin-day-stat-figures {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  margin-top: auto;
+}
+
+.admin-day-stat-figure {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.admin-day-stat-figure strong {
+  color: #433b34;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.admin-day-stat-figure span {
+  color: #78695c;
+  font-size: 11.5px;
+}
+
+.admin-day-stat-figure.is-secondary strong {
+  color: #6d655e;
+  font-size: 17px;
+}
+
+/* ---------- Day filter chips ---------- */
+.admin-day-filter {
+  padding: 14px 16px;
+  background: #f8f5f2;
+  border: 1px solid rgba(166, 129, 78, .15);
+  border-radius: 3px;
+}
+
+.admin-day-filter-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #6d655e;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.admin-day-filter-head svg { color: #a6814e; flex-shrink: 0; }
+
+/* Any / All segmented control, pushed to the trailing edge */
+.admin-day-match {
+  display: inline-flex;
+  margin-left: auto;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(166, 129, 78, .2);
+  border-radius: 3px;
+}
+
+.admin-day-match button {
+  padding: 4px 12px;
+  color: #78695c;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease;
+}
+
+.admin-day-match button + button { border-left: 1px solid rgba(166, 129, 78, .16); }
+.admin-day-match button:hover { background: rgba(166, 129, 78, .07); }
+
+.admin-day-match button.is-active {
+  color: #fff;
+  background: #a6814e;
+}
+
+.admin-day-chips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admin-day-chip {
+  --chip-accent: #a6814e;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px; /* comfortable touch target */
+  padding: 8px 12px;
+  font: inherit;
+  text-align: left;
+  background: #fff;
+  border: 1px solid rgba(166, 129, 78, .18);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
+}
+
+.admin-day-chip:hover { border-color: rgba(166, 129, 78, .38); }
+
+.admin-day-chip:focus-visible {
+  outline: 2px solid var(--chip-accent);
+  outline-offset: 2px;
+}
+
+.admin-day-chip.is-selected {
+  border-color: var(--chip-accent);
+  background: color-mix(in srgb, var(--chip-accent) 8%, #fff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--chip-accent) 35%, transparent);
+}
+
+.admin-day-chip-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  color: transparent;
+  background: #fff;
+  border: 1px solid rgba(166, 129, 78, .35);
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+
+.admin-day-chip.is-selected .admin-day-chip-check {
+  color: #fff;
+  background: var(--chip-accent);
+  border-color: var(--chip-accent);
+}
+
+.admin-day-chip-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.admin-day-chip-date {
+  color: #433b34;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.admin-day-chip-label {
+  overflow: hidden;
+  color: #78695c;
+  font-size: 11.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-day-filter-hint {
+  margin: 9px 0 0;
+  color: #8d8075;
+  font-size: 11.5px;
+  font-style: italic;
+}
+
+/* ---------- Clear-filters affordance ---------- */
+.admin-clear-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  color: #6d655e;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  background: #fff;
+  border: 1px solid rgba(166, 129, 78, .2);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.admin-clear-filters:hover {
+  color: #433b34;
+  border-color: rgba(166, 129, 78, .4);
+  background: #f8f5f2;
+}
+
+.admin-clear-filters svg { color: #a6814e; flex-shrink: 0; }
+
+/* ---------- Results container & pending state ---------- */
+/* Keeps previous rows visible but clearly stale while the next server
+   response streams in, rather than blanking the table out. */
+.admin-results {
+  position: relative;
+  min-height: 120px;
+  transition: opacity .18s ease;
+}
+
+.admin-results.is-pending {
+  opacity: .55;
+  pointer-events: none;
+}
+
+/* ---------- Skeletons ---------- */
+.admin-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(166, 129, 78, .07) 25%,
+    rgba(166, 129, 78, .14) 37%,
+    rgba(166, 129, 78, .07) 63%
+  );
+  background-size: 400% 100%;
+  border-radius: 3px;
+  /* !important is required: a global `* { animation-duration: .5s !important }`
+     rule for <=768px would otherwise make this shimmer strobe. */
+  animation: admin-shimmer 1.4s ease-in-out infinite !important;
+}
+
+@keyframes admin-shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.admin-skeleton-icon { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; }
+.admin-skeleton-value { width: 56px; height: 22px; margin-bottom: 7px; }
+.admin-skeleton-label { width: 96px; height: 11px; }
+
+.admin-skeleton-rows { display: flex; flex-direction: column; gap: 10px; }
+.admin-skeleton-row { height: 62px; border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-skeleton { animation: none !important; background: rgba(166, 129, 78, .1); }
+}
+
+/* ---------- Error boundary ---------- */
+.admin-error-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 24px;
+}
+
+.admin-error-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 30px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid rgba(166, 129, 78, .15);
+  border-radius: 4px;
+  box-shadow: 0 8px 28px rgba(67, 59, 52, .08);
+}
+
+.admin-error-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 18px;
+  color: #a6814e;
+  background: rgba(166, 129, 78, .08);
+  border-radius: 50%;
+}
+
+.admin-error-card h2 {
+  margin: 0 0 10px;
+  color: #433b34;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 23px;
+  font-weight: 500;
+}
+
+.admin-error-card p {
+  margin: 0 0 20px;
+  color: #78695c;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.admin-error-digest {
+  display: block;
+  margin-bottom: 18px;
+  color: #a39689;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.admin-error-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  background: #a6814e;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+
+.admin-error-retry:hover { background: #916f40; }
+
+/* ==========================================================================
+   ADMIN — responsive refinements
+   The admin reads this mostly on a phone and a desktop, so both ends are
+   treated as first-class; tablet gets a real two-column card layout rather
+   than a squeezed desktop table.
+   ========================================================================== */
+
+/* Cards became <button> elements for proper keyboard/touch semantics —
+   strip the UA button styling and lay them out as blocks again. */
+.admin-card {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.admin-card:focus-visible {
+  outline: 2px solid #a6814e;
+  outline-offset: 2px;
+}
+
+/* Child margins are replaced by the flex `gap` above. */
+.admin-card-header,
+.admin-card-contact { margin-bottom: 0; }
+
+.admin-card-header { align-items: center; }
+
+.admin-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(166, 129, 78, .1);
+}
+
+.admin-card-footer .admin-card-date {
+  padding-top: 0;
+  border-top: none;
+}
+
+.admin-modal-link {
+  color: #8d6e42;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(166, 129, 78, .3);
+}
+
+.admin-modal-link:hover { color: #433b34; }
+
+/* Long lists: keep the header visible while scrolling the table. */
+@media (min-width: 1024px) {
+  .admin-table-wrapper { display: block; }
+  .admin-cards { display: none; }
+
+  .admin-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f8f5f2;
+  }
+}
+
+/* Tablet — cards in two columns read far better than a 6-column table
+   crammed into ~800px. Overrides the earlier min-width:768px table rule. */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .admin-table-wrapper { display: none; }
+
+  .admin-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 14px;
+  }
+
+  .admin-cards-empty { grid-column: 1 / -1; }
+
+  .admin-stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .admin-day-stats  { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Phones and small tablets */
+@media (max-width: 767px) {
+  .admin-dashboard-content { padding: 22px 16px 56px; }
+
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 26px;
+  }
+
+  .admin-stat-card { gap: 12px; padding: 14px; }
+  .admin-stat-icon { width: 36px; height: 36px; }
+  .admin-stat-icon svg { width: 17px; height: 17px; }
+  .admin-stat-value { font-size: 21px; }
+  .admin-stat-label { font-size: 11px; }
+
+  /* Per-day cards stack: each one is a headline number, worth the space. */
+  .admin-day-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 26px;
+  }
+
+  .admin-day-stat-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+
+  .admin-day-stat-figures { margin-top: 0; gap: 14px; }
+  .admin-day-stat-figure strong { font-size: 21px; }
+  .admin-day-stat-figure.is-secondary strong { font-size: 15px; }
+  .admin-day-stat-label { font-size: 11.5px; }
+
+  .admin-rsvp-header {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .admin-rsvp-header h2 { font-size: 21px; }
+
+  /* Chips go full-width rows so the event names stay readable. */
+  .admin-day-chips { grid-template-columns: 1fr; gap: 7px; }
+  .admin-day-chip { min-height: 44px; }
+  .admin-day-chip-label { white-space: normal; }
+
+  .admin-day-filter { padding: 12px 13px; }
+  .admin-day-filter-head { flex-wrap: wrap; }
+  .admin-day-match { margin-left: auto; }
+
+  /* Stack the selects and let each fill the row — much easier to tap. */
+  .admin-filter-row { flex-direction: column; gap: 9px; }
+
+  .admin-filter-group {
+    justify-content: space-between;
+    width: 100%;
+    padding: 9px 13px;
+    background: #f8f5f2;
+    border: 1px solid rgba(166, 129, 78, .15);
+    border-radius: 3px;
+  }
+
+  .admin-filter-group select {
+    min-width: 0;
+    max-width: 58%;
+    padding: 7px 9px;
+  }
+
+  .admin-card { padding: 15px; }
+  .admin-card-name { font-size: 14.5px; }
+
+  /* Modal behaves as a scrollable sheet so long records never clip. */
+  .admin-modal-overlay { padding: 14px; align-items: flex-end; }
+
+  .admin-modal {
+    max-height: calc(100dvh - 28px);
+    padding: 24px 20px 26px;
+    overflow-y: auto;
+    border-radius: 6px;
+  }
+
+  .admin-modal h3 { margin-bottom: 18px; font-size: 22px; }
+}
+
+@media (max-width: 420px) {
+  .admin-stats-grid { grid-template-columns: 1fr; }
+  .admin-day-stat-card { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .admin-day-stat-figures { width: 100%; }
+  .admin-card-footer { flex-wrap: wrap; }
 }
