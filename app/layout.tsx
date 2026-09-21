@@ -5,6 +5,7 @@ import 'lenis/dist/lenis.css';
 import SmoothScroll from '@/components/SmoothScroll';
 import StructuredData from '@/components/StructuredData';
 import AudioProvider from '@/components/AudioProvider';
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -108,6 +109,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SmoothScroll />
         {children}
         <AudioProvider />
+        <Analytics />
       </body>
     </html>
   );
