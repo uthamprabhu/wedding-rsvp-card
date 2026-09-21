@@ -9,6 +9,7 @@
  */
 
 import { motion, useReducedMotion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface ItineraryDay {
@@ -18,6 +19,8 @@ interface ItineraryDay {
   description: string;
   timing: string;
   location: string;
+  /** Google Maps link for the venue. Omitted when the venue isn't set yet. */
+  mapUrl?: string;
 }
 
 const DAYS: ItineraryDay[] = [
@@ -29,6 +32,7 @@ const DAYS: ItineraryDay[] = [
       "An evening where two families come together and the celebrations officially begin. As Bilal's family presents Farzeen with her wedding attire, an intimate family tradition unfolds. Then comes the colour, the mehendi, the music and the celebration, as everyone gathers around Farzeen for the first chapter of FABI.",
     timing: '6:00 PM \u2013 9:00 PM',
     location: "Farzeen's Residence",
+    mapUrl: 'https://maps.app.goo.gl/yYyNNZoZ9fMU18kJA',
   },
   {
     day: 'Day 2',
@@ -37,7 +41,8 @@ const DAYS: ItineraryDay[] = [
     description:
       "One last evening before she becomes a bride. Farzeen's closest family and friends gather in yellow for an intimate celebration filled with haldi, music, games, laughter, good food and a little chaos. A night for her favourite people to celebrate Molutty before tomorrow changes everything.",
     timing: '5:00 PM \u2013 9:00 PM',
-    location: 'Location to be confirmed',
+    location: "Farzeen's Residence",
+    mapUrl: 'https://maps.app.goo.gl/yYyNNZoZ9fMU18kJA',
   },
   {
     day: 'Day 3',
@@ -47,6 +52,7 @@ const DAYS: ItineraryDay[] = [
       'The day we have been waiting for. Join Farzeen and Bilal as they begin their next chapter surrounded by the people who matter most.',
     timing: 'Arrival 11:30 AM \u00b7 Nikah 12:00 PM \u2013 12:30 PM',
     location: 'M Convention Centre',
+    mapUrl: 'https://www.google.com/maps/search/?api=1&query=M%20Convention%20Centre%2C%20Vallicode%2C%20Pathanamthitta',
   },
 ];
 
@@ -83,9 +89,10 @@ export default function InteractiveItinerary() {
     };
   }, []);
 
-  const goTo = useCallback((index: number) => {
+  const goTo = useCallback((rawIndex: number) => {
     const el = trackRef.current;
     if (!el) return;
+    const index = Math.max(0, Math.min(DAYS.length - 1, rawIndex));
     el.scrollTo({
       left: index * el.clientWidth,
       behavior: 'smooth',
@@ -121,6 +128,28 @@ export default function InteractiveItinerary() {
           variants={fadeUp}
           transition={{ duration: 0.5, delay: 0.16, ease: 'easeOut' }}
         >
+          {/* Desktop only (hidden via CSS on touch viewports, where swipe/dots
+              are the natural gesture). Dots alone are easy to miss as the
+              primary way to navigate on a mouse-and-keyboard device. */}
+          <button
+            type="button"
+            className="itinerary-arrow itinerary-arrow-prev"
+            onClick={() => goTo(active - 1)}
+            disabled={active === 0}
+            aria-label="Previous day"
+          >
+            <ChevronLeft size={22} strokeWidth={2} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="itinerary-arrow itinerary-arrow-next"
+            onClick={() => goTo(active + 1)}
+            disabled={active === DAYS.length - 1}
+            aria-label="Next day"
+          >
+            <ChevronRight size={22} strokeWidth={2} aria-hidden="true" />
+          </button>
+
           <div className="itinerary-track" ref={trackRef}>
             {DAYS.map((entry) => (
               <article className="itinerary-slide" key={entry.title}>
@@ -131,8 +160,21 @@ export default function InteractiveItinerary() {
                   <h2>{entry.title}</h2>
                   <p className="itinerary-card-description">{entry.description}</p>
                   <div className="itinerary-card-meta">
-                    <span>{entry.timing}</span>
-                    <span>{entry.location}</span>
+                    <span className="itinerary-card-timing">{entry.timing}</span>
+                    {entry.mapUrl ? (
+                      <a
+                        href={entry.mapUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="itinerary-card-location itinerary-card-location-link"
+                        aria-label={`Open ${entry.location} in Google Maps`}
+                      >
+                        <span>{entry.location}</span>
+                        <MapPin size={14} strokeWidth={2} aria-hidden="true" />
+                      </a>
+                    ) : (
+                      <span className="itinerary-card-location">{entry.location}</span>
+                    )}
                   </div>
                 </div>
               </article>

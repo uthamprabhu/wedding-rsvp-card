@@ -341,7 +341,14 @@ body {
 /* Native CSS scroll-snap: the browser handles momentum, touch smoothness and
    elasticity, which is simpler and feels better than hand-rolled drag physics. */
 
-.itinerary-carousel { margin-top: 40px; }
+.itinerary-carousel { position: relative; margin-top: 40px; }
+
+/* Prev/next arrows: desktop only. Dots stay everywhere as the position
+   indicator, but a mouse-and-keyboard guest reads arrows as the primary way
+   to move between days far more reliably than tiny dots. */
+.itinerary-arrow {
+  display: none;
+}
 .itinerary-track {
   display: flex;
   width: 100%;
@@ -400,14 +407,72 @@ body {
 
 .itinerary-card-meta {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin-top: 22px;
   padding-top: 18px;
   border-top: 1px solid rgba(166, 129, 78, .22);
   color: #8a7457;
   font: 500 11.5px/1.5 var(--font-supporting);
   letter-spacing: .02em;
+}
+
+/* Timing sits left, fixed; location sits right and can shrink/wrap first if
+   space is tight, since it's the one with a visible affordance (the pin). */
+.itinerary-card-timing {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.itinerary-card-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 1 auto;
+  min-width: 0;
+  text-align: right;
+}
+
+.itinerary-card-location span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itinerary-card-location svg {
+  flex-shrink: 0;
+  color: #a6814e;
+}
+
+/* The clickable variant: a real touch target with its own gold-tinted pill so
+   guests immediately read it as "tap this to open the map", not just a label. */
+.itinerary-card-location-link {
+  min-height: 34px;
+  padding: 6px 11px 6px 12px;
+  margin: -6px -4px -6px 0;
+  border-radius: 999px;
+  color: #8a6a3d;
+  text-decoration: none;
+  background: rgba(166, 129, 78, .1);
+  border: 1px solid rgba(166, 129, 78, .22);
+  transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.itinerary-card-location-link:hover,
+.itinerary-card-location-link:focus-visible {
+  background: rgba(166, 129, 78, .18);
+  border-color: rgba(166, 129, 78, .4);
+}
+
+.itinerary-card-location-link:active {
+  transform: scale(.97);
+}
+
+.itinerary-card-location-link:focus-visible {
+  outline: 2px solid #a6814e;
+  outline-offset: 2px;
 }
 
 /* ---------------------------------- dots ---------------------------------- */
@@ -469,6 +534,44 @@ body {
   .itinerary-card-meta { flex-direction: row; justify-content: space-between; gap: 18px; font-size: 12px; }
 
   .itinerary-swipe-hint { margin-top: 22px; }
+
+  .itinerary-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    color: #a6814e;
+    background: rgba(255, 253, 249, .92);
+    border: 1px solid rgba(166, 129, 78, .3);
+    border-radius: 50%;
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background-color .18s ease, border-color .18s ease, transform .18s ease, opacity .18s ease;
+    box-shadow: 0 6px 18px rgba(73, 55, 34, .1);
+  }
+  .itinerary-arrow-prev { left: calc(50% - 520px / 2 - 60px); }
+  .itinerary-arrow-next { right: calc(50% - 520px / 2 - 60px); }
+
+  .itinerary-arrow:hover {
+    background: #a6814e;
+    color: #fffdf9;
+    border-color: #a6814e;
+  }
+  .itinerary-arrow:active { transform: translateY(-50%) scale(.94); }
+  .itinerary-arrow:focus-visible {
+    outline: 2px solid #a6814e;
+    outline-offset: 2px;
+  }
+  .itinerary-arrow:disabled {
+    opacity: .35;
+    cursor: default;
+    pointer-events: none;
+  }
 }
 
 /* Shared journey navigation */
