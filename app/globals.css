@@ -91,7 +91,11 @@ body {
 }
 
 /* RSVP invitation surface */
-.rsvp-page { position: relative; min-height: 100vh; height: 100%; overflow-x: hidden;
+/* No `height: 100%` here on purpose: it caps the box to one viewport while the
+   form content overflows past it, so the absolutely-positioned PaperBackground
+   child (inset: 0) stopped painting partway down and left a hard seam where the
+   flat background showed through. `min-height` keeps the full-viewport floor. */
+.rsvp-page { position: relative; min-height: 100vh; overflow-x: hidden;
   color: #433b34;
   background: #ebe1d6;
   font-family: var(--font-geist-sans), sans-serif;
